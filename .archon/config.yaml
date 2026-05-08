@@ -1,0 +1,87 @@
+# Project-scoped Archon harness config for Ainbox.
+# Read by archon-cli when run from the repo root.
+# Pandomagic conversion: 2026-05-08 (dark-factory mode)
+
+worktree:
+  baseBranch: main
+
+# Per-project Obsidian docs (used by workflow nodes that read/write
+# the PRD anchor + architecture diagrams). For Ainbox the PRD lives
+# in-repo at docs/prd.md; Obsidian holds the ops doc only.
+obsidian:
+  project: /Users/mattwright/pandora/Obsidian/PROJECTS/Ainbox
+  prd_in_repo: docs/prd.md      # PRD lives in repo, not Obsidian
+  architecture_dir: docs/architecture
+
+# External services the workflow nodes call into.
+integrations:
+  plane:
+    base_url: https://plane.beyondpandora.com
+    workspace: beyond-pandora
+    project_id: TBD-PHASE-5      # filled during out-of-tree registration
+    feedback_label_id: TBD-PHASE-5
+    # token loaded via env PLANE_API_TOKEN
+  archon_rag:
+    base_url: http://10.90.10.55:8181
+    project_id: da8c5635-b18c-4595-ba06-9c3e268dd3d3   # Ainbox in Archon v1
+  github:
+    repo: tenshimatt/ainbox      # to be created in Phase 5
+    default_reviewer: tenshimatt
+  litellm:
+    base_url: https://ai-gateway.beyondpandora.com/v1
+    # virtual key loaded via env LITELLM_API_KEY (per-tenant in v1)
+
+# Dark-factory: gates execute (audit trail) but auto-approve.
+# Hard halts still apply (see factory-rules.md §4).
+dark_factory:
+  enabled: true
+  auto_approve_gates:
+    - prd
+    - plan
+    - pr
+  pr_cooling_seconds: 60         # gate-pr waits 60s for live :reject:
+  daily_budget_dollars: 50
+  per_run_halt_dollars: 10
+
+# Telegram notifications via Hermes bot.
+notifications:
+  telegram:
+    enabled: true
+    chat_id: 374047225           # Matt's DM
+    helper_script: .archon/scripts/notify-tg.sh
+    events:
+      - mission_triage_reject
+      - gate_prd
+      - gate_plan
+      - gate_pr
+      - implement_halt
+      - validate_fail
+      - pr_open
+      - budget_halt
+
+# Pyramid lanes (per docs/architecture/levels.md).
+classifier:
+  lane_defaults:
+    L1: cosmetic
+    L2: minor
+    L3: major
+    L4: contract
+    L5: escalate
+  smoke_must_pass: tests/smoke
+  contract_dir: tests/contracts
+
+# Cost discipline.
+cost:
+  default_provider_workers: deepseek
+  default_model_workers: deepseek-v4-pro
+  flash_nodes:
+    - mission-triage
+    - plane-tickets
+    - open-pr
+  claude_nodes:
+    architect-review:
+      model: claude-opus-4-7
+    implement:
+      model: claude-sonnet-4-6
+    test-first:
+      model: claude-sonnet-4-6

@@ -1,0 +1,12 @@
+node_modules
+.next
+.vercel
+dist
+.env
+.env.local
+.env.*.local
+.env.production
+*.log
+.DS_Store
+.archon/state
+.archon/secrets
