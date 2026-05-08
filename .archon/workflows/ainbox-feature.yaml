@@ -9,7 +9,7 @@ description: |
   hard rule that every Plane ticket carries `PRD: §X.Y`.
 
   Use when: building any new Ainbox feature from idea to PR.
-  Triggers: "rawgle feature", "build rawgle <thing>", "rawgle <prd_section>".
+  Triggers: "ainbox feature", "build ainbox <thing>", "ainbox <prd_section>".
 
   Input options:
     A) Feature idea in natural language
@@ -51,7 +51,7 @@ nodes:
 
       # Rail #12: mark ticket In Progress as soon as we start
       if [[ -n "${ARCHON_TICKET_ID:-}" && -n "${PLANE_API_TOKEN:-}" ]]; then
-        IN_PROGRESS_STATE="54339d11-6824-4d88-a65d-cfe0ad3a1e13"
+        IN_PROGRESS_STATE="0c4c08e9-2cbb-4152-951f-96dcf1691780"
         bash .archon/scripts/plane-update-state.sh \
           "$ARCHON_TICKET_ID" "$IN_PROGRESS_STATE" || true
         bash .archon/scripts/plane-comment.sh "$ARCHON_TICKET_ID" \
@@ -1149,9 +1149,9 @@ nodes:
       # ARCHON_TICKET_ID is set by the poller when triggered via Plane.
       # PLANE_API_TOKEN is in the harness env on CT 111.
       if [[ -n "${ARCHON_TICKET_ID:-}" && -n "${PLANE_API_TOKEN:-}" ]]; then
-        DONE_STATE="371cffd4-af29-49f8-8bb1-e8bfc3ae7ebd"
-        RUNNING_LABEL="02767618-73c5-463c-9dba-d27eccbc5d4a"
-        DONE_LABEL="1f27e5a6-6797-4c75-8b73-65f4e30769f8"
+        DONE_STATE="eced95c3-ec83-475b-bee6-8f5291532e7c"
+        RUNNING_LABEL="f96475e6-82d6-418b-85f4-2dd4d23270be"
+        DONE_LABEL="fab664ac-739f-4a20-82e4-1d7f667cbcdd"
         bash .archon/scripts/plane-update-state.sh \
           "$ARCHON_TICKET_ID" "$DONE_STATE" "$RUNNING_LABEL" "$DONE_LABEL" || true
         bash .archon/scripts/plane-comment.sh "$ARCHON_TICKET_ID" \

@@ -18,8 +18,18 @@ integrations:
   plane:
     base_url: https://plane.beyondpandora.com
     workspace: beyond-pandora
-    project_id: TBD-PHASE-5      # filled during out-of-tree registration
-    feedback_label_id: TBD-PHASE-5
+    project_id: e11bee8b-8e92-43ea-b4e8-943fce9f204d   # Ainbox in Plane
+    labels:
+      archon_ready: a4c742e7-ec43-4f0f-9c0a-724390eadbd9
+      archon_running: f96475e6-82d6-418b-85f4-2dd4d23270be
+      archon_done: fab664ac-739f-4a20-82e4-1d7f667cbcdd
+      archon_failed: 8fa5cbf8-6e27-484b-b0ac-1a68f740e976
+    states:
+      backlog: 88b35983-573a-4d39-99e7-1f5ee3ea6b0d
+      todo: 8c01c917-2294-4cd7-a13c-fe22a6c3f80f
+      in_progress: 0c4c08e9-2cbb-4152-951f-96dcf1691780
+      done: eced95c3-ec83-475b-bee6-8f5291532e7c
+      cancelled: 53371713-e64c-4acf-a49b-de1888033b68
     # token loaded via env PLANE_API_TOKEN
   archon_rag:
     base_url: http://10.90.10.55:8181
