@@ -1,0 +1,9 @@
+/**
+ * POST /api/deploy/project — create a Vercel project
+ * PRD §12.2
+ */
+import { NextResponse } from 'next/server';
+
+export async function POST() {
+  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+}
