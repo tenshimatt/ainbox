@@ -11,14 +11,62 @@ const SYNC_STEPS = [
   { id: 'complete', label: 'Sync complete' },
 ];
 
+type SyncStatusData = {
+  status: 'in_progress' | 'complete' | 'failed' | string;
+  provider?: string;
+  progress?: { current: number; total: number };
+  error?: string;
+  retryable?: boolean;
+};
+
 export default function SyncPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [syncStatus, setSyncStatus] = useState<'in-progress' | 'complete'>('in-progress');
+  const [syncStatus, setSyncStatus] = useState<'in-progress' | 'complete' | 'failed'>('in-progress');
   const [batchEvents, setBatchEvents] = useState<string[]>([]);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [serverStatus, setServerStatus] = useState<SyncStatusData | null>(null);
 
+  // Poll the sync-status endpoint to reflect server state
   useEffect(() => {
-    // Simulate sync progress
+    let cancelled = false;
+    const poll = async () => {
+      try {
+        const res = await fetch('/api/onboarding/sync-status');
+        if (res.ok) {
+          const data: SyncStatusData = await res.json();
+          if (!cancelled) {
+            setServerStatus(data);
+            if (data.status === 'failed') {
+              setSyncStatus('failed');
+              setErrorMsg(data.error ?? 'Sync failed');
+            } else if (data.status === 'complete') {
+              setSyncStatus('complete');
+            } else if (data.status === 'in_progress' && data.progress) {
+              const pct = Math.round((data.progress.current / data.progress.total) * 100);
+              setProgress(pct);
+              setBatchEvents(prev => [
+                ...prev,
+                `${data.progress!.current} / ${data.progress!.total} emails synced`,
+              ]);
+            }
+          }
+        }
+      } catch {
+        // network error — ignore, local simulation continues
+      }
+    };
+
+    poll();
+    const interval = setInterval(poll, 3000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Local simulation (runs independently of server polling)
+  useEffect(() => {
     const intervals = [
       { step: 1, delay: 600, msg: 'Connected to Gmail — fetching messages...' },
       { step: 2, delay: 1400, msg: 'Fetched 500 emails (batch 1/4)...' },
@@ -36,11 +84,11 @@ export default function SyncPage() {
 
     intervals.forEach(({ step, delay, msg }) => {
       const timer = setTimeout(() => {
-        setCurrentStep(step);
-        setProgress(Math.round((step / SYNC_STEPS.length) * 100));
-        setBatchEvents((prev) => [...prev, msg]);
+        setCurrentStep(prev => Math.max(prev, step));
+        setProgress(prev => Math.max(prev, Math.round((step / SYNC_STEPS.length) * 100)));
+        setBatchEvents(prev => [...prev, msg]);
         if (step === SYNC_STEPS.length) {
-          setSyncStatus('complete');
+          setSyncStatus(prev => prev === 'failed' ? 'failed' : 'complete');
         }
       }, delay);
       timers.push(timer);
@@ -49,98 +97,136 @@ export default function SyncPage() {
     return () => timers.forEach(clearTimeout);
   }, []);
 
+  const handleRetry = async () => {
+    setSyncStatus('in-progress');
+    setErrorMsg(null);
+    setProgress(0);
+    setCurrentStep(0);
+    setBatchEvents([]);
+    try {
+      await fetch('/api/inbox/sync/retry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ retry_count: 1 }),
+      });
+    } catch {
+      // ignore
+    }
+  };
+
   return (
     <main className="flex min-h-screen flex-col bg-slate-50">
       <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-12 sm:px-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-slate-900">Syncing your email</h1>
           <p className="mt-2 text-sm text-slate-500">
-            We're pulling your recent emails to build your knowledge base
+            We&apos;re pulling your recent emails to build your knowledge base
           </p>
         </div>
 
+        {/* Error state */}
+        {syncStatus === 'failed' && (
+          <div className="mt-8 rounded-lg border border-red-200 bg-red-50 p-4">
+            <p className="text-sm font-medium text-red-700">
+              {errorMsg ?? 'Sync failed — could not sync with provider'}
+            </p>
+            <button
+              onClick={handleRetry}
+              className="mt-3 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
         {/* Progress bar */}
-        <div className="mt-10" data-testid="sync-progress" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
-          <div className="flex items-center justify-between text-sm">
-            <span className="font-medium text-slate-700">
-              {syncStatus === 'complete' ? 'Sync complete' : `${progress}% complete`}
-            </span>
-            <span className="text-slate-500">{progress}%</span>
+        {syncStatus !== 'failed' && (
+          <div className="mt-10" data-testid="sync-progress" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium text-slate-700">
+                {syncStatus === 'complete' ? 'Sync complete' : `${progress}% complete`}
+              </span>
+              <span className="text-slate-500">{progress}%</span>
+            </div>
+            <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-slate-200">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  syncStatus === 'complete' ? 'bg-green-500' : 'bg-blue-500'
+                }`}
+                style={{ width: `${progress}%` }}
+              />
+            </div>
           </div>
-          <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-slate-200">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ${
-                syncStatus === 'complete' ? 'bg-green-500' : 'bg-blue-500'
-              }`}
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        </div>
+        )}
 
         {/* Steps */}
-        <div className="mt-8 space-y-4">
-          {SYNC_STEPS.map((step, idx) => (
-            <div
-              key={step.id}
-              className={`flex items-center gap-3 rounded-lg border bg-white p-3 transition-colors ${
-                idx < currentStep
-                  ? 'border-green-200'
-                  : idx === currentStep
-                  ? 'border-blue-200'
-                  : 'border-slate-200 opacity-50'
-              }`}
-            >
+        {syncStatus !== 'failed' && (
+          <div className="mt-8 space-y-4">
+            {SYNC_STEPS.map((step, idx) => (
               <div
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                key={step.id}
+                className={`flex items-center gap-3 rounded-lg border bg-white p-3 transition-colors ${
                   idx < currentStep
-                    ? 'bg-green-100 text-green-700'
+                    ? 'border-green-200'
                     : idx === currentStep
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-slate-100 text-slate-400'
+                    ? 'border-blue-200'
+                    : 'border-slate-200 opacity-50'
                 }`}
               >
-                {idx < currentStep ? '✓' : idx + 1}
+                <div
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                    idx < currentStep
+                      ? 'bg-green-100 text-green-700'
+                      : idx === currentStep
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'bg-slate-100 text-slate-400'
+                  }`}
+                >
+                  {idx < currentStep ? '✓' : idx + 1}
+                </div>
+                <span
+                  className={`text-sm ${
+                    idx < currentStep
+                      ? 'text-green-700'
+                      : idx === currentStep
+                      ? 'text-blue-700'
+                      : 'text-slate-400'
+                  }`}
+                >
+                  {step.label}
+                </span>
+                {idx === currentStep && syncStatus === 'in-progress' && (
+                  <svg className="ml-auto h-4 w-4 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                )}
+                {idx < currentStep && (
+                  <span className="ml-auto text-xs text-green-600">Done</span>
+                )}
               </div>
-              <span
-                className={`text-sm ${
-                  idx < currentStep
-                    ? 'text-green-700'
-                    : idx === currentStep
-                    ? 'text-blue-700'
-                    : 'text-slate-400'
-                }`}
-              >
-                {step.label}
-              </span>
-              {idx === currentStep && syncStatus === 'in-progress' && (
-                <svg className="ml-auto h-4 w-4 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-              )}
-              {idx < currentStep && (
-                <span className="ml-auto text-xs text-green-600">Done</span>
-              )}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Batch events */}
-        <div className="mt-8 rounded-lg border border-slate-200 bg-white p-4">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Sync events
-          </h3>
-          <div className="mt-2 max-h-40 space-y-1 overflow-y-auto">
-            {batchEvents.map((event, idx) => (
-              <p key={idx} className="text-xs text-slate-600">
-                {event}
-              </p>
-            ))}
-            {syncStatus === 'in-progress' && batchEvents.length === 0 && (
-              <p className="text-xs text-slate-400">Waiting to start...</p>
-            )}
+        {syncStatus !== 'failed' && (
+          <div className="mt-8 rounded-lg border border-slate-200 bg-white p-4">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Sync events
+            </h3>
+            <div className="mt-2 max-h-40 space-y-1 overflow-y-auto">
+              {batchEvents.map((event, idx) => (
+                <p key={idx} className="text-xs text-slate-600">
+                  {event}
+                </p>
+              ))}
+              {syncStatus === 'in-progress' && batchEvents.length === 0 && (
+                <p className="text-xs text-slate-400">Waiting to start...</p>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* CTA */}
         <div className="mt-8 text-center">
@@ -151,7 +237,7 @@ export default function SyncPage() {
             >
               Continue to Knowledge Review
             </Link>
-          ) : (
+          ) : syncStatus === 'failed' ? null : (
             <button
               disabled
               className="inline-block rounded-lg bg-slate-300 px-6 py-2.5 text-sm font-medium text-slate-500 cursor-not-allowed"
@@ -160,6 +246,18 @@ export default function SyncPage() {
             </button>
           )}
         </div>
+
+        {/* Retry option — always available for stuck or failed syncs */}
+        {syncStatus !== 'complete' && (
+          <div className="mt-4 text-center">
+            <button
+              onClick={handleRetry}
+              className="text-sm text-slate-400 hover:text-slate-600 underline"
+            >
+              Retry sync
+            </button>
+          </div>
+        )}
       </div>
     </main>
   );
