@@ -42,6 +42,7 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState('');
+  const [finished, setFinished] = useState(false);
 
   const grouped = useMemo(() => {
     const out: Record<KbItemType, KbItemRow[]> = {
@@ -146,10 +147,20 @@ export default function Page() {
         >
           Refresh
         </button>
-        <a href="/inbox" className="ml-auto text-sm underline">
-          Done — go to inbox
-        </a>
+        <button
+          onClick={() => setFinished(true)}
+          className="ml-auto rounded bg-emerald-600 text-white px-4 py-1.5 text-sm"
+          data-testid="kb-finish-button"
+        >
+          Finish
+        </button>
       </div>
+
+      {finished && (
+        <div role="alert" className="mt-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" data-testid="kb-finish-success">
+          Setup complete! <a href="/inbox" className="underline font-medium">Go to inbox →</a>
+        </div>
+      )}
 
       {error && (
         <p role="alert" className="mt-4 text-sm text-red-600" data-testid="kb-error">
