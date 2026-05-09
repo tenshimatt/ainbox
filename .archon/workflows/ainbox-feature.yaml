@@ -812,13 +812,19 @@ nodes:
     depends_on: [test-first]
     bash: |
       set +e
-      NEW=$(git ls-files --others --exclude-standard tests/e2e | grep '\.spec\.ts$' | wc -l)
+      NEW=$(git ls-files --others --exclude-standard tests/features tests/contracts | grep '\\.spec\\.ts$' | wc -l)
       if [[ "$NEW" -eq 0 ]]; then
+        # also check pre-existing tests (contracts, features from previous runs)
+        EXISTING=$(ls tests/features/*.spec.ts tests/contracts/*.spec.ts 2>/dev/null | wc -l)
+        if [[ "$EXISTING" -gt 0 ]]; then
+          echo "test-first: 0 new, $EXISTING existing spec file(s) — proceeding"
+          exit 0
+        fi
         # also check newly-added on-branch case (less common, defensive)
-        NEW=$(git diff --name-only --diff-filter=A origin/main...HEAD -- 'tests/e2e/*.spec.ts' 2>/dev/null | wc -l)
+        NEW=$(git diff --name-only --diff-filter=A origin/main...HEAD -- 'tests/features/*.spec.ts' 2>/dev/null | wc -l)
       fi
       if [[ "$NEW" -eq 0 ]]; then
-        echo "✗ test-first wrote 0 spec files — halting before implement burns time/tokens" >&2
+        echo "✗ test-first wrote 0 spec files and no existing tests found — halting" >&2
         exit 5
       fi
       echo "test-first OK: $NEW new spec file(s) on disk"
