@@ -15,7 +15,8 @@
     "react": "19.0.0-rc-66855b96-20241106",
     "react-dom": "19.0.0-rc-66855b96-20241106",
     "@supabase/ssr": "^0.5.2",
-    "@supabase/supabase-js": "^2.46.1"
+    "@supabase/supabase-js": "^2.46.1",
+    "googleapis": "^140.0.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.2",
