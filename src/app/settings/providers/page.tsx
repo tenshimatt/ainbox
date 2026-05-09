@@ -1,12 +1,32 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AppLayout from '@/components/AppLayout';
 import { MOCK_PROVIDERS } from '@/lib/mock-data';
 
 export default function SettingsProvidersPage() {
   const [providers, setProviders] = useState(MOCK_PROVIDERS);
   const [disconnectConfirm, setDisconnectConfirm] = useState<string | null>(null);
+  const [emailScopeGranted, setEmailScopeGranted] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('upgrade_success') === '1') {
+      setEmailScopeGranted(true);
+      return;
+    }
+    // Check scope status for the first Google provider
+    const googleProvider = MOCK_PROVIDERS.find(p => p.type === 'google' && p.connected);
+    if (!googleProvider) return;
+    fetch(`/api/v1/gmail/scope-status?connection_id=${googleProvider.id}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data && typeof data.email_scope_granted === 'boolean') {
+          setEmailScopeGranted(data.email_scope_granted);
+        }
+      })
+      .catch(() => null);
+  }, []);
 
   const handleDisconnect = async (providerId: string) => {
     try {
@@ -31,6 +51,24 @@ export default function SettingsProvidersPage() {
   return (
     <AppLayout>
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
+        {emailScopeGranted === false && (
+          <div
+            role="alert"
+            data-testid="gmail-scope-upgrade-banner"
+            className="mb-6 flex flex-col gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <p className="text-sm text-amber-800">
+              Grant inbox read permission to enable Gmail email access. Upgrade your Gmail scope to allow Ainbox to read your inbox.
+            </p>
+            <a
+              data-testid="upgrade-scope-button"
+              href="/connect/google?scope=gmail.readonly&upgrade=1"
+              className="shrink-0 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"
+            >
+              Upgrade now
+            </a>
+          </div>
+        )}
         <h1 className="text-2xl font-bold text-slate-900">Providers</h1>
         <p className="mt-1 text-sm text-slate-500">Manage your connected email accounts</p>
 
