@@ -76,7 +76,7 @@ async function loadRefreshToken(supabase: SupabaseLike, userId: string): Promise
   return (data as { refresh_token: string }).refresh_token;
 }
 
-export async function handleIncremental(opts: {
+async function handleIncremental(opts: {
   userId: string;
   deps: SyncDeps;
 }): Promise<{ status: number; body: Record<string, unknown> }> {

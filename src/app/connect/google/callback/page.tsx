@@ -12,13 +12,24 @@
  * On success we navigate to /onboarding/sync (PRD §5.2). On error we
  * surface a message and offer a retry link to /connect.
  */
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getBrowserSupabase } from '@/lib/supabase/client';
+
+// OAuth callback — must render at runtime, not at build time
+export const dynamic = 'force-dynamic';
 
 type Status = 'pending' | 'error';
 
 export default function GoogleCallbackPage() {
+  return (
+    <Suspense fallback={<div>Completing sign-in…</div>}>
+      <GoogleCallbackInner />
+    </Suspense>
+  );
+}
+
+function GoogleCallbackInner() {
   const router = useRouter();
   const params = useSearchParams();
   const [status, setStatus] = useState<Status>('pending');

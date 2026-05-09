@@ -42,12 +42,11 @@ interface PatchBody {
 
 async function maybeReembed(content: string): Promise<void> {
   try {
-    // optional dependency from AINBOX-7
-    const mod: { embedChunks?: (xs: { content: string }[]) => Promise<unknown> } =
-      // @ts-expect-error optional peer module
+    // optional dependency from AINBOX-7 — embed module may not exist in test env
+    const mod: { embedChunks?: (texts: string[]) => Promise<number[][]> } =
       await import('@/lib/embeddings/embed').catch(() => ({}));
     if (typeof mod.embedChunks === 'function') {
-      await mod.embedChunks([{ content }]);
+      await mod.embedChunks([content]);
     }
   } catch (err) {
     console.error('[kb/items PATCH] re-embed failed', err);

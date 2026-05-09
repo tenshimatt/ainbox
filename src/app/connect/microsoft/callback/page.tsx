@@ -12,11 +12,22 @@
  * Deny / error: surface the message + a recovery link back to /connect.
  */
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { completeMicrosoftOAuth } from '@/lib/auth/microsoft';
 
+// OAuth callback — must render at runtime, not at build time
+export const dynamic = 'force-dynamic';
+
 export default function MicrosoftCallbackPage() {
+  return (
+    <Suspense fallback={<div>Completing sign-in…</div>}>
+      <MicrosoftCallbackInner />
+    </Suspense>
+  );
+}
+
+function MicrosoftCallbackInner() {
   const router = useRouter();
   const params = useSearchParams();
   const [status, setStatus] = useState<'exchanging' | 'success' | 'error'>(

@@ -38,11 +38,10 @@ async function maybeEmbed(items: KbItem[]): Promise<void> {
   if (!items.length) return;
   try {
     // dynamic import — AINBOX-7 owns this module; tolerate absence in tests.
-    const mod: { embedChunks?: (xs: { id?: string; content: string }[]) => Promise<unknown> } =
-      // @ts-expect-error optional peer module from AINBOX-7
+    const mod: { embedChunks?: (texts: string[], opts?: Record<string, unknown>) => Promise<number[][]> } =
       await import('@/lib/embeddings/embed').catch(() => ({}));
     if (typeof mod.embedChunks === 'function') {
-      await mod.embedChunks(items.map((i) => ({ content: i.content })));
+      await mod.embedChunks(items.map((i) => i.content));
     }
   } catch (err) {
     console.error('[kb/extract] embedding kickoff failed', err);
