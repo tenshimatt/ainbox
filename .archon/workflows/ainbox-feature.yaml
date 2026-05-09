@@ -152,6 +152,10 @@ nodes:
           if the feature is a new button or copy change, it's L2.
         - L5 means halt the workflow — only set if the change genuinely
           swaps a runtime/framework/host. When in doubt, L4.
+        - **Simple edge functions** that add ONE endpoint using existing
+          patterns, with no schema migration and no new tables = **L2**.
+        - Complex edge functions with multiple endpoints AND schema
+          changes = L3.
         - Always include tests/smoke/ in regression_must_pass.
     output_format:
       type: object
