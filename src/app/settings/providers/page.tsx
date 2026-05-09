@@ -1,29 +1,41 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AppLayout from '@/components/AppLayout';
-import { MOCK_PROVIDERS } from '@/lib/mock-data';
+
+interface OAuthToken {
+  id: string;
+  provider: string;
+  scopes: string;
+  created_at: string;
+}
+
+const PROVIDER_DEFS = [
+  { provider: 'google', label: 'Google', initial: 'G', connectHref: '/connect/google' },
+  { provider: 'microsoft', label: 'Microsoft', initial: 'M', connectHref: '/connect/microsoft' },
+];
 
 export default function SettingsProvidersPage() {
-  const [providers, setProviders] = useState(MOCK_PROVIDERS);
+  const [tokens, setTokens] = useState<OAuthToken[]>([]);
   const [disconnectConfirm, setDisconnectConfirm] = useState<string | null>(null);
 
-  const handleDisconnect = async (providerId: string) => {
+  useEffect(() => {
+    fetch('/api/oauth/tokens')
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) setTokens(data);
+      })
+      .catch(() => null);
+  }, []);
+
+  const handleDisconnect = async (tokenId: string) => {
     try {
-      const resp = await fetch(`/api/oauth/tokens/${providerId}`, { method: 'DELETE' });
+      const resp = await fetch(`/api/oauth/tokens/${tokenId}`, { method: 'DELETE' });
       if (resp.ok) {
-        setProviders((prev) =>
-          prev.map((p) =>
-            p.id === providerId ? { ...p, connected: false } : p
-          )
-        );
+        setTokens((prev) => prev.filter((t) => t.id !== tokenId));
       }
     } catch {
-      setProviders((prev) =>
-        prev.map((p) =>
-          p.id === providerId ? { ...p, connected: false } : p
-        )
-      );
+      setTokens((prev) => prev.filter((t) => t.id !== tokenId));
     }
     setDisconnectConfirm(null);
   };
@@ -35,41 +47,43 @@ export default function SettingsProvidersPage() {
         <p className="mt-1 text-sm text-slate-500">Manage your connected email accounts</p>
 
         <div className="mt-6 space-y-4">
-          {providers.map((provider) => (
-            <div
-              key={provider.id}
-              data-testid="provider-row"
-              className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-lg font-bold text-slate-600">
-                  {provider.type === 'google' ? 'G' : 'M'}
+          {PROVIDER_DEFS.map((def) => {
+            const token = tokens.find((t) => t.provider === def.provider);
+            return (
+              <div
+                key={def.provider}
+                data-testid="provider-row"
+                className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-lg font-bold text-slate-600">
+                    {def.initial}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">{def.label}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-slate-900">{provider.name}</p>
-                  <p className="text-xs text-slate-500">{provider.email}</p>
+                <div className="flex items-center gap-3">
+                  {token ? (
+                    <>
+                      <span className="flex items-center gap-1 text-xs text-green-600">
+                        <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                        Connected
+                      </span>
+                      <button
+                        onClick={() => setDisconnectConfirm(token.id)}
+                        className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
+                      >
+                        Disconnect
+                      </button>
+                    </>
+                  ) : (
+                    <span className="text-xs text-slate-400">Not connected</span>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                {provider.connected ? (
-                  <>
-                    <span className="flex items-center gap-1 text-xs text-green-600">
-                      <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                      Connected
-                    </span>
-                    <button
-                      onClick={() => setDisconnectConfirm(provider.id)}
-                      className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
-                    >
-                      Disconnect
-                    </button>
-                  </>
-                ) : (
-                  <span className="text-xs text-slate-400">Not connected</span>
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
 
           <h2 className="mt-8 text-sm font-semibold text-slate-700">Add another provider</h2>
           <div className="flex gap-3">
@@ -88,7 +102,6 @@ export default function SettingsProvidersPage() {
           </div>
         </div>
 
-        {/* Disconnect confirmation dialog */}
         {disconnectConfirm && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"

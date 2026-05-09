@@ -30,6 +30,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // Allow e2e tests to bypass auth when E2E_BYPASS_AUTH=true
+  if (process.env.E2E_BYPASS_AUTH === 'true') {
+    return NextResponse.next();
+  }
+
   const res = NextResponse.next();
   const supabase = getMiddlewareSupabase(req, res);
 

@@ -88,7 +88,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex-1" />
           <div className="flex items-center gap-3">
             <span className="h-2 w-2 rounded-full bg-green-500" />
-            <span className="text-xs text-slate-500">Connected</span>
+            <span className="text-xs text-slate-500">Online</span>
           </div>
         </header>
 
