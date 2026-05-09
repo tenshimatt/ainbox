@@ -10,9 +10,9 @@
 # ══════════════════════════════════════════════════════════════
 
   # ──────────────────────────────────────────────────────────────
-  # 2-TIER LANE ROUTER — L1-L2 (vibe-code) vs L3-L4 (full DAG)
+  # 2-TIER LANE ROUTER — L1-L3 (vibe-code) vs L3-L4 (full DAG)
   #
-  # L1-L2: signal active, vibe-code-bash handles the work
+  # L1-L3: signal active, vibe-code-bash handles the work
   # L3-L4: no signal, project DAG proceeds normally
   # L5: halted by gate-classify (never reaches here)
   # ──────────────────────────────────────────────────────────────
@@ -26,8 +26,8 @@
 
       echo "lane-router: classified $LEVEL ($LANE)"
 
-      # ── L1 / L2 → Vibe-code express lane ────────────────────
-      if [[ "$LEVEL" == "L1" || "$LEVEL" == "L2" ]]; then
+      # ── L1 / L2 / L3 → Vibe-code express lane ────────────────────
+      if [[ "$LEVEL" == "L1" || "$LEVEL" == "L2" || "$LEVEL" == "L3" ]]; then
         echo "─── Vibe-code express lane for $LEVEL $LANE ───"
         echo "Skipping: full DAG architecture review, diagrams, human gates."
         echo "Going straight to test-first → implement → validate → open-pr."
@@ -60,7 +60,7 @@
         echo "  plan: docs/architecture/${SLUG}.md written"
 
         # Signal file for downstream vibe-code-bash node
-        echo "L1-L2" > .vibe-code-active
+        echo "$LEVEL" > .vibe-code-active
         echo "  vibe-code lane active (signal: .vibe-code-active)"
         exit 0
       fi
@@ -70,7 +70,7 @@
       exit 0
 
   # ══════════════════════════════════════════════════════════════
-  # VIBE-CODE BASH — implement + validate + PR (L1-L2 only)
+  # VIBE-CODE BASH — implement + validate + PR (L1-L3 only)
   #
   # Single bash node runs the entire express pipeline:
   # write feature test → quick validate → commit → PR → mark Done
