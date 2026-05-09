@@ -39,7 +39,7 @@ nodes:
       git checkout main 2>/dev/null || true
       git fetch origin main --quiet 2>/dev/null || true
       git reset --hard origin/main 2>/dev/null || true
-      git clean -fdx tests/ docs/architecture/ 2>/dev/null || true
+      git clean -fdx docs/architecture/ 2>/dev/null || true
       # Rail #9 — wire git's credential helper to gh so open-pr's
       # `git push` doesn't fail with "could not read Username for
       # https://github.com" inside the bun child process. AINBOX-75
