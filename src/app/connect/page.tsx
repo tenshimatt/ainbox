@@ -25,10 +25,11 @@ export default function ConnectPage() {
         <a
           href="/connect/microsoft"
           role="button"
+          data-testid="connect-outlook-btn"
           aria-label="Continue with Microsoft"
           className="block rounded border border-slate-300 px-4 py-3 text-center hover:bg-slate-50"
         >
-          Continue with Microsoft
+          Continue with Microsoft / Outlook
         </a>
       </div>
     </main>

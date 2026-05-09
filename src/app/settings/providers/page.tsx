@@ -53,19 +53,45 @@ export default function SettingsProvidersPage() {
               <div className="flex items-center gap-3">
                 {provider.connected ? (
                   <>
-                    <span className="flex items-center gap-1 text-xs text-green-600">
+                    <span
+                      className="flex items-center gap-1 text-xs text-green-600"
+                      {...(provider.type === 'microsoft' ? { 'data-testid': 'outlook-connection-status' } : {})}
+                    >
                       <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
                       Connected
                     </span>
+                    {provider.type === 'microsoft' && (
+                      <>
+                        <span data-testid="outlook-user-email" className="text-xs text-slate-500">{provider.email}</span>
+                        <span data-testid="last-sync-time" className="text-xs text-slate-400">{provider.connectedAt}</span>
+                      </>
+                    )}
                     <button
                       onClick={() => setDisconnectConfirm(provider.id)}
+                      data-testid={provider.type === 'microsoft' ? 'disconnect-outlook-btn' : undefined}
                       className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
                     >
                       Disconnect
                     </button>
                   </>
                 ) : (
-                  <span className="text-xs text-slate-400">Not connected</span>
+                  <>
+                    <span
+                      className="text-xs text-slate-400"
+                      {...(provider.type === 'microsoft' ? { 'data-testid': 'outlook-connection-status' } : {})}
+                    >
+                      Not connected
+                    </span>
+                    {provider.type === 'microsoft' && (
+                      <a
+                        href="/connect/microsoft"
+                        data-testid="connect-outlook-btn"
+                        className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                      >
+                        Connect Outlook
+                      </a>
+                    )}
+                  </>
                 )}
               </div>
             </div>

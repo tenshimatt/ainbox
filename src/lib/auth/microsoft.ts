@@ -51,6 +51,11 @@ export function getMicrosoftRedirectUrl(origin?: string): string {
 export async function startMicrosoftOAuth(
   client = getBrowserClient(),
 ): Promise<MicrosoftOAuthResult> {
+  // Guard: Supabase must be configured before initiating OAuth
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    return { ok: false, error: 'supabase_not_configured' };
+  }
+
   const { data, error } = await client.auth.signInWithOAuth({
     provider: 'azure',
     options: {
