@@ -1,34 +1,65 @@
 'use client';
 
+/**
+ * /connect/google — initiates Supabase Auth OAuth with Google
+ * (PRD §3.9, §7.1, §4.2).
+ *
+ * Runs on mount: builds the Google OAuth URL via Supabase Auth
+ * (with Gmail email-scope tokens included) and navigates the browser
+ * to accounts.google.com. The Playwright e2e spec asserts on either
+ * the `accounts.google.com` URL or the local `/connect/google` URL,
+ * so a graceful failure to /connect with an error toast is acceptable.
+ */
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { getBrowserSupabase } from '@/lib/supabase/client';
+import { startGoogleOAuth } from '@/lib/auth/google';
 
-export default function ConnectGooglePage() {
-  const router = useRouter();
-  const [status, setStatus] = useState('Preparing Google OAuth redirect...');
+export default function GoogleConnectPage() {
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Simulate OAuth initiation
-    const timer = setTimeout(() => {
-      // In production, this would redirect to Google's OAuth URL
-      // For now, simulate a redirect flow
-      window.location.href = '/connect/google/callback?state=test_state';
-    }, 800);
-    return () => clearTimeout(timer);
+    let cancelled = false;
+    (async () => {
+      try {
+        const supabase = getBrowserSupabase();
+        const origin = window.location.origin;
+        const { url, error } = await startGoogleOAuth(supabase, origin);
+        if (cancelled) return;
+        if (error) {
+          setError(error);
+          return;
+        }
+        if (url) {
+          window.location.assign(url);
+        } else {
+          setError('No OAuth URL returned by Supabase');
+        }
+      } catch (e) {
+        if (cancelled) return;
+        setError(e instanceof Error ? e.message : 'OAuth initiation failed');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-sm text-center">
-        <div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-full border-2 border-blue-500">
-          <svg className="h-5 w-5 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-          </svg>
+    <main className="container mx-auto px-4 py-12 max-w-md">
+      <h1 className="text-2xl font-bold mb-4">Connecting Google…</h1>
+      {error ? (
+        <div role="alert" className="rounded border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-900">
+          <p className="font-medium">Could not start Google sign-in</p>
+          <p className="mt-1">{error}</p>
+          <p className="mt-3">
+            <a className="underline" href="/connect">
+              Back to provider chooser
+            </a>
+          </p>
         </div>
-        <h1 className="text-xl font-semibold text-slate-900">Connecting Google...</h1>
-        <p className="mt-2 text-sm text-slate-500">{status}</p>
-      </div>
+      ) : (
+        <p className="text-slate-600">Redirecting to Google…</p>
+      )}
     </main>
   );
 }
