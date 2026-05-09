@@ -1,0 +1,736 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "hermes-agent",
+  "elements": [
+    {
+      "type": "text",
+      "id": "title",
+      "x": 150,
+      "y": 15,
+      "width": 700,
+      "height": 32,
+      "text": "Ainbox \u2014 Security View (Auth, Encryption & Trust Boundaries)",
+      "fontSize": 26,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "originalText": "Ainbox \u2014 Security View (Auth, Encryption & Trust Boundaries)",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "x": 150,
+      "y": 50,
+      "width": 700,
+      "height": 20,
+      "text": "BDATSI Level 5 \u2014 Every security control, boundary, and encryption layer",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "center",
+      "originalText": "BDATSI Level 5 \u2014 Every security control, boundary, and encryption layer",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "untrusted",
+      "x": 60,
+      "y": 100,
+      "width": 880,
+      "height": 680,
+      "strokeColor": "#ef4444",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 60,
+      "roundness": {
+        "type": 3
+      },
+      "strokeStyle": "dashed"
+    },
+    {
+      "type": "text",
+      "id": "untrusted_label",
+      "x": 75,
+      "y": 108,
+      "width": 180,
+      "height": 18,
+      "text": "UNTRUSTED ZONE (Internet)",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#ef4444",
+      "textAlign": "left",
+      "originalText": "UNTRUSTED ZONE (Internet)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "browser",
+      "x": 320,
+      "y": 125,
+      "width": 180,
+      "height": 60,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_browser",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_browser",
+      "x": 326,
+      "y": 147.5,
+      "width": 168,
+      "height": 19,
+      "text": "User Browser\n(HTTPS Cloudflare)",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "browser",
+      "originalText": "User Browser\n(HTTPS Cloudflare)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "gmail_ext",
+      "x": 560,
+      "y": 125,
+      "width": 160,
+      "height": 60,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_gmail_ext",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_gmail_ext",
+      "x": 566,
+      "y": 147.5,
+      "width": 148,
+      "height": 19,
+      "text": "Gmail API\n(Google Servers)",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "gmail_ext",
+      "originalText": "Gmail API\n(Google Servers)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "ms_ext",
+      "x": 750,
+      "y": 125,
+      "width": 160,
+      "height": 60,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_ms_ext",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_ms_ext",
+      "x": 756,
+      "y": 147.5,
+      "width": 148,
+      "height": 19,
+      "text": "MS Graph API\n(Microsoft Servers)",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "ms_ext",
+      "originalText": "MS Graph API\n(Microsoft Servers)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "cf_protect",
+      "x": 120,
+      "y": 220,
+      "width": 760,
+      "height": 50,
+      "strokeColor": "#f59e0b",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 80,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_cf_protect",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_cf_protect",
+      "x": 125,
+      "y": 230,
+      "width": 750,
+      "height": 18,
+      "text": "Cloudflare Edge: TLS termination, DDoS protection, WAF, origin IP masking",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "cf_protect",
+      "originalText": "Cloudflare Edge: TLS termination, DDoS protection, WAF, origin IP masking",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "trusted",
+      "x": 120,
+      "y": 300,
+      "width": 760,
+      "height": 280,
+      "strokeColor": "#10b981",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 60,
+      "roundness": {
+        "type": 3
+      },
+      "strokeStyle": "dashed"
+    },
+    {
+      "type": "text",
+      "id": "trusted_label",
+      "x": 135,
+      "y": 308,
+      "width": 200,
+      "height": 18,
+      "text": "TRUSTED ZONE (Vercel + BP Infra)",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#10b981",
+      "textAlign": "left",
+      "originalText": "TRUSTED ZONE (Vercel + BP Infra)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "nextjs",
+      "x": 160,
+      "y": 335,
+      "width": 220,
+      "height": 70,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#c3fae8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_nextjs",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_nextjs",
+      "x": 166,
+      "y": 364.0,
+      "width": 208,
+      "height": 16,
+      "text": "Next.js Server\n(SSR + API Routes)\nJWT verified per request",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "nextjs",
+      "originalText": "Next.js Server\n(SSR + API Routes)\nJWT verified per request",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "edge_fn_int",
+      "x": 430,
+      "y": 335,
+      "width": 220,
+      "height": 70,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#c3fae8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_edge_fn_int",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_edge_fn_int",
+      "x": 436,
+      "y": 364.5,
+      "width": 208,
+      "height": 15,
+      "text": "Supabase Edge Functions\n(Auth context injected\nby Supabase runtime)",
+      "fontSize": 11,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "edge_fn_int",
+      "originalText": "Supabase Edge Functions\n(Auth context injected\nby Supabase runtime)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "litellm_int",
+      "x": 700,
+      "y": 335,
+      "width": 160,
+      "height": 70,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#d0bfff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_litellm_int",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_litellm_int",
+      "x": 706,
+      "y": 364.5,
+      "width": 148,
+      "height": 15,
+      "text": "LiteLLM Gateway\n(Private, no public\nendpoint)",
+      "fontSize": 11,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "litellm_int",
+      "originalText": "LiteLLM Gateway\n(Private, no public\nendpoint)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "supabase_data",
+      "x": 160,
+      "y": 435,
+      "width": 280,
+      "height": 70,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#c3fae8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_supabase_data",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_supabase_data",
+      "x": 166,
+      "y": 464.0,
+      "width": 268,
+      "height": 16,
+      "text": "Supabase Database\n(Postgres + RLS)\nRow-level security\non every table",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "supabase_data",
+      "originalText": "Supabase Database\n(Postgres + RLS)\nRow-level security\non every table",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "vault_int",
+      "x": 500,
+      "y": 435,
+      "width": 220,
+      "height": 70,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#d0bfff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_vault_int",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_vault_int",
+      "x": 506,
+      "y": 464.5,
+      "width": 208,
+      "height": 15,
+      "text": "Supabase Vault\n(OAuth tokens encrypted\nat column level)",
+      "fontSize": 11,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "vault_int",
+      "originalText": "Supabase Vault\n(OAuth tokens encrypted\nat column level)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "ollama_int",
+      "x": 750,
+      "y": 435,
+      "width": 120,
+      "height": 70,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#c3fae8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_ollama_int",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_ollama_int",
+      "x": 756,
+      "y": 465.0,
+      "width": 108,
+      "height": 14,
+      "text": "Ollama (CT 146)\nLocal embeddings,\nno external egress",
+      "fontSize": 10,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "ollama_int",
+      "originalText": "Ollama (CT 146)\nLocal embeddings,\nno external egress",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "s1",
+      "x": 410,
+      "y": 185,
+      "width": -140,
+      "height": 150,
+      "strokeColor": "#f59e0b",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -140,
+          150
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_s1",
+      "x": 305.0,
+      "y": 246.0,
+      "width": 70,
+      "height": 14,
+      "text": "JWT + session cookie",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#f59e0b",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "JWT + session cookie",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "s2",
+      "x": 380,
+      "y": 370,
+      "width": 50,
+      "height": 0,
+      "strokeColor": "#10b981",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          50,
+          0
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_s2",
+      "x": 370.0,
+      "y": 356.0,
+      "width": 70,
+      "height": 14,
+      "text": "service-role JWT (internal only)",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#10b981",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "service-role JWT (internal only)",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "s3",
+      "x": 270,
+      "y": 405,
+      "width": 0,
+      "height": 30,
+      "strokeColor": "#10b981",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          30
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_s3",
+      "x": 235.0,
+      "y": 406.0,
+      "width": 70,
+      "height": 14,
+      "text": "anon JWT (RLS enforced)",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#10b981",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "anon JWT (RLS enforced)",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "s4",
+      "x": 540,
+      "y": 405,
+      "width": 0,
+      "height": 30,
+      "strokeColor": "#10b981",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          30
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_s4",
+      "x": 505.0,
+      "y": 406.0,
+      "width": 70,
+      "height": 14,
+      "text": "anon JWT (RLS)",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#10b981",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "anon JWT (RLS)",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "s5",
+      "x": 380,
+      "y": 380,
+      "width": 320,
+      "height": -10,
+      "strokeColor": "#10b981",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          320,
+          -10
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_s5",
+      "x": 505.0,
+      "y": 361.0,
+      "width": 70,
+      "height": 14,
+      "text": "HTTPS (internal)",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#10b981",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "HTTPS (internal)",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "rules_title",
+      "x": 120,
+      "y": 610,
+      "width": 760,
+      "height": 20,
+      "text": "Non-negotiable Security Rules (PRD 4, 6, 9):",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "left",
+      "originalText": "Non-negotiable Security Rules (PRD 4, 6, 9):",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "rules",
+      "x": 120,
+      "y": 635,
+      "width": 780,
+      "height": 100,
+      "text": "4.1 Tenant isolation: every table has RLS on auth.uid() -- no exceptions\n4.2 OAuth tokens: encrypted in Vault, never in client, server-only refresh\n4.3 Email bodies: encrypted at rest, decrypted per-request in edge function memory\n4.3 PII redaction: email bodies NEVER in logs, fixtures, or observability\n4.4 Auto-send: hard floor 0.85 confidence -- user can raise, never lower\n9.1 Cross-tenant aggregation: forbidden in v1, even anonymised\n9.4 Service-role: never in user-facing endpoints\n9.6 Refresh token rotation: server-only, never in client JavaScript",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#ef4444",
+      "textAlign": "left",
+      "originalText": "",
+      "autoResize": true
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#f4f1ee"
+  }
+}

@@ -1,0 +1,1078 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "hermes-agent",
+  "elements": [
+    {
+      "type": "text",
+      "id": "title",
+      "x": 120,
+      "y": 15,
+      "width": 760,
+      "height": 32,
+      "text": "Ainbox \u2014 Integration View (Event & Data Flow)",
+      "fontSize": 28,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "originalText": "Ainbox \u2014 Integration View (Event & Data Flow)",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "x": 120,
+      "y": 50,
+      "width": 760,
+      "height": 20,
+      "text": "BDATSI Level 6 \u2014 How data moves between every component in the system",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "center",
+      "originalText": "BDATSI Level 6 \u2014 How data moves between every component in the system",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "gmail",
+      "x": 80,
+      "y": 100,
+      "width": 200,
+      "height": 80,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_gmail",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_gmail",
+      "x": 86,
+      "y": 132.5,
+      "width": 188,
+      "height": 19,
+      "text": "Gmail API\n(OAuth + IMAP)",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "gmail",
+      "originalText": "Gmail API\n(OAuth + IMAP)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "msft",
+      "x": 360,
+      "y": 100,
+      "width": 200,
+      "height": 80,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_msft",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_msft",
+      "x": 366,
+      "y": 132.5,
+      "width": 188,
+      "height": 19,
+      "text": "MS Graph API\n(OAuth + Graph)",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "msft",
+      "originalText": "MS Graph API\n(OAuth + Graph)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "user",
+      "x": 700,
+      "y": 100,
+      "width": 160,
+      "height": 80,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#ede0d0",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_user",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_user",
+      "x": 706,
+      "y": 132.5,
+      "width": 148,
+      "height": 19,
+      "text": "User\n(Browser)",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "user",
+      "originalText": "User\n(Browser)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "sync_gmail",
+      "x": 80,
+      "y": 240,
+      "width": 200,
+      "height": 80,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_sync_gmail",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_sync_gmail",
+      "x": 86,
+      "y": 272.5,
+      "width": 188,
+      "height": 19,
+      "text": "email-sync-gmail\n(Edge Function)",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "sync_gmail",
+      "originalText": "email-sync-gmail\n(Edge Function)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "sync_msft",
+      "x": 360,
+      "y": 240,
+      "width": 200,
+      "height": 80,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_sync_msft",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_sync_msft",
+      "x": 366,
+      "y": 272.5,
+      "width": 188,
+      "height": 19,
+      "text": "email-sync-outlook\n(Edge Function)",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "sync_msft",
+      "originalText": "email-sync-outlook\n(Edge Function)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "dash_ui",
+      "x": 660,
+      "y": 240,
+      "width": 220,
+      "height": 80,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#a5d8ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_dash_ui",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_dash_ui",
+      "x": 666,
+      "y": 272.5,
+      "width": 208,
+      "height": 19,
+      "text": "App Pages\n(/inbox, /drafts, etc.)",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "dash_ui",
+      "originalText": "App Pages\n(/inbox, /drafts, etc.)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "kb_extract",
+      "x": 80,
+      "y": 380,
+      "width": 200,
+      "height": 80,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_kb_extract",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_kb_extract",
+      "x": 86,
+      "y": 412.5,
+      "width": 188,
+      "height": 19,
+      "text": "kb-extract\n(Edge Function)",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "kb_extract",
+      "originalText": "kb-extract\n(Edge Function)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "classify",
+      "x": 360,
+      "y": 380,
+      "width": 200,
+      "height": 80,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_classify",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_classify",
+      "x": 366,
+      "y": 412.5,
+      "width": 188,
+      "height": 19,
+      "text": "classify\n(Edge Function)",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "classify",
+      "originalText": "classify\n(Edge Function)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "draft",
+      "x": 640,
+      "y": 380,
+      "width": 200,
+      "height": 80,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_draft",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_draft",
+      "x": 646,
+      "y": 412.5,
+      "width": 188,
+      "height": 19,
+      "text": "draft\n(Edge Function)",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "draft",
+      "originalText": "draft\n(Edge Function)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "supa_db",
+      "x": 80,
+      "y": 520,
+      "width": 250,
+      "height": 90,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#c3fae8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_supa_db",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_supa_db",
+      "x": 86,
+      "y": 557.5,
+      "width": 238,
+      "height": 19,
+      "text": "Supabase DB\n(Postgres + RLS\n+ pgvector)",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "supa_db",
+      "originalText": "Supabase DB\n(Postgres + RLS\n+ pgvector)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "auto_send",
+      "x": 400,
+      "y": 520,
+      "width": 200,
+      "height": 80,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_auto_send",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_auto_send",
+      "x": 406,
+      "y": 552.5,
+      "width": 188,
+      "height": 19,
+      "text": "auto-send\n(Threshold Check)",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "auto_send",
+      "originalText": "auto-send\n(Threshold Check)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "audit_log",
+      "x": 660,
+      "y": 520,
+      "width": 200,
+      "height": 80,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#ffc9c9",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_audit_log",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_audit_log",
+      "x": 666,
+      "y": 552.5,
+      "width": 188,
+      "height": 19,
+      "text": "Audit Log\n(Every decision\nrecorded)",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "audit_log",
+      "originalText": "Audit Log\n(Every decision\nrecorded)",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "i1",
+      "x": 700,
+      "y": 180,
+      "width": -520,
+      "height": 60,
+      "strokeColor": "#10b981",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -520,
+          60
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_i1",
+      "x": 400.0,
+      "y": 196.0,
+      "width": 80,
+      "height": 14,
+      "text": "1. OAuth connect",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#10b981",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "1. OAuth connect",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "i2",
+      "x": 180,
+      "y": 180,
+      "width": 0,
+      "height": 60,
+      "strokeColor": "#8855ff",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          60
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_i2",
+      "x": 140.0,
+      "y": 196.0,
+      "width": 80,
+      "height": 14,
+      "text": "2. Backfill 1k emails",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#8855ff",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "2. Backfill 1k emails",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "i3",
+      "x": 460,
+      "y": 180,
+      "width": 0,
+      "height": 60,
+      "strokeColor": "#8855ff",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          60
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_i3",
+      "x": 420.0,
+      "y": 196.0,
+      "width": 80,
+      "height": 14,
+      "text": "3. Backfill 1k emails",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#8855ff",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "3. Backfill 1k emails",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "i4",
+      "x": 180,
+      "y": 320,
+      "width": 0,
+      "height": 200,
+      "strokeColor": "#10b981",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          200
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_i4",
+      "x": 140.0,
+      "y": 406.0,
+      "width": 80,
+      "height": 14,
+      "text": "4. Write encrypted",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#10b981",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "4. Write encrypted",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "i5",
+      "x": 460,
+      "y": 320,
+      "width": 0,
+      "height": 200,
+      "strokeColor": "#10b981",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          200
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_i5",
+      "x": 420.0,
+      "y": 406.0,
+      "width": 80,
+      "height": 14,
+      "text": "5. Write encrypted",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#10b981",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "5. Write encrypted",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "i6",
+      "x": 280,
+      "y": 280,
+      "width": -100,
+      "height": 100,
+      "strokeColor": "#f59e0b",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -100,
+          100
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_i6",
+      "x": 190.0,
+      "y": 316.0,
+      "width": 80,
+      "height": 14,
+      "text": "6. Trigger kb-extract",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#f59e0b",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "6. Trigger kb-extract",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "i7",
+      "x": 460,
+      "y": 320,
+      "width": 0,
+      "height": 60,
+      "strokeColor": "#f59e0b",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          60
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_i7",
+      "x": 420.0,
+      "y": 336.0,
+      "width": 80,
+      "height": 14,
+      "text": "7. Classify each email",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#f59e0b",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "7. Classify each email",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "i8",
+      "x": 280,
+      "y": 420,
+      "width": 80,
+      "height": 0,
+      "strokeColor": "#8855ff",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "dashed",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          80,
+          0
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_i8",
+      "x": 280.0,
+      "y": 406.0,
+      "width": 80,
+      "height": 14,
+      "text": "8. Uses KB vectors",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#8855ff",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "8. Uses KB vectors",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "i9",
+      "x": 560,
+      "y": 420,
+      "width": 80,
+      "height": 0,
+      "strokeColor": "#6b6563",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          80,
+          0
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_i9",
+      "x": 560.0,
+      "y": 406.0,
+      "width": 80,
+      "height": 14,
+      "text": "9. Classified emails",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "9. Classified emails",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "i10",
+      "x": 740,
+      "y": 460,
+      "width": -535,
+      "height": 60,
+      "strokeColor": "#8855ff",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "dashed",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -535,
+          60
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_i10",
+      "x": 432.5,
+      "y": 476.0,
+      "width": 80,
+      "height": 14,
+      "text": "10. Top-5 KB items\n+ 3 tone samples",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#8855ff",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "10. Top-5 KB items\n+ 3 tone samples",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "i11",
+      "x": 740,
+      "y": 460,
+      "width": -240,
+      "height": 60,
+      "strokeColor": "#f59e0b",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -240,
+          60
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_i11",
+      "x": 580.0,
+      "y": 476.0,
+      "width": 80,
+      "height": 14,
+      "text": "11. Draft result",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#f59e0b",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "11. Draft result",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "i12",
+      "x": 500,
+      "y": 600,
+      "width": 0,
+      "height": 0,
+      "strokeColor": "#10b981",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "i13",
+      "x": 700,
+      "y": 320,
+      "width": 0,
+      "height": 0,
+      "strokeColor": "#8855ff",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "dashed",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_i13",
+      "x": 660.0,
+      "y": 306.0,
+      "width": 80,
+      "height": 14,
+      "text": "12. Approve/reject",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#8855ff",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "12. Approve/reject",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "i14",
+      "x": 660,
+      "y": 520,
+      "width": 0,
+      "height": 0,
+      "strokeColor": "#6b6563",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "legend_title",
+      "x": 80,
+      "y": 650,
+      "width": 800,
+      "height": 20,
+      "text": "Flow Legend:",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "left",
+      "originalText": "Flow Legend:",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "legend",
+      "x": 80,
+      "y": 675,
+      "width": 800,
+      "height": 60,
+      "text": "Green = data writes to storage  |  Purple = vector/KB lookups  |  Orange = function triggers and pipelines\nGray = general control/data flow  |  Numbers indicate processing order from connection to auto-send",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "left",
+      "originalText": "Green = data writes to storage  |  Purple = vector/KB lookups  |  Orange = function triggers and pipelines\nGray = general control/data flow  |  Numbers indicate processing order from connection to auto-send",
+      "autoResize": true
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#f4f1ee"
+  }
+}

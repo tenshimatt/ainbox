@@ -1,0 +1,987 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "hermes-agent",
+  "elements": [
+    {
+      "type": "text",
+      "id": "title",
+      "x": 150,
+      "y": 15,
+      "width": 700,
+      "height": 32,
+      "text": "Ainbox \u2014 Technology View (Stack & Infrastructure)",
+      "fontSize": 28,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "originalText": "Ainbox \u2014 Technology View (Stack & Infrastructure)",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "x": 150,
+      "y": 50,
+      "width": 700,
+      "height": 20,
+      "text": "BDATSI Level 4 \u2014 Every technology, version pin, and hosting layer",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "center",
+      "originalText": "BDATSI Level 4 \u2014 Every technology, version pin, and hosting layer",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "l1_bg",
+      "x": 60,
+      "y": 100,
+      "width": 880,
+      "height": 100,
+      "strokeColor": "#9cc1e7",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 80,
+      "roundness": {
+        "type": 3
+      },
+      "strokeStyle": "solid"
+    },
+    {
+      "type": "text",
+      "id": "l1_label",
+      "x": 75,
+      "y": 108,
+      "width": 160,
+      "height": 18,
+      "text": "Layer 1: Client (Browser)",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "left",
+      "originalText": "Layer 1: Client (Browser)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "react",
+      "x": 80,
+      "y": 130,
+      "width": 200,
+      "height": 60,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#a5d8ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_react",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_react",
+      "x": 86,
+      "y": 153.5,
+      "width": 188,
+      "height": 17,
+      "text": "React 19\n+ Next.js 15\n(App Router)",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "react",
+      "originalText": "React 19\n+ Next.js 15\n(App Router)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "tailwind",
+      "x": 330,
+      "y": 130,
+      "width": 200,
+      "height": 60,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#a5d8ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_tailwind",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_tailwind",
+      "x": 336,
+      "y": 153.5,
+      "width": 188,
+      "height": 17,
+      "text": "Tailwind v3\n+ shadcn/ui",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "tailwind",
+      "originalText": "Tailwind v3\n+ shadcn/ui",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "tanstack",
+      "x": 580,
+      "y": 130,
+      "width": 200,
+      "height": 60,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#a5d8ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_tanstack",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_tanstack",
+      "x": 586,
+      "y": 153.5,
+      "width": 188,
+      "height": 17,
+      "text": "TanStack Query\n+ Zustand\n+ Context API",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "tanstack",
+      "originalText": "TanStack Query\n+ Zustand\n+ Context API",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "playwright",
+      "x": 830,
+      "y": 130,
+      "width": 100,
+      "height": 60,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#a5d8ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_playwright",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_playwright",
+      "x": 836,
+      "y": 154.5,
+      "width": 88,
+      "height": 15,
+      "text": "Playwright\n(e2e + smoke\n+ contract)",
+      "fontSize": 11,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "playwright",
+      "originalText": "Playwright\n(e2e + smoke\n+ contract)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "l2_bg",
+      "x": 60,
+      "y": 230,
+      "width": 880,
+      "height": 80,
+      "strokeColor": "#ffd8a8",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 80,
+      "roundness": {
+        "type": 3
+      },
+      "strokeStyle": "solid"
+    },
+    {
+      "type": "text",
+      "id": "l2_label",
+      "x": 75,
+      "y": 238,
+      "width": 160,
+      "height": 18,
+      "text": "Layer 2: Hosting & CDN",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "left",
+      "originalText": "Layer 2: Hosting & CDN",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "vercel",
+      "x": 80,
+      "y": 255,
+      "width": 180,
+      "height": 45,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_vercel",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_vercel",
+      "x": 86,
+      "y": 271.0,
+      "width": 168,
+      "height": 17,
+      "text": "Vercel\n(Next.js SSR + Edge)",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "vercel",
+      "originalText": "Vercel\n(Next.js SSR + Edge)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "cloudflare",
+      "x": 320,
+      "y": 255,
+      "width": 220,
+      "height": 45,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_cloudflare",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_cloudflare",
+      "x": 326,
+      "y": 271.5,
+      "width": 208,
+      "height": 16,
+      "text": "Cloudflare DNS\n(ainbox.beyondpandora.com)",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "cloudflare",
+      "originalText": "Cloudflare DNS\n(ainbox.beyondpandora.com)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "traefik",
+      "x": 600,
+      "y": 255,
+      "width": 180,
+      "height": 45,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_traefik",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_traefik",
+      "x": 606,
+      "y": 271.5,
+      "width": 168,
+      "height": 16,
+      "text": "Traefik (CT 103)\nReverse Proxy",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "traefik",
+      "originalText": "Traefik (CT 103)\nReverse Proxy",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "ct113",
+      "x": 830,
+      "y": 255,
+      "width": 100,
+      "height": 45,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_ct113",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_ct113",
+      "x": 836,
+      "y": 272.5,
+      "width": 88,
+      "height": 14,
+      "text": "Cloudflared (CT 113)\nTunnel Agent",
+      "fontSize": 10,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "ct113",
+      "originalText": "Cloudflared (CT 113)\nTunnel Agent",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "l3_bg",
+      "x": 60,
+      "y": 340,
+      "width": 880,
+      "height": 150,
+      "strokeColor": "#d0bfff",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 80,
+      "roundness": {
+        "type": 3
+      },
+      "strokeStyle": "solid"
+    },
+    {
+      "type": "text",
+      "id": "l3_label",
+      "x": 75,
+      "y": 348,
+      "width": 160,
+      "height": 18,
+      "text": "Layer 3: Backend & Data",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "left",
+      "originalText": "Layer 3: Backend & Data",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "api_routes",
+      "x": 80,
+      "y": 370,
+      "width": 200,
+      "height": 50,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#d0bfff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_api_routes",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_api_routes",
+      "x": 86,
+      "y": 389.0,
+      "width": 188,
+      "height": 16,
+      "text": "Next.js API Routes\n(14 endpoints, mock data)",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "api_routes",
+      "originalText": "Next.js API Routes\n(14 endpoints, mock data)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "edge_fn",
+      "x": 320,
+      "y": 370,
+      "width": 230,
+      "height": 50,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#d0bfff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_edge_fn",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_edge_fn",
+      "x": 326,
+      "y": 389.5,
+      "width": 218,
+      "height": 15,
+      "text": "Supabase Edge Functions\n(6 workers: sync, kb,\nclassify, draft, send)",
+      "fontSize": 11,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "edge_fn",
+      "originalText": "Supabase Edge Functions\n(6 workers: sync, kb,\nclassify, draft, send)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "supabase",
+      "x": 590,
+      "y": 370,
+      "width": 180,
+      "height": 50,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#c3fae8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_supabase",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_supabase",
+      "x": 596,
+      "y": 389.5,
+      "width": 168,
+      "height": 15,
+      "text": "Supabase\nProject ainbox-prod\nPostgres 15 + pgvector",
+      "fontSize": 11,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "supabase",
+      "originalText": "Supabase\nProject ainbox-prod\nPostgres 15 + pgvector",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "litellm",
+      "x": 820,
+      "y": 370,
+      "width": 110,
+      "height": 50,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#ffc9c9",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_litellm",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_litellm",
+      "x": 826,
+      "y": 390.5,
+      "width": 98,
+      "height": 13,
+      "text": "LiteLLM Gateway\nai-gateway.beyondpandora.com\n\u2192 DeepSeek V4 Pro",
+      "fontSize": 9,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "litellm",
+      "originalText": "LiteLLM Gateway\nai-gateway.beyondpandora.com\n\u2192 DeepSeek V4 Pro",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "pg_cron",
+      "x": 80,
+      "y": 440,
+      "width": 160,
+      "height": 40,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_pg_cron",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_pg_cron",
+      "x": 86,
+      "y": 454.0,
+      "width": 148,
+      "height": 16,
+      "text": "pg_cron\n(Scheduled Jobs)",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "pg_cron",
+      "originalText": "pg_cron\n(Scheduled Jobs)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "realtime",
+      "x": 280,
+      "y": 440,
+      "width": 160,
+      "height": 40,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_realtime",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_realtime",
+      "x": 286,
+      "y": 454.0,
+      "width": 148,
+      "height": 16,
+      "text": "Supabase Realtime\n(Live Updates)",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "realtime",
+      "originalText": "Supabase Realtime\n(Live Updates)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "vault",
+      "x": 480,
+      "y": 440,
+      "width": 160,
+      "height": 40,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#ffc9c9",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_vault",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_vault",
+      "x": 486,
+      "y": 454.0,
+      "width": 148,
+      "height": 16,
+      "text": "Supabase Vault\n(Encrypted Secrets)",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "vault",
+      "originalText": "Supabase Vault\n(Encrypted Secrets)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "ollama",
+      "x": 680,
+      "y": 440,
+      "width": 140,
+      "height": 40,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_ollama",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_ollama",
+      "x": 686,
+      "y": 454.5,
+      "width": 128,
+      "height": 15,
+      "text": "Ollama bge-m3\n(Embeddings,\nlocal CT 146)",
+      "fontSize": 11,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "ollama",
+      "originalText": "Ollama bge-m3\n(Embeddings,\nlocal CT 146)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "l4_bg",
+      "x": 60,
+      "y": 520,
+      "width": 880,
+      "height": 90,
+      "strokeColor": "#ffc9c9",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 80,
+      "roundness": {
+        "type": 3
+      },
+      "strokeStyle": "solid"
+    },
+    {
+      "type": "text",
+      "id": "l4_label",
+      "x": 75,
+      "y": 528,
+      "width": 160,
+      "height": 18,
+      "text": "Layer 4: External APIs",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "left",
+      "originalText": "Layer 4: External APIs",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "gmail_api",
+      "x": 80,
+      "y": 550,
+      "width": 200,
+      "height": 50,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#ffc9c9",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_gmail_api",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_gmail_api",
+      "x": 86,
+      "y": 569.0,
+      "width": 188,
+      "height": 16,
+      "text": "Gmail API\n(googleapis@^140)",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "gmail_api",
+      "originalText": "Gmail API\n(googleapis@^140)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "ms_graph",
+      "x": 340,
+      "y": 550,
+      "width": 200,
+      "height": 50,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#ffc9c9",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_ms_graph",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_ms_graph",
+      "x": 346,
+      "y": 569.0,
+      "width": 188,
+      "height": 16,
+      "text": "MS Graph API\n(@microsoft/graph@^3)",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "ms_graph",
+      "originalText": "MS Graph API\n(@microsoft/graph@^3)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "deepseek",
+      "x": 600,
+      "y": 550,
+      "width": 160,
+      "height": 50,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#ffc9c9",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_deepseek",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_deepseek",
+      "x": 606,
+      "y": 569.0,
+      "width": 148,
+      "height": 16,
+      "text": "DeepSeek\n(V4 Pro, API)",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "deepseek",
+      "originalText": "DeepSeek\n(V4 Pro, API)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "supabase_api",
+      "x": 820,
+      "y": 550,
+      "width": 110,
+      "height": 50,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#ffc9c9",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_supabase_api",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_supabase_api",
+      "x": 826,
+      "y": 570.0,
+      "width": 98,
+      "height": 14,
+      "text": "Supabase\nManagement API",
+      "fontSize": 10,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "supabase_api",
+      "originalText": "Supabase\nManagement API",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "version_note",
+      "x": 60,
+      "y": 640,
+      "width": 860,
+      "height": 40,
+      "text": "Version pins: next@15, react@19, tailwind@3, typescript@5.6. ADR required for any stack change.\nPentesting: Kali on CT 157 (10.90.10.57). CI: GitHub Actions + Playwright. Billing: Vercel Pro + Supabase Pro.",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "left",
+      "originalText": "Version pins: next@15, react@19, tailwind@3, typescript@5.6. ADR required for any stack change.\nPentesting: Kali on CT 157 (10.90.10.57). CI: GitHub Actions + Playwright. Billing: Vercel Pro + Supabase Pro.",
+      "autoResize": true
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#f4f1ee"
+  }
+}

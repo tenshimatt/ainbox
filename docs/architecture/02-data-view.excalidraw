@@ -1,0 +1,888 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "hermes-agent",
+  "elements": [
+    {
+      "type": "text",
+      "id": "title",
+      "x": 200,
+      "y": 20,
+      "width": 600,
+      "height": 32,
+      "text": "Ainbox \u2014 Data View (Schema & Storage Architecture)",
+      "fontSize": 28,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "originalText": "Ainbox \u2014 Data View (Schema & Storage Architecture)",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "x": 200,
+      "y": 58,
+      "width": 600,
+      "height": 20,
+      "text": "BDATSI Level 2 \u2014 Tables, columns, relationships, and retention",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "center",
+      "originalText": "BDATSI Level 2 \u2014 Tables, columns, relationships, and retention",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "supabase_bg",
+      "x": 60,
+      "y": 100,
+      "width": 880,
+      "height": 740,
+      "strokeColor": "#8855ff",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "strokeStyle": "dashed"
+    },
+    {
+      "type": "text",
+      "id": "supabase_label",
+      "x": 80,
+      "y": 110,
+      "width": 200,
+      "height": 20,
+      "text": "Supabase (Postgres 15 + pgvector)",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#8855ff",
+      "textAlign": "left",
+      "originalText": "Supabase (Postgres 15 + pgvector)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "users",
+      "x": 80,
+      "y": 140,
+      "width": 240,
+      "height": 90,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_users",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_users",
+      "x": 88,
+      "y": 178.5,
+      "width": 224,
+      "height": 17,
+      "text": "auth.users\n(Supabase Auth)\nuid, email, created_at",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "users",
+      "originalText": "auth.users\n(Supabase Auth)\nuid, email, created_at",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "profiles",
+      "x": 360,
+      "y": 140,
+      "width": 240,
+      "height": 90,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#c3fae8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_profiles",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_profiles",
+      "x": 368,
+      "y": 178.5,
+      "width": 224,
+      "height": 17,
+      "text": "user_profiles\nid, user_id, name,\navatar_url, timezone",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "profiles",
+      "originalText": "user_profiles\nid, user_id, name,\navatar_url, timezone",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "oauth",
+      "x": 640,
+      "y": 140,
+      "width": 270,
+      "height": 90,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#c3fae8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_oauth",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_oauth",
+      "x": 648,
+      "y": 178.5,
+      "width": 254,
+      "height": 17,
+      "text": "oauth_tokens\nid, user_id, provider,\nencrypted_token, scope",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "oauth",
+      "originalText": "oauth_tokens\nid, user_id, provider,\nencrypted_token, scope",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "email_meta",
+      "x": 80,
+      "y": 290,
+      "width": 270,
+      "height": 130,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#a5d8ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_email_meta",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_email_meta",
+      "x": 88,
+      "y": 348.5,
+      "width": 254,
+      "height": 17,
+      "text": "email_messages\nid, user_id, thread_id,\nsender, subject_hash,\nbody_encrypted, timestamp,\ncategory, synced_at",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "email_meta",
+      "originalText": "email_messages\nid, user_id, thread_id,\nsender, subject_hash,\nbody_encrypted, timestamp,\ncategory, synced_at",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "sync_state",
+      "x": 400,
+      "y": 290,
+      "width": 250,
+      "height": 110,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#c3fae8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_sync_state",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_sync_state",
+      "x": 408,
+      "y": 338.5,
+      "width": 234,
+      "height": 17,
+      "text": "email_sync_state\nid, user_id, provider,\ndelta_token, last_seq,\nlast_sync_at",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "sync_state",
+      "originalText": "email_sync_state\nid, user_id, provider,\ndelta_token, last_seq,\nlast_sync_at",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "categories",
+      "x": 700,
+      "y": 290,
+      "width": 210,
+      "height": 90,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#ffc9c9",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_categories",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_categories",
+      "x": 708,
+      "y": 328.5,
+      "width": 194,
+      "height": 17,
+      "text": "email_categories\nid, user_id, name,\nis_system, confidence",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "categories",
+      "originalText": "email_categories\nid, user_id, name,\nis_system, confidence",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "kb_items",
+      "x": 80,
+      "y": 460,
+      "width": 270,
+      "height": 130,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#d0bfff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_kb_items",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_kb_items",
+      "x": 88,
+      "y": 518.5,
+      "width": 254,
+      "height": 17,
+      "text": "kb_items\nid, user_id, type,\ncontent, confidence,\nsource_email_id,\nvector (1024d), verified",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "kb_items",
+      "originalText": "kb_items\nid, user_id, type,\ncontent, confidence,\nsource_email_id,\nvector (1024d), verified",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "drafts",
+      "x": 400,
+      "y": 460,
+      "width": 270,
+      "height": 130,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#c3fae8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_drafts",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_drafts",
+      "x": 408,
+      "y": 518.5,
+      "width": 254,
+      "height": 17,
+      "text": "drafts\nid, user_id, email_id,\ndraft_text, confidence,\nretrieval_score, gen_score,\nstatus, sent_at",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "drafts",
+      "originalText": "drafts\nid, user_id, email_id,\ndraft_text, confidence,\nretrieval_score, gen_score,\nstatus, sent_at",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "audit_log",
+      "x": 710,
+      "y": 460,
+      "width": 200,
+      "height": 130,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_audit_log",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_audit_log",
+      "x": 718,
+      "y": 518.5,
+      "width": 184,
+      "height": 17,
+      "text": "audit_log\nid, user_id, event_type,\nemail_id, model_used,\nconfidence, timestamp",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "audit_log",
+      "originalText": "audit_log\nid, user_id, event_type,\nemail_id, model_used,\nconfidence, timestamp",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "auto_config",
+      "x": 80,
+      "y": 640,
+      "width": 270,
+      "height": 90,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#ffc9c9",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_auto_config",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_auto_config",
+      "x": 88,
+      "y": 678.5,
+      "width": 254,
+      "height": 17,
+      "text": "auto_send_config\nid, user_id, category,\nenabled, threshold,\ncreated_at, updated_at",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "auto_config",
+      "originalText": "auto_send_config\nid, user_id, category,\nenabled, threshold,\ncreated_at, updated_at",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "admin_health",
+      "x": 400,
+      "y": 640,
+      "width": 270,
+      "height": 90,
+      "strokeColor": "#1a1615",
+      "backgroundColor": "#c3fae8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "t_admin_health",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_admin_health",
+      "x": 408,
+      "y": 678.5,
+      "width": 254,
+      "height": 17,
+      "text": "admin_health\n(system-level, no tenant data)\nerrors, queue depth,\nrate_limit, timestamp",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1a1615",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "admin_health",
+      "originalText": "admin_health\n(system-level, no tenant data)\nerrors, queue depth,\nrate_limit, timestamp",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "r_up",
+      "x": 200,
+      "y": 230,
+      "width": 280,
+      "height": 0,
+      "strokeColor": "#6b6563",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          280,
+          0
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_r_up",
+      "x": 300.0,
+      "y": 214.0,
+      "width": 80,
+      "height": 16,
+      "text": "FK: user_id",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "FK: user_id",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "r_uo",
+      "x": 200,
+      "y": 230,
+      "width": 575,
+      "height": 0,
+      "strokeColor": "#6b6563",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          575,
+          0
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_r_uo",
+      "x": 447.5,
+      "y": 214.0,
+      "width": 80,
+      "height": 16,
+      "text": "FK: user_id",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "FK: user_id",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "r_ue",
+      "x": 200,
+      "y": 230,
+      "width": 15,
+      "height": 60,
+      "strokeColor": "#6b6563",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          15,
+          60
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_r_ue",
+      "x": 167.5,
+      "y": 244.0,
+      "width": 80,
+      "height": 16,
+      "text": "FK: user_id",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "FK: user_id",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "r_uk",
+      "x": 200,
+      "y": 230,
+      "width": 15,
+      "height": 230,
+      "strokeColor": "#6b6563",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          15,
+          230
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_r_uk",
+      "x": 167.5,
+      "y": 329.0,
+      "width": 80,
+      "height": 16,
+      "text": "FK: user_id",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "FK: user_id",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "r_ud",
+      "x": 200,
+      "y": 280,
+      "width": 335,
+      "height": 180,
+      "strokeColor": "#6b6563",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          335,
+          180
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_r_ud",
+      "x": 327.5,
+      "y": 354.0,
+      "width": 80,
+      "height": 16,
+      "text": "FK: user_id",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "FK: user_id",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "r_ec",
+      "x": 350,
+      "y": 350,
+      "width": 350,
+      "height": 0,
+      "strokeColor": "#6b6563",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "solid",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          350,
+          0
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_r_ec",
+      "x": 485.0,
+      "y": 334.0,
+      "width": 80,
+      "height": 16,
+      "text": "category",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "category",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "r_ed",
+      "x": 350,
+      "y": 370,
+      "width": 185,
+      "height": 90,
+      "strokeColor": "#6b6563",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "dashed",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          185,
+          90
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_r_ed",
+      "x": 402.5,
+      "y": 399.0,
+      "width": 80,
+      "height": 16,
+      "text": "source",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "source",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "r_ke",
+      "x": 215,
+      "y": 520,
+      "width": 0,
+      "height": -100,
+      "strokeColor": "#6b6563",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "dashed",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          -100
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_r_ke",
+      "x": 175.0,
+      "y": 454.0,
+      "width": 80,
+      "height": 16,
+      "text": "source_email_id",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "source_email_id",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "r_da",
+      "x": 670,
+      "y": 520,
+      "width": 40,
+      "height": 0,
+      "strokeColor": "#6b6563",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "dashed",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          40,
+          0
+        ]
+      ],
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "l_r_da",
+      "x": 650.0,
+      "y": 504.0,
+      "width": 80,
+      "height": 16,
+      "text": "logged",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "originalText": "logged",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "retention_note",
+      "x": 80,
+      "y": 760,
+      "width": 800,
+      "height": 60,
+      "text": "Retention: Email bodies \u2014 configurable 30/90/365/forever (encrypted at rest).\nAudit logs \u2014 24 months. OAuth tokens \u2014 until disconnect. KB items \u2014 until user deletes.",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#6b6563",
+      "textAlign": "left",
+      "originalText": "Retention: Email bodies \u2014 configurable 30/90/365/forever (encrypted at rest).\nAudit logs \u2014 24 months. OAuth tokens \u2014 until disconnect. KB items \u2014 until user deletes.",
+      "autoResize": true
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#f4f1ee"
+  }
+}
