@@ -46,7 +46,7 @@ export interface AutomationRule {
 
 export const MOCK_PROVIDERS: Provider[] = [
   { id: 'p1', name: 'Google', email: 'alice@gmail.com', type: 'google', connected: true, connectedAt: '2026-04-15T10:30:00Z' },
-  { id: 'p2', name: 'Microsoft', email: 'alice@outlook.com', type: 'microsoft', connected: true, connectedAt: '2026-04-16T14:00:00Z' },
+  { id: 'p2', name: 'Microsoft', email: 'alice@outlook.com', type: 'microsoft', connected: false, connectedAt: '2026-04-16T14:00:00Z' },
 ];
 
 export const MOCK_DRAFTS: Draft[] = [

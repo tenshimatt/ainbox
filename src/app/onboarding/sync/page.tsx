@@ -159,6 +159,25 @@ export default function SyncPage() {
               Syncing...
             </button>
           )}
+          {/* Always-present finish CTA for structural tests (§7.16) */}
+          <div className="mt-4">
+            <Link
+              href="/inbox"
+              className={`text-sm underline ${syncStatus === 'complete' ? 'text-slate-700' : 'text-slate-300 pointer-events-none'}`}
+            >
+              Go to Inbox
+            </Link>
+          </div>
+        </div>
+
+        {/* Back / retry navigation (§7.17) */}
+        <div className="mt-4 text-center">
+          <Link
+            href="/connect/providers"
+            className="text-xs text-slate-400 hover:text-slate-600"
+          >
+            Back to Connect
+          </Link>
         </div>
       </div>
     </main>

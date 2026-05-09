@@ -33,6 +33,15 @@ export default function SettingsProvidersPage() {
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
         <h1 className="text-2xl font-bold text-slate-900">Providers</h1>
         <p className="mt-1 text-sm text-slate-500">Manage your connected email accounts</p>
+        {/* Provider health indicator — visible for observability tests (§7.17) */}
+        {providers.some((p) => !p.connected) && (
+          <div
+            data-testid="provider-error"
+            className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700"
+          >
+            One or more providers are not connected. Reconnect to resume email sync.
+          </div>
+        )}
 
         <div className="mt-6 space-y-4">
           {providers.map((provider) => (
@@ -65,7 +74,15 @@ export default function SettingsProvidersPage() {
                     </button>
                   </>
                 ) : (
-                  <span className="text-xs text-slate-400">Not connected</span>
+                  <>
+                    <span data-testid="provider-error" className="text-xs text-red-500">Not connected</span>
+                    <a
+                      href={`/connect/${provider.type}`}
+                      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                    >
+                      Reconnect
+                    </a>
+                  </>
                 )}
               </div>
             </div>
@@ -73,18 +90,18 @@ export default function SettingsProvidersPage() {
 
           <h2 className="mt-8 text-sm font-semibold text-slate-700">Add another provider</h2>
           <div className="flex gap-3">
-            <a
-              href="/connect/google"
+            <button
+              onClick={() => { window.location.href = '/connect/google'; }}
               className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
               Connect Google
-            </a>
-            <a
-              href="/connect/microsoft"
+            </button>
+            <button
+              onClick={() => { window.location.href = '/connect/microsoft'; }}
               className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
               Connect Microsoft
-            </a>
+            </button>
           </div>
         </div>
 
