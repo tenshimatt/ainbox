@@ -11,13 +11,14 @@
 
 ## L2 — Minor (single component, no surface change)
 **Examples**: one new state in an existing component, refactor of one
-file, lint fix sweep.
+file, lint fix sweep, **simple edge function or API route that adds one
+endpoint using existing patterns (no schema migration, no new tables)**.
 **Contracts**: `tests/smoke/` + any L4 contract test the file touches.
 **Lane**: `L2-minor`.
 
 ## L3 — Major (cross-cutting, multiple files)
-**Examples**: a new feature page, new edge function, schema migration
-that affects multiple tables.
+**Examples**: a new feature page, complex edge function with multiple
+endpoints and schema migration, multiple new tables or RLS policies.
 **Contracts**: `tests/smoke/` + ALL L4 contract tests + feature tests.
 **Lane**: `L3-major`.
 
