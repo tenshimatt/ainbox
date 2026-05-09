@@ -34,6 +34,29 @@ if [[ -z "$TICKETS" ]]; then
   exit 0
 fi
 
+# ─── CONCURRENCY GUARD ──────────────────────────────────────────────
+# The Pandomagic harness has a per-workflow singleton lock — running a
+# second `ainbox-feature` while another is in flight rejects with
+# "Workflow already running". Skip this tick entirely if any
+# ainbox-feature run is currently active on the harness.
+HARNESS_URL="${ARCHON_HARNESS_URL:-http://10.90.10.56:3090}"
+ACTIVE="$(curl -fsS --max-time 4 "${HARNESS_URL}/api/health" 2>/dev/null \
+  | jq -r '.concurrency.active // 0' 2>/dev/null || echo 0)"
+if [[ "${ACTIVE:-0}" != "0" ]]; then
+  echo "[$(date -u +%FT%TZ)] harness busy (active=${ACTIVE}); skipping tick" >&2
+  exit 0
+fi
+# Also guard against another poller process already running a workflow
+# locally (oneshot service overlap protection).
+if pgrep -f "workflow run ainbox-feature" >/dev/null 2>&1; then
+  echo "[$(date -u +%FT%TZ)] another ainbox-feature workflow already running locally; skipping tick" >&2
+  exit 0
+fi
+
+# Only process ONE ticket per tick — the harness can only handle one
+# at a time. Take the first archon-ready ticket and break.
+TICKETS="$(echo "$TICKETS" | head -1)"
+
 while IFS= read -r TID; do
   echo "[$(date -u +%FT%TZ)] kicking off ainbox-feature for ticket $TID" >&2
 
