@@ -1,8 +1,11 @@
 /**
  * POST /api/sync/outlook/incremental — delta poll (PRD §7.5).
  *
- * Uses the persisted delta token from email_sync_state.delta_token. Designed
- * to be called every 60s by pg_cron.
+ * AINBOX-18: getAccessToken now performs a real Microsoft token refresh.
+ *   1. Read the encrypted refresh token from oauth_tokens.
+ *   2. Decrypt + exchange via Microsoft's /token endpoint (refreshMicrosoftToken).
+ *   3. If Microsoft issues a new refresh token, persist it back to oauth_tokens.
+ *   4. Return the fresh access token (in-memory only — never stored per §4.2).
  *
  * PRD: §3.8 §4.2 §4.3 §7.5 §7.17 §7.18
  */
@@ -12,6 +15,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
 import { runOutlookIncremental, type PersistedMessage } from '@/lib/sync/outlook';
+import { refreshMicrosoftToken } from '@/lib/auth/microsoft-refresh';
 
 export const runtime = 'nodejs';
 
@@ -44,18 +48,43 @@ export async function POST(): Promise<NextResponse> {
     );
   }
 
+  /**
+   * AINBOX-18: real token refresh.
+   * Read encrypted_refresh_token → decrypt → exchange with Microsoft → return
+   * fresh access token. Persists a rotated refresh token if Microsoft issued one.
+   */
   const getAccessToken = async (): Promise<string> => {
     if (!supabase) throw new Error('supabase unavailable');
     const { data, error } = await supabase
       .from('oauth_tokens')
-      .select('access_token')
+      .select('encrypted_refresh_token')
       .eq('user_id', userId)
       .eq('provider', 'microsoft')
       .single();
-    if (error || !data?.access_token) {
-      throw new Error('no microsoft oauth token for user');
+    if (error || !data?.encrypted_refresh_token) {
+      throw new Error(
+        'no microsoft oauth token for user (run /connect/microsoft first)',
+      );
     }
-    return data.access_token as string;
+    const { accessToken, newEncryptedRefreshToken } =
+      await refreshMicrosoftToken(
+        data.encrypted_refresh_token as string,
+        userId,
+      );
+    if (newEncryptedRefreshToken) {
+      supabase
+        .from('oauth_tokens')
+        .update({
+          encrypted_refresh_token: newEncryptedRefreshToken,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', userId)
+        .eq('provider', 'microsoft')
+        .then(() => {
+          /* best-effort */
+        });
+    }
+    return accessToken;
   };
 
   const persistMessage = async (row: PersistedMessage): Promise<void> => {

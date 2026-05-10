@@ -3,12 +3,11 @@
 /**
  * PRD §5.2 Onboarding — `/connect/microsoft/callback` lands the OAuth code
  * PRD §7.2 Provider OAuth — Microsoft
- * PRD §4.2 OAuth token storage — Supabase exchanges the code, persists the
- *          session, and (server-side) routes the refresh token into the
- *          encrypted `oauth_tokens` table. This client page never touches
- *          tokens directly.
+ * PRD §4.2 OAuth token storage — Supabase exchanges the code server-side.
+ *          After exchange this page calls POST /api/oauth/microsoft/store-tokens
+ *          to persist the encrypted refresh token (AINBOX-18).
  *
- * Happy path: code present, exchange ok → push user to /onboarding/sync.
+ * Happy path: code present → exchange → store tokens → push to /onboarding/sync.
  * Deny / error: surface the message + a recovery link back to /connect.
  */
 
@@ -55,15 +54,46 @@ function MicrosoftCallbackInner() {
     }
 
     (async () => {
+      // Step 1: Exchange the auth code for a Supabase session (mints
+      // provider_token + provider_refresh_token in the session).
       const result = await completeMicrosoftOAuth(code);
       if (cancelled) return;
-      if (result.ok) {
-        setStatus('success');
-        router.replace('/onboarding/sync');
-      } else {
+      if (!result.ok) {
         setErrorMessage(result.error);
         setStatus('error');
+        return;
       }
+
+      // Step 2: Persist the Microsoft refresh token server-side (AINBOX-18).
+      // The route extracts provider_refresh_token from the active session,
+      // encrypts it via AINBOX-5 crypto, and upserts into oauth_tokens.
+      let storeOk = true;
+      let storeError: string | null = null;
+      try {
+        const storeRes = await fetch('/api/oauth/microsoft/store-tokens', {
+          method: 'POST',
+          credentials: 'same-origin',
+        });
+        if (!storeRes.ok) {
+          const body = await storeRes.json().catch(() => ({})) as { error?: string };
+          storeError = body.error ?? 'token_storage_failed';
+          storeOk = false;
+        }
+      } catch {
+        storeError = 'token_storage_network_error';
+        storeOk = false;
+      }
+
+      if (cancelled) return;
+
+      if (!storeOk) {
+        setErrorMessage(storeError);
+        setStatus('error');
+        return;
+      }
+
+      setStatus('success');
+      router.replace('/onboarding/sync');
     })();
 
     return () => {
