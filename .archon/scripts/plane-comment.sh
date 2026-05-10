@@ -15,7 +15,7 @@ set -euo pipefail
 TICKET="${1:?ticket id required}"
 PLANE_BASE="${PLANE_BASE:-https://plane.beyondpandora.com}"
 WORKSPACE="${PLANE_WORKSPACE:-beyond-pandora}"
-PROJECT_ID="${PLANE_PROJECT_ID:-f88111cd-cac2-4e9f-af38-2241e215c4ad}"
+PROJECT_ID="${PLANE_PROJECT_ID:-e11bee8b-8e92-43ea-b4e8-943fce9f204d}"
 
 if [[ -n "${2:-}" ]]; then
   BODY="$2"
