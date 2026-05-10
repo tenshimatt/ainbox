@@ -5,10 +5,15 @@ test.describe('@smoke public surfaces', () => {
     await page.goto('/');
     await expect(page).toHaveTitle(/Ainbox/i);
   });
-  test('marketing pages exist', async ({ page }) => {
-    for (const path of ['/pricing', '/security', '/legal/privacy', '/legal/terms']) {
-      const resp = await page.goto(path);
+
+  // Each marketing page is a SEPARATE test, not a for-loop.
+  // page.goto in a tight loop in one test causes
+  // "Navigation interrupted by another navigation" — the previous
+  // request hasn't fully loaded before the next one starts.
+  for (const path of ['/pricing', '/security', '/legal/privacy', '/legal/terms']) {
+    test(`marketing page exists: ${path}`, async ({ page }) => {
+      const resp = await page.goto(path, { waitUntil: 'load' });
       expect(resp?.status()).toBeLessThan(500);
-    }
-  });
+    });
+  }
 });
