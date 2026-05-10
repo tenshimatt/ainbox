@@ -173,23 +173,36 @@ function clamp01(n: number): number {
   return n;
 }
 
+export interface LiteLlmCallOptions {
+  /** Override base URL (for tests). */
+  baseUrl?: string;
+  /** Override API key (for tests). */
+  apiKey?: string;
+  /** Custom fetch implementation (for tests). */
+  fetchImpl?: typeof fetch;
+}
+
 /**
  * Default LiteLLM caller. Used by the API route.
- * Tests inject their own callLlm and never reach this.
+ * Tests may pass overrides via the optional second argument.
  */
-export async function liteLlmCall(prompt: LlmPrompt): Promise<{
+export async function liteLlmCall(
+  prompt: LlmPrompt,
+  opts: LiteLlmCallOptions = {},
+): Promise<{
   body: string;
   generation_score: number;
 }> {
-  const baseUrl = process.env.LITELLM_BASE_URL;
-  const apiKey = process.env.LITELLM_API_KEY ?? '';
+  const baseUrl = opts.baseUrl ?? process.env.LITELLM_BASE_URL;
+  const apiKey = opts.apiKey ?? process.env.LITELLM_API_KEY ?? '';
+  const fetchFn = opts.fetchImpl ?? fetch;
   if (!baseUrl) throw new Error('LITELLM_BASE_URL not configured');
 
-  const resp = await fetch(`${baseUrl.replace(/\/$/, '')}/chat/completions`, {
+  const resp = await fetchFn(`${baseUrl.replace(/\/$/, '')}/chat/completions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
+      ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
     },
     body: JSON.stringify({
       model: prompt.model,
