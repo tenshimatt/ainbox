@@ -926,6 +926,12 @@ nodes:
   - id: validate
     depends_on: [implement]
     bash: |
+      # Kill any orphan dev server holding port 3001
+      pkill -9 -f "next dev\\|next-server\\|npm run dev" 2>/dev/null || true
+      for i in 1 2 3 4 5; do
+        ss -tlnp 2>/dev/null | grep -q :3001 || break
+        sleep 1
+      done
       # Pandomagic validate — the safety net.
       #
       # Validates:
