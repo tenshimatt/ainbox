@@ -203,30 +203,25 @@ CREATE POLICY "audit_log_owner_select" ON public.audit_log FOR SELECT USING (aut
 CREATE POLICY "audit_log_owner_insert" ON public.audit_log FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE INDEX IF NOT EXISTS idx_audit_log_user_time ON public.audit_log(user_id, created_at desc);
 
--- audit_logs (plural) — alias view for code paths using the alt name.
--- Reads pass through with RLS; inserts via INSTEAD OF trigger remap to audit_log.
-CREATE OR REPLACE VIEW public.audit_logs AS
-  SELECT id, user_id, event_type,
-         null::text as entity_type, null::text as entity_id,
-         event_type as action,
-         metadata as details,
-         null::inet as ip_address, null::text as user_agent,
-         created_at
-  FROM public.audit_log;
-
-CREATE OR REPLACE FUNCTION public.audit_logs_insert_redirect()
-RETURNS trigger LANGUAGE plpgsql SECURITY INVOKER AS $$
-BEGIN
-  INSERT INTO public.audit_log (user_id, event_type, metadata, created_at)
-  VALUES (new.user_id, COALESCE(new.action, new.event_type, 'unknown'),
-          COALESCE(new.details, '{}'::jsonb), COALESCE(new.created_at, now()));
-  RETURN new;
-END;
-$$;
-DROP TRIGGER IF EXISTS trg_audit_logs_redirect ON public.audit_logs;
-CREATE TRIGGER trg_audit_logs_redirect
-  INSTEAD OF INSERT ON public.audit_logs
-  FOR EACH ROW EXECUTE FUNCTION public.audit_logs_insert_redirect();
+-- audit_logs (plural) — separate real table for classify edge fn.
+-- supabase/functions/classify and src/lib/classify write here using
+-- (action, details) shape; not worth re-routing into audit_log.
+CREATE TABLE IF NOT EXISTS public.audit_logs (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  event_type text,
+  entity_type text,
+  entity_id text,
+  action text not null,
+  details jsonb default '{}'::jsonb,
+  ip_address inet,
+  user_agent text,
+  created_at timestamptz not null default now()
+);
+ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "audit_logs_owner_select" ON public.audit_logs FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "audit_logs_owner_insert" ON public.audit_logs FOR INSERT WITH CHECK (auth.uid() = user_id OR auth.role() = 'service_role');
+CREATE INDEX IF NOT EXISTS idx_audit_logs_user_time ON public.audit_logs(user_id, created_at desc);
 
 -- ============================================================
 -- AUTOMATION RULES (per-category) + automation_config alias
