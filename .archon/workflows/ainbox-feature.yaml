@@ -1161,6 +1161,7 @@ nodes:
       AUTHED_URL=${REMOTE_URL/https:\/\//https:\/\/x-access-token:${GH_TOKEN}@}
       git push "$AUTHED_URL" -u "$BRANCH":"$BRANCH" 2>&1 || { echo "✗ git push failed" >&2; exit 10; }
 
+      export GH_TOKEN
       GH_OUT=$(gh pr create --base main --head "$BRANCH" \
         --title "$TITLE_RAW" --body-file "$COMMIT_MSG_FILE" 2>&1)
       PR_URL=$(echo "$GH_OUT" | grep -oE 'https://github.com/[^ ]+/pull/[0-9]+' | head -1)
