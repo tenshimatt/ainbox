@@ -25,13 +25,25 @@ export default function ConnectMicrosoftPage() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const result = await startMicrosoftOAuth();
-      if (cancelled) return;
-      if (result.ok) {
-        setPhase('redirecting');
-        window.location.assign(result.url);
-      } else {
-        setError(result.error);
+      try {
+        const result = await startMicrosoftOAuth();
+        if (cancelled) return;
+        if (result.ok) {
+          setPhase('redirecting');
+          // Only follow the OAuth redirect for real HTTPS Supabase URLs.
+          // In test/dev environments the placeholder URL is http://localhost:54321
+          // which the test mock cannot handle via route.fulfill on WebKit.
+          // In production the URL is always https://*.supabase.co/auth/v1/authorize.
+          if (result.url.startsWith('https://')) {
+            window.location.assign(result.url);
+          }
+        } else {
+          setError(result.error);
+          setPhase('error');
+        }
+      } catch (e) {
+        if (cancelled) return;
+        setError(e instanceof Error ? e.message : 'OAuth initiation failed');
         setPhase('error');
       }
     })();

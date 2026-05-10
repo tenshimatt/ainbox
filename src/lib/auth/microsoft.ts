@@ -16,7 +16,8 @@
  * the auth code; we just call signInWithOAuth and hand off.
  */
 
-import { getBrowserClient } from '@/lib/supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { getBrowserSupabase } from '@/lib/supabase/client';
 
 export const MICROSOFT_SCOPES = [
   'openid',
@@ -47,9 +48,12 @@ export function getMicrosoftRedirectUrl(origin?: string): string {
  * Initiate Supabase Azure OAuth. Returns either the URL Supabase wants
  * us to redirect to, or an error string. Caller is responsible for the
  * actual `window.location.assign` so this stays testable in jsdom.
+ *
+ * Uses skipBrowserRedirect so the caller controls the navigation,
+ * keeping the function testable and consistent with the Google pattern.
  */
 export async function startMicrosoftOAuth(
-  client = getBrowserClient(),
+  client: SupabaseClient = getBrowserSupabase(),
 ): Promise<MicrosoftOAuthResult> {
   const { data, error } = await client.auth.signInWithOAuth({
     provider: 'azure',
@@ -76,7 +80,7 @@ export async function startMicrosoftOAuth(
  */
 export async function completeMicrosoftOAuth(
   code: string,
-  client = getBrowserClient(),
+  client: SupabaseClient = getBrowserSupabase(),
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   if (!code) return { ok: false, error: 'missing_code' };
   const { error } = await client.auth.exchangeCodeForSession(code);
