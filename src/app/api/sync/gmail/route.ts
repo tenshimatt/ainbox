@@ -25,6 +25,7 @@ import {
   type SyncDeps,
   type SyncStorage,
 } from '@/lib/sync/gmail';
+import { decryptForUser } from '@/lib/crypto';
 
 export const runtime = 'nodejs';
 
@@ -83,15 +84,17 @@ function makeProgress(supabase: SupabaseLike): ProgressEmitter {
 
 async function loadRefreshToken(supabase: SupabaseLike, userId: string): Promise<string> {
   // depends on AINBOX-4 migration (oauth_tokens table + column-level encryption).
+  // Column is `encrypted_refresh_token` (AES-256-GCM via encryptForUser — §4.2).
   const { data, error } = await supabase
     .from('oauth_tokens')
-    .select('refresh_token')
+    .select('encrypted_refresh_token')
     .eq('user_id', userId)
     .eq('provider', 'gmail')
     .maybeSingle();
   if (error) throw error;
   if (!data) throw new Error('no Gmail oauth token for user (run /connect first)');
-  return (data as { refresh_token: string }).refresh_token;
+  const { encrypted_refresh_token } = data as { encrypted_refresh_token: string };
+  return decryptForUser(userId, encrypted_refresh_token);
 }
 
 export async function buildSupabaseServerClient() {

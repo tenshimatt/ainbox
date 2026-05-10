@@ -2,15 +2,19 @@
 
 /**
  * /connect/google/callback — handles redirect back from Google
- * (PRD §3.9, §5.2, §7.1).
+ * (PRD §3.9, §5.2, §7.1, AINBOX-17).
  *
- * Supabase Auth's PKCE flow returns either:
- *   - `?code=…` (auth-code) which we exchange for a session, OR
- *   - `#access_token=…` (implicit / hash) handled automatically by detectSessionInUrl
- *   - `?error=…` from a denied consent
+ * Supabase Auth's PKCE flow (detectSessionInUrl: true) auto-exchanges
+ * the ?code= during client initialization — before our explicit
+ * exchangeCodeForSession call. We subscribe to onAuthStateChange FIRST
+ * so whichever path completes the exchange fires our token-save logic.
  *
- * On success we navigate to /onboarding/sync (PRD §5.2). On error we
- * surface a message and offer a retry link to /connect.
+ * Token persistence flow (§4.2):
+ *   SIGNED_IN event with provider_refresh_token
+ *     → POST /api/oauth/gmail/tokens (best-effort, never blocks redirect)
+ *     → router.replace('/onboarding/sync')
+ *
+ * On error we surface a message and offer a retry link to /connect.
  */
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -37,32 +41,85 @@ function GoogleCallbackInner() {
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      const oauthError = params.get('error') || params.get('error_description');
-      if (oauthError) {
-        if (!cancelled) {
-          setStatus('error');
-          setMessage(oauthError);
-        }
-        return;
+
+    const oauthError = params.get('error') || params.get('error_description');
+    if (oauthError) {
+      if (!cancelled) {
+        setStatus('error');
+        setMessage(oauthError);
       }
+      return;
+    }
 
+    const supabase = getBrowserSupabase();
+    const code = params.get('code');
+
+    // Track whether SIGNED_IN fired (auto-exchange or explicit) so we know whether
+    // a PKCE-verifier-missing error from our explicit call is a race artefact.
+    let signedInHandled = false;
+
+    /**
+     * Save provider tokens server-side (encrypted) and redirect.
+     * Called from the SIGNED_IN onAuthStateChange event — whichever code
+     * path wins the PKCE exchange race triggers this exactly once.
+     */
+    async function onSignedIn(session: import('@supabase/supabase-js').Session | null) {
+      signedInHandled = true;
+      if (session?.provider_refresh_token) {
+        try {
+          await fetch('/api/oauth/gmail/tokens', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              provider_token: session.provider_token,
+              provider_refresh_token: session.provider_refresh_token,
+              expires_at: session.expires_at,
+            }),
+          });
+        } catch {
+          // Non-fatal: sync will surface a "connect your email" prompt.
+        }
+      }
+      if (!cancelled) {
+        router.replace('/onboarding/sync');
+      }
+    }
+
+    // Subscribe BEFORE any exchange attempt so we capture the SIGNED_IN event
+    // whether detectSessionInUrl or our explicit call wins the PKCE race.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (cancelled) return;
+        if (event === 'SIGNED_IN') {
+          await onSignedIn(session);
+        }
+      },
+    );
+
+    (async () => {
       try {
-        const supabase = getBrowserSupabase();
-        const code = params.get('code');
-
         if (code) {
+          // Attempt explicit exchange. If detectSessionInUrl already handled it,
+          // the verifier is gone and we get a PKCE error — but onAuthStateChange
+          // already fired and redirect is in progress, so we suppress that error.
           const { error } = await supabase.auth.exchangeCodeForSession(code);
           if (error) {
-            if (!cancelled) {
-              setStatus('error');
-              setMessage(error.message);
+            const isPkceRace =
+              signedInHandled ||
+              error.message?.toLowerCase().includes('pkce') ||
+              error.message?.toLowerCase().includes('code verifier');
+            if (!isPkceRace) {
+              if (!cancelled) {
+                setStatus('error');
+                setMessage(error.message);
+              }
             }
-            return;
           }
+          // On success: onAuthStateChange(SIGNED_IN) handles token save + redirect.
         } else {
-          // Hash-fragment flow — getSession() resolves once SDK ingests #access_token.
-          const { error } = await supabase.auth.getSession();
+          // Hash-fragment flow — getSession() resolves once SDK ingests #access_token,
+          // or returns null if no session. Either way we redirect (no error → onboarding).
+          const { data, error } = await supabase.auth.getSession();
           if (error) {
             if (!cancelled) {
               setStatus('error');
@@ -70,10 +127,11 @@ function GoogleCallbackInner() {
             }
             return;
           }
-        }
-
-        if (!cancelled) {
-          router.replace('/onboarding/sync');
+          // If SIGNED_IN already fired (e.g. session existed), the subscription handles it.
+          // If no session and SIGNED_IN hasn't fired, redirect unconditionally.
+          if (!signedInHandled && !cancelled) {
+            router.replace('/onboarding/sync');
+          }
         }
       } catch (e) {
         if (!cancelled) {
@@ -82,8 +140,10 @@ function GoogleCallbackInner() {
         }
       }
     })();
+
     return () => {
       cancelled = true;
+      subscription.unsubscribe();
     };
   }, [params, router]);
 
