@@ -1,10 +1,11 @@
 /**
  * POST /api/sync/outlook — kick off Outlook backfill (PRD §7.4).
  *
- * Depends on AINBOX-4 oauth_tokens + email_sync_state tables and AINBOX-5
- * lib/crypto.ts for encryptForUser. If those aren't yet in place this route
- * returns 501 with a structured error so callers (and the smoke spec) can
- * detect the wiring without crashing.
+ * AINBOX-18: getAccessToken now performs a real Microsoft token refresh.
+ *   1. Read the encrypted refresh token from oauth_tokens.
+ *   2. Decrypt + exchange via Microsoft's /token endpoint (refreshMicrosoftToken).
+ *   3. If Microsoft issues a new refresh token, persist it back to oauth_tokens.
+ *   4. Return the fresh access token (in-memory only — never stored per §4.2).
  *
  * PRD: §3.8 §4.2 §4.3 §7.4 §7.17 §7.18
  */
@@ -14,6 +15,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
 import { runOutlookBackfill, type PersistedMessage } from '@/lib/sync/outlook';
+import { refreshMicrosoftToken } from '@/lib/auth/microsoft-refresh';
 
 export const runtime = 'nodejs';
 
@@ -48,20 +50,46 @@ export async function POST(): Promise<NextResponse> {
   }
 
   // ------- Wire dependencies (AINBOX-4 owned tables) -------
+
+  /**
+   * AINBOX-18: real token refresh.
+   * Read encrypted_refresh_token → decrypt → exchange with Microsoft → return
+   * fresh access token. Persists a rotated refresh token if Microsoft issued one.
+   */
   const getAccessToken = async (): Promise<string> => {
-    // depends on AINBOX-4 oauth_tokens table — refresh-token → access-token
-    // exchange happens server-side only (§4.2).
     if (!supabase) throw new Error('supabase unavailable');
     const { data, error } = await supabase
       .from('oauth_tokens')
-      .select('access_token')
+      .select('encrypted_refresh_token')
       .eq('user_id', userId)
       .eq('provider', 'microsoft')
       .single();
-    if (error || !data?.access_token) {
-      throw new Error('no microsoft oauth token for user');
+    if (error || !data?.encrypted_refresh_token) {
+      throw new Error(
+        'no microsoft oauth token for user (run /connect/microsoft first)',
+      );
     }
-    return data.access_token as string;
+    const { accessToken, newEncryptedRefreshToken } =
+      await refreshMicrosoftToken(
+        data.encrypted_refresh_token as string,
+        userId,
+      );
+    if (newEncryptedRefreshToken) {
+      // Microsoft rotated the refresh token — persist the new one so the
+      // next sync still works. Fire-and-forget: don't block the sync on it.
+      supabase
+        .from('oauth_tokens')
+        .update({
+          encrypted_refresh_token: newEncryptedRefreshToken,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', userId)
+        .eq('provider', 'microsoft')
+        .then(() => {
+          /* best-effort */
+        });
+    }
+    return accessToken;
   };
 
   const persistMessage = async (row: PersistedMessage): Promise<void> => {
