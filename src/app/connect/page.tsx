@@ -1,11 +1,20 @@
+'use client';
+
 /**
  * /connect — provider chooser (PRD §5.2, §7.1, §7.2).
  *
  * Buttons navigate to per-provider entry routes which kick off the
  * Supabase Auth OAuth flow (PRD §3.9). We don't call signInWithOAuth
  * directly here — the e2e spec asserts on a navigation event.
+ *
+ * Client component so that onClick navigation works reliably on
+ * mobile WebKit (Playwright mobile click quirks on <a role="button">).
  */
+import { useRouter } from 'next/navigation';
+
 export default function ConnectPage() {
+  const router = useRouter();
+
   return (
     <main className="container mx-auto px-4 py-12 max-w-md">
       <h1 className="text-2xl font-bold mb-6">Connect provider</h1>
@@ -22,14 +31,14 @@ export default function ConnectPage() {
         >
           Continue with Google
         </a>
-        <a
-          href="/connect/microsoft"
-          role="button"
+        <button
+          type="button"
           aria-label="Continue with Microsoft"
-          className="block rounded border border-slate-300 px-4 py-3 text-center hover:bg-slate-50"
+          onClick={() => router.push('/connect/microsoft')}
+          className="block w-full rounded border border-slate-300 px-4 py-3 text-center hover:bg-slate-50"
         >
           Continue with Microsoft
-        </a>
+        </button>
       </div>
     </main>
   );
