@@ -21,7 +21,7 @@ export type GenerateDraftSupabaseLike = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   from: (table: string) => any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  rpc: (fn: string, params: Record<string, unknown>) => Promise<{ data: any; error: any }>;
+  rpc: (fn: string, params: Record<string, unknown>) => PromiseLike<{ data: any; error: any }>;
 };
 
 export interface GenerateDraftOptions {
