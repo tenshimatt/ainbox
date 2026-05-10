@@ -55,7 +55,7 @@ export default function SyncPage() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-slate-900">Syncing your email</h1>
           <p className="mt-2 text-sm text-slate-500">
-            We're pulling your recent emails to build your knowledge base
+            We&apos;re pulling your recent emails to build your knowledge base
           </p>
         </div>
 
