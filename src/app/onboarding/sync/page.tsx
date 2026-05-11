@@ -44,10 +44,11 @@ export default function SyncPage() {
             started = true;
             break;
           }
-          const body = await r.json().catch(() => ({})) as { error?: string };
+          const body = await r.json().catch(() => ({})) as { error?: string; detail?: string };
           // Skip silently if "no token" — that just means user didn't sign in via this provider
           if (!/no\s+(gmail|outlook|provider)\s+oauth\s+token|run\s+\/connect|missing\s+token/i.test(body.error ?? '')) {
-            setBatchEvents((q) => [...q, `${p.label} skipped: ${body.error ?? r.statusText}`]);
+            const detail = body.detail ? ` — ${body.detail.slice(0, 200)}` : '';
+            setBatchEvents((q) => [...q, `${p.label} skipped: ${body.error ?? r.statusText}${detail}`]);
           }
         } catch (err) {
           setBatchEvents((q) => [...q, `${p.label} request failed: ${(err as Error).message}`]);

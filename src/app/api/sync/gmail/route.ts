@@ -129,7 +129,9 @@ export async function handleBackfill(opts: {
     return { status: 202, body: { ok: true, result } };
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown error';
-    return { status: 500, body: { ok: false, error: msg } };
+    const stack = err instanceof Error ? err.stack : String(err);
+    console.error('[sync/gmail] backfill failed', { msg, stack });
+    return { status: 500, body: { ok: false, error: msg, detail: stack?.slice(0, 600) } };
   }
 }
 

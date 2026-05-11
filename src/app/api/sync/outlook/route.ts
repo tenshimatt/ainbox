@@ -138,8 +138,11 @@ export async function POST(): Promise<NextResponse> {
     });
     return NextResponse.json({ ok: true, ...result });
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack : undefined;
+    console.error('[sync/outlook] backfill failed', { msg, stack });
     return NextResponse.json(
-      { ok: false, error: 'backfill_failed', detail: (err as Error).message },
+      { ok: false, error: 'backfill_failed', detail: msg, stack: stack?.slice(0, 600) },
       { status: 500 },
     );
   }
