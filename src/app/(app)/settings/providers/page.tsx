@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import AppLayout from '@/components/AppLayout';
 import { MOCK_PROVIDERS } from '@/lib/mock-data';
 
 export default function SettingsProvidersPage() {
@@ -29,7 +28,7 @@ export default function SettingsProvidersPage() {
   };
 
   return (
-    <AppLayout>
+    <>
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
         <h1 className="text-2xl font-bold text-slate-900">Providers</h1>
         <p className="mt-1 text-sm text-slate-500">Manage your connected email accounts</p>
@@ -118,6 +117,6 @@ export default function SettingsProvidersPage() {
           </div>
         )}
       </div>
-    </AppLayout>
+    </>
   );
 }

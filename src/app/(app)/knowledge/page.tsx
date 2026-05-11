@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import AppLayout from '@/components/AppLayout';
 import { MOCK_KB_ITEMS, KB_TYPES } from '@/lib/mock-data';
 
 export default function KnowledgePage() {
@@ -21,7 +20,7 @@ export default function KnowledgePage() {
   );
 
   return (
-    <AppLayout>
+    <>
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -108,6 +107,6 @@ export default function KnowledgePage() {
           ))}
         </div>
       </div>
-    </AppLayout>
+    </>
   );
 }
