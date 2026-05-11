@@ -127,16 +127,18 @@ export async function POST(): Promise<NextResponse> {
     return (data?.delta_token as string | undefined) ?? null;
   };
 
-  // ------- Run backfill -------
+  // ------- Fire-and-forget backfill (same rationale as gmail route) -------
   try {
-    const result = await runOutlookBackfill({
+    void runOutlookBackfill({
       userId,
       getAccessToken,
       persistMessage,
       saveDeltaToken,
       loadDeltaToken,
+    }).catch((err) => {
+      console.error('[sync/outlook] background backfill threw', err);
     });
-    return NextResponse.json({ ok: true, ...result });
+    return NextResponse.json({ ok: true, status: 'started', mode: 'background' }, { status: 202 });
   } catch (err) {
     const dump = (() => {
       try {

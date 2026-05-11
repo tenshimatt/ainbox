@@ -177,6 +177,14 @@ export async function POST(): Promise<Response> {
     progress: makeProgress(supabase),
   };
 
-  const { status, body } = await handleBackfill({ userId: user.id, deps });
-  return NextResponse.json(body, { status });
+  // Fire-and-forget: kick the backfill off; return 202 immediately so the
+  // request doesn't hang on Vercel's 60s function timeout for 1000-msg pulls.
+  // Errors are logged server-side; UI polls /api/inbox/count for progress.
+  void handleBackfill({ userId: user.id, deps }).catch((err) => {
+    console.error('[sync/gmail] background backfill threw', err);
+  });
+  return NextResponse.json(
+    { ok: true, status: 'started', mode: 'background' },
+    { status: 202 },
+  );
 }
