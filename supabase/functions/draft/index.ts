@@ -62,11 +62,24 @@ serve(async (req: Request) => {
   const { data: candidates, error } = await supabase.rpc("draftable_candidates", { p_limit: limit });
   if (error) return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500 });
 
-  const out = { ok: true, candidates: (candidates ?? []).length, drafted: 0, failed: 0, errors: [] as string[] };
+  const out = { ok: true, candidates: (candidates ?? []).length, drafted: 0, skipped: 0, failed: 0, errors: [] as string[] };
   for (const r of candidates ?? []) {
     try {
-      const { reply, confidence } = await generateReply(r.subject, r.body_preview, r.from_addr, r.category);
-      if (!reply) throw new Error("empty reply");
+      const { reply, confidence, reason } = await generateReply(r.subject, r.body_preview, r.from_addr, r.category);
+      if (!reply || reply.trim() === "") {
+        // Claude judged "no reply needed" — record a rejected stub so we
+        // don't reprocess this email on every tick.
+        await supabase.from("drafts").insert({
+          user_id: r.user_id,
+          email_id: r.id,
+          reply_body: `[no reply needed] ${reason}`.slice(0, 500),
+          confidence: 0,
+          status: "rejected",
+          model: MODEL,
+        });
+        out.skipped += 1;
+        continue;
+      }
       const { error: insErr } = await supabase.from("drafts").insert({
         user_id: r.user_id,
         email_id: r.id,
