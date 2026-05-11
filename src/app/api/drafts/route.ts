@@ -29,9 +29,65 @@ import {
 import { createProviderDraft, type EmailProvider } from '@/lib/sync/draft';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 interface PostBody {
   email_id: string;
+}
+
+/**
+ * GET /api/drafts — list pending drafts for the authenticated user, joined
+ * with their source email (subject + category) so the UI can render
+ * meaningful titles. Returns { drafts: Draft[] }.
+ */
+export async function GET(): Promise<NextResponse> {
+  const cookieStore = await cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
+    {
+      cookies: {
+        getAll: () => cookieStore.getAll(),
+        setAll: () => {},
+      },
+    },
+  );
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
+
+  const { data, error } = await supabase
+    .from('drafts')
+    .select('id, confidence, reply_body, status, created_at, updated_at, email_id, email_messages(subject, from_addr, category)')
+    .eq('status', 'pending')
+    .order('confidence', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(200);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  type Joined = {
+    id: string;
+    confidence: number | null;
+    reply_body: string | null;
+    status: string | null;
+    created_at: string;
+    email_id: string | null;
+    email_messages: { subject: string | null; from_addr: string | null; category: string | null } | null;
+  };
+
+  const drafts = (data as Joined[] | null ?? []).map((d) => ({
+    id: d.id,
+    subject: d.email_messages?.subject ?? '(no subject)',
+    recipient: d.email_messages?.from_addr ?? null,
+    category: d.email_messages?.category ?? null,
+    confidence: d.confidence ?? 0,
+    is_reply: true,
+    body: d.reply_body,
+    status: d.status,
+    created_at: d.created_at,
+  }));
+
+  return NextResponse.json({ drafts });
 }
 
 export async function POST(req: NextRequest) {
