@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
  */
 export default function DraftsPage() {
   return (
-    <main className="mx-auto w-full max-w-3xl px-3 py-6 sm:px-4 sm:py-10">
+    <main className="mx-auto w-full max-w-full px-4 py-6 sm:px-6 lg:px-8">
       <header className="mb-4">
         <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">Drafts</h1>
         <p className="mt-1 text-sm text-slate-600">

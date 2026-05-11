@@ -16,7 +16,7 @@ export default function SettingsAccountPage() {
 
   return (
     <>
-      <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
+      <div className="mx-auto w-full max-w-full px-4 py-6 sm:px-6 lg:px-8">
         <h1 className="text-2xl font-bold text-slate-900">Account</h1>
         <p className="mt-1 text-sm text-slate-500">Manage your account settings</p>
 

@@ -21,7 +21,7 @@ export default function KnowledgePage() {
 
   return (
     <>
-      <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
+      <div className="mx-auto w-full max-w-full px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Knowledge Base</h1>

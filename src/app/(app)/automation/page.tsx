@@ -114,7 +114,7 @@ export default function AutomationPage() {
   };
 
   return (
-    <main className="container mx-auto px-4 py-8 max-w-3xl">
+    <main className="mx-auto w-full max-w-full px-4 py-6 sm:px-6 lg:px-8">
       <h1 className="text-2xl font-bold mb-2">Automation</h1>
       <p className="text-sm text-gray-600 mb-6">
         Auto-send rules per category. Confidence threshold floor is{' '}
