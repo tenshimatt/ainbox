@@ -18,35 +18,67 @@ export default function SyncPage() {
   const [batchEvents, setBatchEvents] = useState<string[]>([]);
 
   useEffect(() => {
-    // Simulate sync progress
-    const intervals = [
-      { step: 1, delay: 600, msg: 'Connected to Gmail — fetching messages...' },
-      { step: 2, delay: 1400, msg: 'Fetched 500 emails (batch 1/4)...' },
-      { step: 2, delay: 2200, msg: 'Fetched 1,000 emails (batch 2/4)...' },
-      { step: 2, delay: 3000, msg: 'Connected to Outlook — fetching messages...' },
-      { step: 2, delay: 3800, msg: 'Fetched 300 emails (batch 1/2)...' },
-      { step: 3, delay: 4600, msg: 'Classifying emails...' },
-      { step: 3, delay: 5400, msg: 'Classified 800 emails across 10 categories' },
-      { step: 4, delay: 6200, msg: 'Extracting knowledge base items...' },
-      { step: 4, delay: 7000, msg: 'Extracted 12 KB items from email history' },
-      { step: 5, delay: 7800, msg: 'Sync complete!' },
-    ];
+    let cancelled = false;
+    let pollTimer: ReturnType<typeof setInterval> | null = null;
 
-    const timers: ReturnType<typeof setTimeout>[] = [];
+    async function runSync() {
+      setCurrentStep(1);
+      setBatchEvents((p) => [...p, 'Triggering Gmail backfill…']);
 
-    intervals.forEach(({ step, delay, msg }) => {
-      const timer = setTimeout(() => {
-        setCurrentStep(step);
-        setProgress(Math.round((step / SYNC_STEPS.length) * 100));
-        setBatchEvents((prev) => [...prev, msg]);
-        if (step === SYNC_STEPS.length) {
-          setSyncStatus('complete');
+      try {
+        const res = await fetch('/api/sync/gmail', {
+          method: 'POST',
+          credentials: 'same-origin',
+        });
+        if (cancelled) return;
+
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({})) as { error?: string };
+          setBatchEvents((p) => [...p, `Sync error: ${body.error ?? res.statusText}`]);
+          return;
         }
-      }, delay);
-      timers.push(timer);
-    });
 
-    return () => timers.forEach(clearTimeout);
+        setCurrentStep(2);
+        setBatchEvents((p) => [...p, 'Backfill running — fetching messages…']);
+
+        let lastCount = 0;
+        let stableTicks = 0;
+        pollTimer = setInterval(async () => {
+          if (cancelled) return;
+          try {
+            const countRes = await fetch('/api/inbox/count', { credentials: 'same-origin' });
+            if (countRes.ok) {
+              const { count = 0 } = (await countRes.json()) as { count: number };
+              if (count > lastCount) {
+                setBatchEvents((p) => [...p, `Synced ${count} messages so far…`]);
+                setCurrentStep(2);
+                setProgress(Math.min(80, 20 + Math.floor(count / 10)));
+                lastCount = count;
+                stableTicks = 0;
+              } else {
+                stableTicks++;
+              }
+              if (stableTicks >= 3 && lastCount > 0) {
+                setCurrentStep(5);
+                setProgress(100);
+                setSyncStatus('complete');
+                setBatchEvents((p) => [...p, `Sync complete — ${lastCount} messages.`]);
+                if (pollTimer) clearInterval(pollTimer);
+              }
+            }
+          } catch { /* keep polling */ }
+        }, 4000);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'unknown';
+        setBatchEvents((p) => [...p, `Sync failed: ${msg}`]);
+      }
+    }
+
+    runSync();
+    return () => {
+      cancelled = true;
+      if (pollTimer) clearInterval(pollTimer);
+    };
   }, []);
 
   return (
