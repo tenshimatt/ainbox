@@ -60,7 +60,7 @@ async function fetchInbox() {
   const [inboundRes, draftsRes, activityRes] = await Promise.all([
     supabase
       .from('email_messages')
-      .select('id, from_addr, subject, subject_hash, received_at, internal_date, category, label_ids')
+      .select('id, from_addr, subject, subject_hash, received_at, internal_date, category, label_ids, provider')
       .eq('is_outbound', false)
       .order('received_at', { ascending: false, nullsFirst: false })
       .limit(50),
@@ -91,6 +91,7 @@ async function fetchInbox() {
     received_at: string | null;
     internal_date: string | null;
     category: string | null;
+    provider: 'gmail' | 'outlook' | null;
   };
   const inbound: InboundRow[] = ((inboundRes.data ?? []) as RawInbound[]).map((r) => ({
     id: r.id,
@@ -100,6 +101,7 @@ async function fetchInbox() {
       r.received_at ??
       (r.internal_date ? new Date(Number(r.internal_date)).toISOString() : null),
     category: r.category,
+    provider: r.provider,
   }));
 
   return {

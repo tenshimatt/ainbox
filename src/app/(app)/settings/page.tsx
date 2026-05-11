@@ -1,11 +1,28 @@
 'use client';
 
-import { useState } from 'react';
-import { MOCK_PROVIDERS } from '@/lib/mock-data';
+import { useEffect, useState } from 'react';
+
+type Provider = {
+  id: string;
+  type: 'google' | 'microsoft';
+  name: string;
+  email: string | null;
+  connected: boolean;
+  connectedAt: string;
+};
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<'providers' | 'account'>('providers');
-  const [providers, setProviders] = useState(MOCK_PROVIDERS);
+  const [providers, setProviders] = useState<Provider[]>([]);
+  useEffect(() => {
+    (async () => {
+      const r = await fetch('/api/oauth/tokens', { credentials: 'include' });
+      if (r.ok) {
+        const data = (await r.json()) as { providers: Provider[] };
+        setProviders(data.providers ?? []);
+      }
+    })();
+  }, []);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [disconnectConfirm, setDisconnectConfirm] = useState<string | null>(null);
 

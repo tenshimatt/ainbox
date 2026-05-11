@@ -24,6 +24,7 @@ export type InboundRow = {
   subject: string | null;
   received_at: string | null;
   category: string | null;
+  provider?: 'gmail' | 'outlook' | null;
 };
 
 export type DraftRow = {
@@ -243,15 +244,29 @@ export function LiveSection(props: LiveSectionProps) {
         </p>
       ) : (
         <ul className="space-y-2">
-          {rows.map((row) => (
-            <li
-              key={String(row.id)}
-              data-testid={`${testId}-row`}
-              className="rounded-md border border-slate-200 bg-white p-3 text-sm w-full max-w-full break-words"
-            >
-              {renderByKind(kind, row)}
-            </li>
-          ))}
+          {rows.map((row) => {
+            // Provider-tint inbound rows: gmail → pale peach, outlook → pale blue.
+            // Drafts use neutral white.
+            const prov = (row as InboundRow).provider;
+            const tintClass =
+              kind === 'inbound'
+                ? prov === 'gmail'
+                  ? 'border-orange-100 bg-orange-50/50'
+                  : prov === 'outlook'
+                    ? 'border-sky-100 bg-sky-50/50'
+                    : 'border-slate-200 bg-white'
+                : 'border-slate-200 bg-white';
+            return (
+              <li
+                key={String(row.id)}
+                data-testid={`${testId}-row`}
+                data-provider={prov ?? ''}
+                className={`rounded-md border p-3 text-sm w-full max-w-full break-words ${tintClass}`}
+              >
+                {renderByKind(kind, row)}
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>

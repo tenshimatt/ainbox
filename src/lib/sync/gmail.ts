@@ -88,6 +88,7 @@ export interface PersistedMessageRow {
   label_ids: string[];
   received_at: string | null;
   is_outbound: boolean;
+  provider: 'gmail';
 }
 
 export interface SyncDeps {
@@ -248,6 +249,7 @@ function rowFromMessage(userId: string, message: gmail_v1.Schema$Message): Persi
     label_ids: labelIds,
     received_at: internalDate ? new Date(Number(internalDate)).toISOString() : null,
     is_outbound: labelIds.includes('SENT'),
+    provider: 'gmail',
   };
 }
 
