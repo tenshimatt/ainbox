@@ -138,11 +138,24 @@ export async function POST(): Promise<NextResponse> {
     });
     return NextResponse.json({ ok: true, ...result });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    const stack = err instanceof Error ? err.stack : undefined;
-    console.error('[sync/outlook] backfill failed', { msg, stack });
+    const dump = (() => {
+      try {
+        if (err instanceof Error) {
+          return JSON.stringify({
+            name: err.name,
+            message: err.message,
+            stack: err.stack?.split('\n').slice(0, 6).join('\n'),
+          });
+        }
+        return JSON.stringify(err, Object.getOwnPropertyNames(err as object));
+      } catch {
+        return String(err);
+      }
+    })();
+    const msg = err instanceof Error ? err.message : dump.slice(0, 200);
+    console.error('[sync/outlook] backfill failed', dump);
     return NextResponse.json(
-      { ok: false, error: 'backfill_failed', detail: msg, stack: stack?.slice(0, 600) },
+      { ok: false, error: 'backfill_failed', detail: msg, dump: dump.slice(0, 1200) },
       { status: 500 },
     );
   }

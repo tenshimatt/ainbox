@@ -128,10 +128,30 @@ export async function handleBackfill(opts: {
     const result = await runGmailBackfill(opts.userId, opts.deps);
     return { status: 202, body: { ok: true, result } };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'unknown error';
-    const stack = err instanceof Error ? err.stack : String(err);
-    console.error('[sync/gmail] backfill failed', { msg, stack });
-    return { status: 500, body: { ok: false, error: msg, detail: stack?.slice(0, 600) } };
+    // Capture EVERYTHING — googleapis throws structured non-Error objects.
+    const dump = (() => {
+      try {
+        if (err instanceof Error) {
+          return JSON.stringify({
+            name: err.name,
+            message: err.message,
+            stack: err.stack?.split('\n').slice(0, 6).join('\n'),
+            // @ts-expect-error — googleapis errors carry .code, .errors, .response.data
+            code: (err as { code?: unknown }).code,
+            // @ts-expect-error
+            errors: (err as { errors?: unknown }).errors,
+            // @ts-expect-error
+            responseData: (err as { response?: { data?: unknown } }).response?.data,
+          });
+        }
+        return JSON.stringify(err, Object.getOwnPropertyNames(err as object));
+      } catch {
+        return String(err);
+      }
+    })();
+    const msg = err instanceof Error ? err.message : (dump.slice(0, 200) || 'unknown error');
+    console.error('[sync/gmail] backfill failed', dump);
+    return { status: 500, body: { ok: false, error: msg, detail: dump.slice(0, 1200) } };
   }
 }
 
