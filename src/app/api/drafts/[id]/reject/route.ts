@@ -1,32 +1,34 @@
-import { NextResponse } from 'next/server';
-
 /**
- * AINBOX-11 — POST /api/drafts/[id]/reject
- * PRD §7.11 Approval queue UI
+ * POST /api/drafts/[id]/reject
  *
- * Rejects a draft: deletes locally and at the provider (if it was created there).
- * Real provider-delete lands with AINBOX-12; this route gives the UI a stable
- * endpoint so the workflow chain is testable today.
+ * AINBOX-11 + AINBOX-36 — marks the draft 'rejected' and captures
+ * a draft_feedback row.
  */
+import { NextResponse } from 'next/server';
+import { getServerSupabase } from '@/lib/supabase/server';
+import { captureFeedback } from '@/lib/feedback/capture';
 
-async function deleteDraft(_userId: string, _draftId: string): Promise<{ deleted: true }> {
-  return { deleted: true };
-}
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function POST(
   _req: Request,
   context: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
   const { id } = await context.params;
-  if (!id) {
-    return NextResponse.json({ error: 'missing draft id' }, { status: 400 });
-  }
-  const userId = 'placeholder-user';
-  try {
-    const result = await deleteDraft(userId, id);
-    return NextResponse.json({ id, ...result });
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : 'reject failed';
-    return NextResponse.json({ error: msg }, { status: 500 });
-  }
+  if (!id) return NextResponse.json({ error: 'missing draft id' }, { status: 400 });
+
+  const supabase = await getServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
+
+  const { error: updErr } = await supabase
+    .from('drafts')
+    .update({ status: 'rejected' })
+    .eq('id', id)
+    .eq('user_id', user.id);
+  if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
+
+  void captureFeedback(supabase, { userId: user.id, draftId: id, action: 'reject' });
+  return NextResponse.json({ id, status: 'rejected' });
 }

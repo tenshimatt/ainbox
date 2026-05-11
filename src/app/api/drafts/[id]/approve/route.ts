@@ -1,35 +1,37 @@
-import { NextResponse } from 'next/server';
-
 /**
- * AINBOX-11 — POST /api/drafts/[id]/approve
- * PRD §7.11 Approval queue UI
+ * POST /api/drafts/[id]/approve
  *
- * Approves a draft and sends it via the user's provider.
- * The actual provider-send is implemented in AINBOX-12; here we call
- * a placeholder `sendDraft(userId, draftId)` so wiring exists today.
+ * AINBOX-11 (UI wiring) + AINBOX-36 (L1 feedback capture).
+ *
+ * Marks the draft 'approved'. The auto-send executor cron (AINBOX-31)
+ * sends approved drafts past their cooling window. Captures a
+ * draft_feedback row for personalization mining.
  */
+import { NextResponse } from 'next/server';
+import { getServerSupabase } from '@/lib/supabase/server';
+import { captureFeedback } from '@/lib/feedback/capture';
 
-// Placeholder — AINBOX-12 will replace this with the real Gmail/Graph send.
-// Kept inline so this route is self-contained until the helper module lands.
-async function sendDraft(_userId: string, _draftId: string): Promise<{ sent: true }> {
-  return { sent: true };
-}
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function POST(
   _req: Request,
   context: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
   const { id } = await context.params;
-  if (!id) {
-    return NextResponse.json({ error: 'missing draft id' }, { status: 400 });
-  }
-  // TODO (AINBOX-12): resolve userId from Supabase auth + RLS, then send.
-  const userId = 'placeholder-user';
-  try {
-    const result = await sendDraft(userId, id);
-    return NextResponse.json({ id, ...result });
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : 'send failed';
-    return NextResponse.json({ error: msg }, { status: 500 });
-  }
+  if (!id) return NextResponse.json({ error: 'missing draft id' }, { status: 400 });
+
+  const supabase = await getServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
+
+  const { error: updErr } = await supabase
+    .from('drafts')
+    .update({ status: 'approved' })
+    .eq('id', id)
+    .eq('user_id', user.id);
+  if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
+
+  void captureFeedback(supabase, { userId: user.id, draftId: id, action: 'approve' });
+  return NextResponse.json({ id, status: 'approved' });
 }
