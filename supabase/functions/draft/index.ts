@@ -50,22 +50,26 @@ serve(async (req: Request) => {
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
   const limit = Math.min(25, Math.max(1, body.limit ?? 10));
 
-  const { data: rows, error } = await supabase
+  // Anti-join: pull the email_ids that already have a draft, then exclude.
+  const { data: drafted } = await supabase.from("drafts").select("email_id");
+  const draftedIds = (drafted ?? []).map((d) => d.email_id).filter(Boolean);
+
+  let q = supabase
     .from("email_messages")
-    .select("id, user_id, subject, body_preview, from_addr, category")
+    .select("id, user_id, subject, body_preview, from_addr, category, category_confidence")
     .not("category", "is", null)
     .eq("is_outbound", false)
+    .neq("category", "spam") // don't waste tokens drafting replies to spam
     .order("received_at", { ascending: false })
-    .limit(limit * 4);
-
+    .limit(limit);
+  if (draftedIds.length > 0) {
+    q = q.not("id", "in", `(${draftedIds.join(",")})`);
+  }
+  const { data: candidates, error } = await q;
   if (error) return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500 });
 
-  const { data: existingDrafts } = await supabase.from("drafts").select("email_id");
-  const haveDraft = new Set((existingDrafts ?? []).map((d) => d.email_id));
-  const candidates = (rows ?? []).filter((r) => !haveDraft.has(r.id)).slice(0, limit);
-
-  const out = { ok: true, candidates: candidates.length, drafted: 0, failed: 0, errors: [] as string[] };
-  for (const r of candidates) {
+  const out = { ok: true, candidates: (candidates ?? []).length, drafted: 0, failed: 0, errors: [] as string[] };
+  for (const r of candidates ?? []) {
     try {
       const { reply, confidence } = await generateReply(r.subject, r.body_preview, r.from_addr, r.category);
       if (!reply) throw new Error("empty reply");
