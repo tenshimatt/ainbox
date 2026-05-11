@@ -136,11 +136,8 @@ export async function handleBackfill(opts: {
             name: err.name,
             message: err.message,
             stack: err.stack?.split('\n').slice(0, 6).join('\n'),
-            // @ts-expect-error — googleapis errors carry .code, .errors, .response.data
             code: (err as { code?: unknown }).code,
-            // @ts-expect-error
             errors: (err as { errors?: unknown }).errors,
-            // @ts-expect-error
             responseData: (err as { response?: { data?: unknown } }).response?.data,
           });
         }
