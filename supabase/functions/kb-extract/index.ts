@@ -1,43 +1,42 @@
 /**
- * kb-extract edge function — streamlined for demo.
- * Asks LiteLLM to mine recent sent emails for KB items (FAQ answers,
- * preferences, pricing nuggets) and upserts them into kb_items.
- *
- * Naive but effective: pulls last 100 sent messages, sends headers +
- * body_preview to the model, expects a JSON array of items back.
- *
- * pg_cron schedules invocation every 5 min.
+ * kb-extract edge function — Anthropic Claude Sonnet 4.6.
+ * Mines sent mail for durable KB items, upserts kb_items. pg_cron every 5 min.
  */
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const LITELLM_URL  = Deno.env.get("LITELLM_BASE_URL") ?? "";
-const LITELLM_KEY  = Deno.env.get("LITELLM_API_KEY")  ?? "";
-const MODEL        = Deno.env.get("CLASSIFY_MODEL")   ?? "deepseek-v4-pro";
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SERVICE_KEY  = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const ANTHROPIC_KEY = Deno.env.get("ANTHROPIC_API_KEY")!;
+const MODEL         = Deno.env.get("KB_MODEL") ?? "claude-sonnet-4-6";
+const SUPABASE_URL  = Deno.env.get("SUPABASE_URL")!;
+const SERVICE_KEY   = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const VALID_TYPES = ["faq","policy","pricing","preference","contact","signature","tone-sample"] as const;
 
 async function mine(samples: Array<{ subject: string | null; preview: string | null }>) {
-  const messages = [
-    { role: "system",
-      content:
-        "From the provided sent-email samples, extract durable KB facts the writer would want re-used in future replies. " +
-        `Each fact has a kb_type from ${VALID_TYPES.join("|")} and a short content sentence. ` +
-        "Return JSON {\"items\":[{\"kb_type\":\"...\",\"content\":\"...\",\"confidence\":0..1}]}. Up to 8 items, no duplicates. " +
-        "If samples reveal nothing reusable, return {\"items\":[]}. No prose.",
-    },
-    { role: "user", content: JSON.stringify(samples) },
-  ];
-  const resp = await fetch(`${LITELLM_URL}/chat/completions`, {
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${LITELLM_KEY}` },
-    body: JSON.stringify({ model: MODEL, messages, response_format: { type: "json_object" }, temperature: 0.2 }),
+    headers: {
+      "x-api-key": ANTHROPIC_KEY,
+      "anthropic-version": "2023-06-01",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 1500,
+      system:
+        "From the user's sent-email samples, extract up to 8 durable KB facts the writer would want re-used. " +
+        `Each fact has a kb_type from ${VALID_TYPES.join("|")} and a short content sentence. ` +
+        'Output ONLY JSON: {"items":[{"kb_type":"...","content":"...","confidence":0..1}]}. No prose.',
+      messages: [{ role: "user", content: JSON.stringify(samples) }],
+    }),
   });
-  if (!resp.ok) throw new Error(`litellm ${resp.status}: ${(await resp.text()).slice(0, 200)}`);
-  const raw = (await resp.json()).choices?.[0]?.message?.content ?? "{}";
-  const p = JSON.parse(raw);
+  const txt = await resp.text();
+  if (!resp.ok) throw new Error(`anthropic ${resp.status}: ${txt.slice(0, 300)}`);
+  const data = JSON.parse(txt);
+  const text = data.content?.[0]?.text ?? "";
+  const m = text.match(/\{[\s\S]*\}/);
+  if (!m) return [];
+  const p = JSON.parse(m[0]);
   return Array.isArray(p.items) ? p.items : [];
 }
 
@@ -46,7 +45,6 @@ serve(async (req: Request) => {
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
   const userId: string | undefined = body.user_id;
 
-  // Get one or all users with sent mail.
   let users: string[] = [];
   if (userId) users = [userId];
   else {
@@ -84,7 +82,7 @@ serve(async (req: Request) => {
         if (!error) out.extracted += 1;
       }
     } catch (e) {
-      out.errors.push(`${uid.slice(0, 8)}: ${(e as Error).message.slice(0, 120)}`);
+      out.errors.push(`${uid.slice(0, 8)}: ${(e as Error).message.slice(0, 160)}`);
     }
   }
   return new Response(JSON.stringify(out), { headers: { "Content-Type": "application/json" } });
