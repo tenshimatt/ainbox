@@ -73,8 +73,39 @@ export default function Page() {
     }
   }, []);
 
+  // Auto-trigger extraction on first mount if no items exist yet.
+  // pg_cron also runs every 5 min; this is the immediate kick so the
+  // page never sits empty while waiting for the next tick.
   useEffect(() => {
-    void load();
+    let cancelled = false;
+    (async () => {
+      await load();
+      if (cancelled) return;
+      // After load: if we still have zero items, kick extraction once.
+      // We re-read `items` via closure won't work; check via fresh fetch.
+      try {
+        const r = await fetch('/api/kb/items', { credentials: 'include' });
+        const data = (await r.json()) as ListResp;
+        if ((data.items ?? []).length === 0 && !cancelled) {
+          setExtracting(true);
+          await fetch('/api/kb/extract', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({}),
+          });
+          if (!cancelled) {
+            setExtracting(false);
+            await load();
+          }
+        }
+      } catch {
+        /* swallow — manual button still available */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [load]);
 
   async function runExtract() {
