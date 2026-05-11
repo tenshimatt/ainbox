@@ -80,11 +80,14 @@ export interface PersistedMessageRow {
   internal_date: string | null;
   from_addr: string | null;
   to_addr: string | null;
+  subject: string | null;
   subject_hash: string | null;
   /** Encrypted body — NEVER plaintext. */
   body_encrypted: string;
   size_bytes: number;
   label_ids: string[];
+  received_at: string | null;
+  is_outbound: boolean;
 }
 
 export interface SyncDeps {
@@ -228,17 +231,23 @@ export class QuotaPacer {
 
 function rowFromMessage(userId: string, message: gmail_v1.Schema$Message): PersistedMessageRow {
   const body = extractBody(message);
+  const subject = headerValue(message.payload ?? undefined, 'Subject');
+  const labelIds = message.labelIds ?? [];
+  const internalDate = message.internalDate ?? null;
   return {
     user_id: userId,
     gmail_id: message.id ?? '',
     thread_id: message.threadId ?? null,
-    internal_date: message.internalDate ?? null,
+    internal_date: internalDate,
     from_addr: headerValue(message.payload ?? undefined, 'From'),
     to_addr: headerValue(message.payload ?? undefined, 'To'),
-    subject_hash: hashSubject(headerValue(message.payload ?? undefined, 'Subject')),
+    subject: subject ?? null,
+    subject_hash: hashSubject(subject),
     body_encrypted: encryptForUser(userId, body),
     size_bytes: message.sizeEstimate ?? 0,
-    label_ids: message.labelIds ?? [],
+    label_ids: labelIds,
+    received_at: internalDate ? new Date(Number(internalDate)).toISOString() : null,
+    is_outbound: labelIds.includes('SENT'),
   };
 }
 

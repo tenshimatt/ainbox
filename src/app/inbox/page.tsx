@@ -60,9 +60,9 @@ async function fetchInbox() {
   const [inboundRes, draftsRes, activityRes] = await Promise.all([
     supabase
       .from('email_messages')
-      .select('id, from_address, subject, received_at, category')
+      .select('id, from_addr, subject, subject_hash, received_at, internal_date, category, label_ids')
       .eq('is_outbound', false)
-      .order('received_at', { ascending: false })
+      .order('received_at', { ascending: false, nullsFirst: false })
       .limit(50),
     supabase
       .from('drafts')
@@ -79,8 +79,31 @@ async function fetchInbox() {
       .limit(50),
   ]);
 
+  // Map backfill columns -> UI shape. Gmail backfill writes from_addr/subject_hash;
+  // UI wants from_address/subject. Use the plaintext subject when stored, else
+  // fall back to a short fingerprint from subject_hash. internal_date (epoch ms
+  // string) is used when received_at hasn't been backfilled.
+  type RawInbound = {
+    id: string;
+    from_addr: string | null;
+    subject: string | null;
+    subject_hash: string | null;
+    received_at: string | null;
+    internal_date: string | null;
+    category: string | null;
+  };
+  const inbound: InboundRow[] = ((inboundRes.data ?? []) as RawInbound[]).map((r) => ({
+    id: r.id,
+    from_address: r.from_addr,
+    subject: r.subject ?? (r.subject_hash ? `(hashed: ${r.subject_hash.slice(0, 8)}…)` : null),
+    received_at:
+      r.received_at ??
+      (r.internal_date ? new Date(Number(r.internal_date)).toISOString() : null),
+    category: r.category,
+  }));
+
   return {
-    inbound: (inboundRes.data ?? []) as InboundRow[],
+    inbound,
     pendingDrafts: (draftsRes.data ?? []) as DraftRow[],
     recentActivity: (activityRes.data ?? []) as DraftRow[],
   };
