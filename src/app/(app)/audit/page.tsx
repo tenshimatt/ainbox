@@ -93,6 +93,18 @@ type Filters = {
 
 const EMPTY_FILTERS: Filters = { from: '', to: '', event_type: '', category: '' };
 
+/**
+ * Past 7 days → today, as YYYY-MM-DD strings.
+ * Generated client-side so the values are fresh on every mount.
+ */
+function defaultDateRange(): { from: string; to: string } {
+  const today = new Date();
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const fmt = (d: Date) => d.toISOString().slice(0, 10);
+  return { from: fmt(weekAgo), to: fmt(today) };
+}
+
 function buildQuery(filters: Filters, page: number): string {
   const qs = new URLSearchParams();
   if (filters.from) qs.set('from', filters.from);
@@ -107,8 +119,11 @@ function buildQuery(filters: Filters, page: number): string {
 export default function AuditPage() {
   // `pending` is what's typed into the form; `applied` is what's been
   // committed by clicking "Apply filters" (and used for fetch + export).
-  const [pending, setPending] = useState<Filters>(EMPTY_FILTERS);
-  const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS);
+  // Default both pending + applied to last-7-days. Use a lazy initialiser
+  // so the dates are computed once on first mount (not re-rendered).
+  const initial = useMemo<Filters>(() => ({ ...EMPTY_FILTERS, ...defaultDateRange() }), []);
+  const [pending, setPending] = useState<Filters>(initial);
+  const [applied, setApplied] = useState<Filters>(initial);
   const [page, setPage] = useState(1);
   const [data, setData] = useState<AuditResponse>({
     rows: [],
