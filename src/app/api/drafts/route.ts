@@ -72,20 +72,26 @@ export async function GET(): Promise<NextResponse> {
     status: string | null;
     created_at: string;
     email_id: string | null;
-    email_messages: { subject: string | null; from_addr: string | null; category: string | null } | null;
+    email_messages:
+      | { subject: string | null; from_addr: string | null; category: string | null }
+      | Array<{ subject: string | null; from_addr: string | null; category: string | null }>
+      | null;
   };
 
-  const drafts = (data as Joined[] | null ?? []).map((d) => ({
-    id: d.id,
-    subject: d.email_messages?.subject ?? '(no subject)',
-    recipient: d.email_messages?.from_addr ?? null,
-    category: d.email_messages?.category ?? null,
-    confidence: d.confidence ?? 0,
-    is_reply: true,
-    body: d.reply_body,
-    status: d.status,
-    created_at: d.created_at,
-  }));
+  const drafts = (data as unknown as Joined[] ?? []).map((d) => {
+    const em = Array.isArray(d.email_messages) ? d.email_messages[0] : d.email_messages;
+    return {
+      id: d.id,
+      subject: em?.subject ?? '(no subject)',
+      recipient: em?.from_addr ?? null,
+      category: em?.category ?? null,
+      confidence: d.confidence ?? 0,
+      is_reply: true,
+      body: d.reply_body,
+      status: d.status,
+      created_at: d.created_at,
+    };
+  });
 
   return NextResponse.json({ drafts });
 }
