@@ -27,15 +27,6 @@ function isProtected(pathname: string): boolean {
 export async function middleware(req: NextRequest) {
   const { pathname, searchParams } = req.nextUrl;
 
-  // If Supabase redirected an OAuth flow to the Site URL root instead of
-  // our /connect/<provider>/callback (because of allow-list edge cases),
-  // forward the ?code= to /auth/callback which is provider-agnostic.
-  if (pathname === '/' && searchParams.has('code')) {
-    const url = req.nextUrl.clone();
-    url.pathname = '/auth/callback';
-    return NextResponse.redirect(url);
-  }
-
   if (!isProtected(pathname)) {
     return NextResponse.next();
   }
@@ -63,7 +54,6 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    '/',
     '/inbox/:path*',
     '/drafts/:path*',
     '/knowledge/:path*',

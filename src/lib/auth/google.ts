@@ -16,7 +16,7 @@ export const GOOGLE_SCOPES = [
   'https://www.googleapis.com/auth/gmail.send',
 ].join(' ');
 
-export const GOOGLE_CALLBACK_PATH = '/connect/google/callback';
+export const GOOGLE_CALLBACK_PATH = '/auth/callback';
 
 export function buildRedirectTo(origin: string): string {
   return `${origin}${GOOGLE_CALLBACK_PATH}`;

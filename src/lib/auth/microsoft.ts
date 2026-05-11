@@ -41,7 +41,7 @@ export function getMicrosoftRedirectUrl(origin?: string): string {
   const base =
     origin ??
     (typeof window !== 'undefined' ? window.location.origin : '');
-  return `${base}/connect/microsoft/callback`;
+  return `${base}/auth/callback`;
 }
 
 /**
