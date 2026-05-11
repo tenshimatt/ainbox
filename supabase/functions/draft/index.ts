@@ -11,13 +11,14 @@ const MODEL         = Deno.env.get("DRAFT_MODEL") ?? "claude-sonnet-4-6";
 const SUPABASE_URL  = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY   = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-function extractJson(s: string): { reply: string; confidence: number } {
+function extractJson(s: string): { reply: string; confidence: number; reason: string } {
   const m = s.match(/\{[\s\S]*\}/);
   if (!m) throw new Error("no json in response");
   const p = JSON.parse(m[0]);
   return {
     reply: typeof p.reply === "string" ? p.reply : "",
     confidence: typeof p.confidence === "number" ? Math.max(0, Math.min(1, p.confidence)) : 0,
+    reason: typeof p.reason === "string" ? p.reason : "",
   };
 }
 
@@ -33,8 +34,15 @@ async function generateReply(subject: string | null, preview: string | null, fro
       model: MODEL,
       max_tokens: 600,
       system:
-        'Write a concise professional reply (80-150 words). Output ONLY JSON: ' +
-        '{"reply":"<text>","confidence":0..1}. No prose outside the JSON.',
+        "You are drafting reply emails for a busy professional. " +
+        "FIRST decide: does this email expect a human reply? " +
+        "If it's an automated notification, transactional alert, marketing blast, " +
+        "newsletter, no-reply sender, or anything where replying is pointless, " +
+        "return {\"reply\":null,\"confidence\":0,\"reason\":\"<why\"}. " +
+        "Only when a real human reply is warranted, write a concise 60-120 word reply that: " +
+        "(a) acknowledges the specific ask, (b) answers or commits to a next step, " +
+        "(c) is natural and direct — no over-formal corporate filler. " +
+        "Output ONLY JSON: {\"reply\":\"<text or null>\",\"confidence\":0..1,\"reason\":\"<short>\"}. No prose.",
       messages: [{ role: "user", content: JSON.stringify({ from, subject: subject ?? "", preview: preview ?? "", category }) }],
     }),
   });
