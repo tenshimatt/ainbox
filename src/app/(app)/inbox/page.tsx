@@ -95,7 +95,7 @@ async function fetchInbox() {
   const inbound: InboundRow[] = ((inboundRes.data ?? []) as RawInbound[]).map((r) => ({
     id: r.id,
     from_address: r.from_addr,
-    subject: r.subject ?? (r.subject_hash ? `(hashed: ${r.subject_hash.slice(0, 8)}…)` : null),
+    subject: r.subject ?? '(subject pending — re-sync to refresh)',
     received_at:
       r.received_at ??
       (r.internal_date ? new Date(Number(r.internal_date)).toISOString() : null),
