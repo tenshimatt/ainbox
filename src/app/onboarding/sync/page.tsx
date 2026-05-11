@@ -23,21 +23,42 @@ export default function SyncPage() {
 
     async function runSync() {
       setCurrentStep(1);
-      setBatchEvents((p) => [...p, 'Triggering Gmail backfill…']);
+      setBatchEvents((p) => [...p, 'Detecting connected providers…']);
+
+      // Try both providers; first one with a token wins.
+      const providers: Array<{ slug: 'gmail' | 'outlook'; label: string }> = [
+        { slug: 'gmail',   label: 'Gmail' },
+        { slug: 'outlook', label: 'Outlook' },
+      ];
+
+      let started = false;
+      for (const p of providers) {
+        try {
+          const r = await fetch(`/api/sync/${p.slug}`, {
+            method: 'POST',
+            credentials: 'same-origin',
+          });
+          if (cancelled) return;
+          if (r.ok) {
+            setBatchEvents((q) => [...q, `${p.label} backfill started.`]);
+            started = true;
+            break;
+          }
+          const body = await r.json().catch(() => ({})) as { error?: string };
+          // Skip silently if "no token" — that just means user didn't sign in via this provider
+          if (!/no\s+(gmail|outlook|provider)\s+oauth\s+token|run\s+\/connect|missing\s+token/i.test(body.error ?? '')) {
+            setBatchEvents((q) => [...q, `${p.label} skipped: ${body.error ?? r.statusText}`]);
+          }
+        } catch (err) {
+          setBatchEvents((q) => [...q, `${p.label} request failed: ${(err as Error).message}`]);
+        }
+      }
+      if (!started) {
+        setBatchEvents((q) => [...q, 'No mailbox connected. Go to /connect and link Google or Microsoft.']);
+        return;
+      }
 
       try {
-        const res = await fetch('/api/sync/gmail', {
-          method: 'POST',
-          credentials: 'same-origin',
-        });
-        if (cancelled) return;
-
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({})) as { error?: string };
-          setBatchEvents((p) => [...p, `Sync error: ${body.error ?? res.statusText}`]);
-          return;
-        }
-
         setCurrentStep(2);
         setBatchEvents((p) => [...p, 'Backfill running — fetching messages…']);
 
