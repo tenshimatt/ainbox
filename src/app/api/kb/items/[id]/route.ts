@@ -66,15 +66,17 @@ export async function PATCH(
     if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
 
     const body = (await req.json().catch(() => ({}))) as PatchBody;
+    // UI uses { type, human_verified }; DB columns are { kb_type, verified }.
+    // Mapping happens once here, mirroring the GET route's read-side mapping.
     const update: Record<string, unknown> = {};
     if (typeof body.content === 'string' && body.content.trim()) {
       update.content = body.content.trim();
     }
     if (body.type && KB_ITEM_TYPES.includes(body.type)) {
-      update.type = body.type;
+      update.kb_type = body.type;
     }
     if (typeof body.human_verified === 'boolean') {
-      update.human_verified = body.human_verified;
+      update.verified = body.human_verified;
     }
     if (!Object.keys(update).length) {
       return NextResponse.json({ error: 'no_fields' }, { status: 400 });
@@ -85,7 +87,7 @@ export async function PATCH(
       .update(update)
       .eq('id', id)
       .eq('user_id', user.id)
-      .select('*')
+      .select('id, user_id, kb_type, content, confidence, source_email_id, verified, created_at')
       .single();
 
     if (error) {
@@ -99,7 +101,23 @@ export async function PATCH(
       await maybeReembed(update.content as string);
     }
 
-    return NextResponse.json({ ok: true, item: data });
+    // Map DB shape back to UI shape (same as GET).
+    const row = data as {
+      id: string; user_id: string; kb_type: KbItemType; content: string;
+      confidence: number; source_email_id: string | null; verified: boolean;
+      created_at?: string;
+    };
+    const item = {
+      id: row.id,
+      user_id: row.user_id,
+      type: row.kb_type,
+      content: row.content,
+      confidence: row.confidence,
+      source_email_id: row.source_email_id,
+      human_verified: row.verified,
+      created_at: row.created_at,
+    };
+    return NextResponse.json({ ok: true, item });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
     return NextResponse.json({ error: 'patch_failed', detail: msg }, { status: 500 });
