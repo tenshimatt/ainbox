@@ -31,6 +31,41 @@ export interface GenerateDraftOptions {
   embedder?: (chunks: string[]) => Promise<number[][]>;
   /** Override clock — tests inject a fixed timestamp. */
   now?: () => Date;
+  /**
+   * AINBOX-52 — Quality L2: user's full name (e.g. "Alice Smith").
+   * When provided, draft generation hard-skips if the email's body greeting
+   * explicitly addresses someone other than this user.
+   */
+  userFullName?: string | null;
+}
+
+/**
+ * AINBOX-52 — Returns true when the body preview contains a greeting that
+ * names a specific person who is NOT the receiving user.
+ *
+ * Only skips when a name is positively identified AND it does not match the
+ * user. Emails with no greeting, or generic greetings ("Hi there"), pass through.
+ */
+export function greetingNamesOther(
+  preview: string | null,
+  fullName: string | null,
+): boolean {
+  if (!preview || !fullName) return false;
+  const first = fullName.trim().split(/\s+/)[0]?.toLowerCase();
+  if (!first || first.length < 2) return false;
+
+  const m = preview.match(
+    /(?:^|\n|\s)(hi|hello|hey|dear|good (?:morning|afternoon|evening))[ ,]+([\w]+)/i,
+  );
+  if (!m) return false; // no greeting name → no basis to skip
+
+  const greeted = m[2].toLowerCase();
+
+  // Generic forms of address are not person-names — don't skip.
+  const generic = new Set(['there', 'all', 'team', 'everyone', 'folks', 'sir', 'madam', 'friend']);
+  if (generic.has(greeted)) return false;
+
+  return greeted !== first && greeted !== fullName.toLowerCase();
 }
 
 export interface GenerateDraftResult {
@@ -85,6 +120,11 @@ export async function generateDraftForEmail(
   }
 
   const emailRow = row as EmailRow;
+
+  // AINBOX-52 — Quality L2: hard-skip when greeting names someone else.
+  if (opts.userFullName != null && greetingNamesOther(emailRow.body_preview, opts.userFullName)) {
+    throw new Error('generateDraftForEmail: hard-skip: greeting names other');
+  }
 
   // 2. Deps — KB search via pgvector RPC, sample sent emails for tone.
   const searchKb = async (uid: string, query: string, topN: number): Promise<KbHit[]> => {
