@@ -89,6 +89,15 @@ export interface PersistedMessageRow {
   received_at: string | null;
   is_outbound: boolean;
   provider: 'gmail';
+  // Eligibility headers (L1.7) — used by draftable_candidates() rules.
+  cc_addrs: string[] | null;
+  bcc_addrs: string[] | null;
+  reply_to: string | null;
+  list_id: string | null;
+  list_unsubscribe: string | null;
+  auto_submitted: string | null;
+  precedence: string | null;
+  recipient_count: number;
 }
 
 export interface SyncDeps {
@@ -230,18 +239,30 @@ export class QuotaPacer {
   }
 }
 
+function splitAddrs(raw: string | null): string[] | null {
+  if (!raw) return null;
+  const parts = raw.split(',').map((s) => s.trim()).filter(Boolean);
+  return parts.length > 0 ? parts : null;
+}
+
 function rowFromMessage(userId: string, message: gmail_v1.Schema$Message): PersistedMessageRow {
   const body = extractBody(message);
   const subject = headerValue(message.payload ?? undefined, 'Subject');
   const labelIds = message.labelIds ?? [];
   const internalDate = message.internalDate ?? null;
+  const toAddr = headerValue(message.payload ?? undefined, 'To');
+  const ccRaw = headerValue(message.payload ?? undefined, 'Cc');
+  const bccRaw = headerValue(message.payload ?? undefined, 'Bcc');
+  const cc = splitAddrs(ccRaw);
+  const bcc = splitAddrs(bccRaw);
+  const toCount = splitAddrs(toAddr)?.length ?? 0;
   return {
     user_id: userId,
     gmail_id: message.id ?? '',
     thread_id: message.threadId ?? null,
     internal_date: internalDate,
     from_addr: headerValue(message.payload ?? undefined, 'From'),
-    to_addr: headerValue(message.payload ?? undefined, 'To'),
+    to_addr: toAddr,
     subject: subject ?? null,
     subject_hash: hashSubject(subject),
     body_encrypted: encryptForUser(userId, body),
@@ -250,6 +271,14 @@ function rowFromMessage(userId: string, message: gmail_v1.Schema$Message): Persi
     received_at: internalDate ? new Date(Number(internalDate)).toISOString() : null,
     is_outbound: labelIds.includes('SENT'),
     provider: 'gmail',
+    cc_addrs: cc,
+    bcc_addrs: bcc,
+    reply_to: headerValue(message.payload ?? undefined, 'Reply-To'),
+    list_id: headerValue(message.payload ?? undefined, 'List-Id'),
+    list_unsubscribe: headerValue(message.payload ?? undefined, 'List-Unsubscribe'),
+    auto_submitted: headerValue(message.payload ?? undefined, 'Auto-Submitted'),
+    precedence: headerValue(message.payload ?? undefined, 'Precedence'),
+    recipient_count: toCount + (cc?.length ?? 0) + (bcc?.length ?? 0),
   };
 }
 
