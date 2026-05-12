@@ -26,6 +26,11 @@ export async function POST(): Promise<NextResponse> {
     );
   }
 
+  // Vercel's serverless functions default to a short timeout; the edge fn
+  // can take 5-20s. Use AbortController with 50s ceiling and surface the
+  // real reason if it dies.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 50_000);
   try {
     const resp = await fetch(`${url}/functions/v1/kb-extract`, {
       method: 'POST',
@@ -34,15 +39,21 @@ export async function POST(): Promise<NextResponse> {
         Authorization: `Bearer ${serviceKey}`,
       },
       body: JSON.stringify({ user_id: user.id }),
+      signal: controller.signal,
     });
     const text = await resp.text();
     let payload: unknown;
     try { payload = JSON.parse(text); } catch { payload = { raw: text.slice(0, 500) }; }
     return NextResponse.json(payload, { status: resp.status });
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const name = err instanceof Error ? err.name : 'unknown';
+    console.error('[kb/extract] edge_call_failed', { name, msg });
     return NextResponse.json(
-      { error: 'edge_call_failed', detail: (err as Error).message },
+      { error: 'edge_call_failed', name, detail: msg },
       { status: 502 },
     );
+  } finally {
+    clearTimeout(timer);
   }
 }
