@@ -11,11 +11,14 @@ const SYNC_STEPS = [
   { id: 'complete', label: 'Sync complete' },
 ];
 
+type Counts = { synced: number; classified: number; drafts: number; kb: number };
+
 export default function SyncPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const [syncStatus, setSyncStatus] = useState<'in-progress' | 'complete'>('in-progress');
   const [batchEvents, setBatchEvents] = useState<string[]>([]);
+  const [counts, setCounts] = useState<Counts>({ synced: 0, classified: 0, drafts: 0, kb: 0 });
 
   useEffect(() => {
     let cancelled = false;
@@ -68,25 +71,28 @@ export default function SyncPage() {
         pollTimer = setInterval(async () => {
           if (cancelled) return;
           try {
-            const countRes = await fetch('/api/inbox/count', { credentials: 'same-origin' });
-            if (countRes.ok) {
-              const { count = 0 } = (await countRes.json()) as { count: number };
-              if (count > lastCount) {
-                setBatchEvents((p) => [...p, `Synced ${count} messages so far…`]);
-                setCurrentStep(2);
-                setProgress(Math.min(80, 20 + Math.floor(count / 10)));
-                lastCount = count;
-                stableTicks = 0;
-              } else {
-                stableTicks++;
-              }
-              if (stableTicks >= 3 && lastCount > 0) {
-                setCurrentStep(5);
-                setProgress(100);
-                setSyncStatus('complete');
-                setBatchEvents((p) => [...p, `Sync complete — ${lastCount} messages.`]);
-                if (pollTimer) clearInterval(pollTimer);
-              }
+            const r = await fetch('/api/sync/status', { credentials: 'same-origin' });
+            if (!r.ok) return;
+            const { counts: c } = (await r.json()) as { counts: Counts };
+            setCounts(c);
+
+            if (c.synced > lastCount) {
+              setBatchEvents((p) => [...p, `Synced ${c.synced} messages so far…`]);
+              setCurrentStep(2);
+              setProgress(Math.min(80, 20 + Math.floor(c.synced / 10)));
+              lastCount = c.synced;
+              stableTicks = 0;
+            } else {
+              stableTicks++;
+            }
+            if (c.classified > 0 && currentStep < 3) setCurrentStep(3);
+            if (c.kb > 0 && currentStep < 4)         setCurrentStep(4);
+            if (stableTicks >= 3 && lastCount > 0) {
+              setCurrentStep(5);
+              setProgress(100);
+              setSyncStatus('complete');
+              setBatchEvents((p) => [...p, `Sync complete — ${lastCount} messages.`]);
+              if (pollTimer) clearInterval(pollTimer);
             }
           } catch { /* keep polling */ }
         }, 4000);
@@ -129,6 +135,25 @@ export default function SyncPage() {
               style={{ width: `${progress}%` }}
             />
           </div>
+        </div>
+
+        {/* Live counters — what's actually happening on the backend */}
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4" data-testid="sync-counters">
+          {([
+            { k: 'synced',     label: 'Synced',       v: counts.synced,     accent: 'blue' },
+            { k: 'classified', label: 'Classified',   v: counts.classified, accent: 'indigo' },
+            { k: 'drafts',     label: 'Drafts ready', v: counts.drafts,     accent: 'amber' },
+            { k: 'kb',         label: 'KB items',     v: counts.kb,         accent: 'emerald' },
+          ] as const).map((c) => (
+            <div key={c.k} className="rounded-lg border border-slate-200 bg-white px-3 py-3">
+              <div className="text-2xl font-bold tabular-nums text-slate-900">
+                {c.v.toLocaleString()}
+              </div>
+              <div className="mt-0.5 text-xs uppercase tracking-wider text-slate-500">
+                {c.label}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Steps */}
