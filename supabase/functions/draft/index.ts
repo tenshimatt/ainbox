@@ -1,7 +1,12 @@
 /**
  * draft edge function — Anthropic Claude Sonnet 4.6.
- * Selects classified inbound messages without a draft, generates a
- * reply, inserts into drafts. pg_cron every 2 min.
+ *
+ * Pulls draftable candidates via draftable_candidates() RPC (which already
+ * applies L1.8 hard-skips + L1.10 thread-suppression), asks Claude for a
+ * reply, then applies L1.9 soft signals + L1.11 name-match boost to the
+ * model's raw confidence before persisting.
+ *
+ * pg_cron every 2 min.
  */
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -11,7 +16,13 @@ const MODEL         = Deno.env.get("DRAFT_MODEL") ?? "claude-sonnet-4-6";
 const SUPABASE_URL  = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY   = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-function extractJson(s: string): { reply: string; confidence: number; reason: string } {
+interface ReplyJson {
+  reply: string;
+  confidence: number;
+  reason: string;
+}
+
+function extractJson(s: string): ReplyJson {
   const m = s.match(/\{[\s\S]*\}/);
   if (!m) throw new Error("no json in response");
   const p = JSON.parse(m[0]);
@@ -22,7 +33,12 @@ function extractJson(s: string): { reply: string; confidence: number; reason: st
   };
 }
 
-async function generateReply(subject: string | null, preview: string | null, from: string | null, category: string | null) {
+async function generateReply(
+  subject: string | null,
+  preview: string | null,
+  from: string | null,
+  category: string | null,
+): Promise<ReplyJson> {
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -37,20 +53,57 @@ async function generateReply(subject: string | null, preview: string | null, fro
         "You are drafting reply emails for a busy professional. " +
         "FIRST decide: does this email expect a human reply? " +
         "If it's an automated notification, transactional alert, marketing blast, " +
-        "newsletter, no-reply sender, or anything where replying is pointless, " +
-        "return {\"reply\":null,\"confidence\":0,\"reason\":\"<why\"}. " +
+        "newsletter, or anything where replying is pointless, return " +
+        '{"reply":null,"confidence":0,"reason":"<why>"}. ' +
         "Only when a real human reply is warranted, write a concise 60-120 word reply that: " +
         "(a) acknowledges the specific ask, (b) answers or commits to a next step, " +
         "(c) is natural and direct — no over-formal corporate filler. " +
-        "Output ONLY JSON: {\"reply\":\"<text or null>\",\"confidence\":0..1,\"reason\":\"<short>\"}. No prose.",
+        'Output ONLY JSON: {"reply":"<text or null>","confidence":0..1,"reason":"<short>"}. No prose.',
       messages: [{ role: "user", content: JSON.stringify({ from, subject: subject ?? "", preview: preview ?? "", category }) }],
     }),
   });
   const txt = await resp.text();
   if (!resp.ok) throw new Error(`anthropic ${resp.status}: ${txt.slice(0, 300)}`);
   const data = JSON.parse(txt);
-  const text = data.content?.[0]?.text ?? "";
-  return extractJson(text);
+  return extractJson(data.content?.[0]?.text ?? "");
+}
+
+/**
+ * L1.11 name-match: does the body greeting contain the user's first name?
+ * Greedy regex on common greeting forms — Hi / Hey / Hello / Dear / Good morning, etc.
+ */
+function greetingMatchesName(preview: string | null, fullName: string | null): boolean {
+  if (!preview || !fullName) return false;
+  const first = fullName.trim().split(/\s+/)[0]?.toLowerCase();
+  if (!first || first.length < 2) return false;
+  const m = preview.match(/(?:^|\n|\s)(hi|hello|hey|dear|good (?:morning|afternoon|evening))[ ,]+([\w]+)/i);
+  if (!m) return false;
+  return m[2].toLowerCase() === first || m[2].toLowerCase() === fullName.toLowerCase();
+}
+
+/** L1.9 soft signals — additive, clamped to [0,1]. Returns adjusted confidence. */
+function adjustConfidence(raw: number, signals: {
+  greeting_name_match: boolean;
+  body_has_question: boolean;
+  is_re_thread: boolean;
+  same_domain: boolean;
+  first_time_sender: boolean;
+  reply_to_differs: boolean;
+}): number {
+  let c = raw;
+  if (signals.greeting_name_match) c += 0.20;
+  if (signals.body_has_question)   c += 0.10;
+  if (signals.is_re_thread)        c += 0.10;
+  if (signals.same_domain)         c += 0.05;
+  if (signals.first_time_sender)   c -= 0.10;
+  if (signals.reply_to_differs)    c -= 0.10;
+  return Math.max(0, Math.min(1, c));
+}
+
+function extractDomain(addr: string | null): string | null {
+  if (!addr) return null;
+  const m = addr.match(/@([\w.-]+)/);
+  return m ? m[1].toLowerCase() : null;
 }
 
 serve(async (req: Request) => {
@@ -58,17 +111,37 @@ serve(async (req: Request) => {
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
   const limit = Math.min(25, Math.max(1, body.limit ?? 10));
 
-  // SQL anti-join via RPC — avoids the URL-bloat problem of NOT IN(uuid,…).
   const { data: candidates, error } = await supabase.rpc("draftable_candidates", { p_limit: limit });
   if (error) return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500 });
 
   const out = { ok: true, candidates: (candidates ?? []).length, drafted: 0, skipped: 0, failed: 0, errors: [] as string[] };
+
   for (const r of candidates ?? []) {
     try {
-      const { reply, confidence, reason } = await generateReply(r.subject, r.body_preview, r.from_addr, r.category);
+      // Per-user profile lookup (name + email) for soft signals. Cache by user_id within this run.
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", r.user_id)
+        .maybeSingle();
+      const fullName = (profile as { full_name?: string } | null)?.full_name ?? null;
+      const userEmail = (profile as { email?: string } | null)?.email ?? null;
+
+      // Compute soft signals BEFORE the model call.
+      const signals = {
+        greeting_name_match: greetingMatchesName(r.body_preview, fullName),
+        body_has_question:   /\?/.test(r.body_preview ?? ''),
+        is_re_thread:        /^re:\s/i.test(r.subject ?? ''),
+        same_domain:         !!(userEmail && extractDomain(r.from_addr) === extractDomain(userEmail)),
+        first_time_sender:   false, // requires history lookup, skip for now
+        reply_to_differs:    false, // requires reply_to vs from check, skip until we wire it through RPC
+      };
+
+      const { reply, confidence: rawConfidence, reason } = await generateReply(
+        r.subject, r.body_preview, r.from_addr, r.category,
+      );
+
       if (!reply || reply.trim() === "") {
-        // Claude judged "no reply needed" — record a rejected stub so we
-        // don't reprocess this email on every tick.
         await supabase.from("drafts").insert({
           user_id: r.user_id,
           email_id: r.id,
@@ -80,11 +153,14 @@ serve(async (req: Request) => {
         out.skipped += 1;
         continue;
       }
+
+      const adjusted = adjustConfidence(rawConfidence, signals);
       const { error: insErr } = await supabase.from("drafts").insert({
         user_id: r.user_id,
         email_id: r.id,
         reply_body: reply,
-        confidence,
+        confidence: adjusted,
+        generation_score: rawConfidence,
         status: "pending",
         model: MODEL,
       });
