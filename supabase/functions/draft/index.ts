@@ -40,6 +40,7 @@ async function generateReply(
   category: string | null,
   examples: Array<{ subject: string | null; reply_body: string | null }>,
   memories: Array<{ kind: string; signal: string }>,
+  voicePrompt: string | null,
 ): Promise<ReplyJson> {
   // L3 — few-shot: inject the user's most-recently-approved replies in this category.
   const examplesBlock =
@@ -54,6 +55,11 @@ async function generateReply(
     memories.length > 0
       ? "\\n\\nAvoid these patterns the user has rejected before:\\n" +
         memories.slice(0, 10).map((m) => `- (${m.kind}) ${m.signal}`).join("\\n")
+      : "";
+  // L5 — voice prompt: synthesised tone/style guide from KB items + tone-samples.
+  const voiceBlock =
+    voicePrompt
+      ? `\\n\\nThis user's personal writing voice (apply to every reply):\\n${voicePrompt.slice(0, 400)}`
       : "";
 
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
@@ -76,6 +82,7 @@ async function generateReply(
         "(a) acknowledges the specific ask, (b) answers or commits to a next step, " +
         "(c) is natural and direct — no over-formal corporate filler. " +
         'Output ONLY JSON: {"reply":"<text or null>","confidence":0..1,"reason":"<short>"}. No prose.' +
+        voiceBlock +
         examplesBlock +
         memoryBlock,
       messages: [{ role: "user", content: JSON.stringify({ from, subject: subject ?? "", preview: preview ?? "", category }) }],
@@ -167,11 +174,19 @@ serve(async (req: Request) => {
         .eq("user_id", r.user_id)
         .order("created_at", { ascending: false })
         .limit(10);
+      // L5 — load voice prompt (synthesised nightly from KB items + tone-samples).
+      const { data: voiceRow } = await supabase
+        .from("voice_profiles")
+        .select("voice_prompt")
+        .eq("user_id", r.user_id)
+        .maybeSingle();
+      const voicePrompt = (voiceRow as { voice_prompt?: string } | null)?.voice_prompt ?? null;
 
       const { reply, confidence: rawConfidence, reason } = await generateReply(
         r.subject, r.body_preview, r.from_addr, r.category,
         (examples as Array<{ subject: string | null; reply_body: string | null }>) ?? [],
         (memories as Array<{ kind: string; signal: string }>) ?? [],
+        voicePrompt,
       );
 
       if (!reply || reply.trim() === "") {
