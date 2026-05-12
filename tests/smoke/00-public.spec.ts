@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('@smoke public surfaces', () => {
   test('landing page renders', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle(/Ainbox/i);
+    await expect(page).toHaveTitle(/Task Response/i);
   });
 
   // Each marketing page is a SEPARATE test, not a for-loop.

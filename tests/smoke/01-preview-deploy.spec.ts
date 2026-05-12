@@ -14,9 +14,9 @@ import { test, expect } from '@playwright/test';
 test.describe('@smoke preview-deploy', () => {
   // ── Landing ─────────────────────────────────────────────────────────────
 
-  test('landing page has Ainbox title', async ({ page }) => {
+  test('landing page has Task Response title', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle(/Ainbox/i);
+    await expect(page).toHaveTitle(/Task Response/i);
   });
 
   // ── Public marketing + legal — must not 500 ──────────────────────────────
