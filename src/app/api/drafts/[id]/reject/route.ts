@@ -7,6 +7,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSupabase } from '@/lib/supabase/server';
 import { captureFeedback } from '@/lib/feedback/capture';
+import { analyseReject } from '@/lib/feedback/analyse';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -30,5 +31,7 @@ export async function POST(
   if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
 
   void captureFeedback(supabase, { userId: user.id, draftId: id, action: 'reject' });
+  // L1.5 — analyse the reject and write a user_memory entry. Fire-and-forget.
+  void analyseReject(supabase, user.id, id);
   return NextResponse.json({ id, status: 'rejected' });
 }

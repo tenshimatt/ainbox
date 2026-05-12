@@ -38,7 +38,24 @@ async function generateReply(
   preview: string | null,
   from: string | null,
   category: string | null,
+  examples: Array<{ subject: string | null; reply_body: string | null }>,
+  memories: Array<{ kind: string; signal: string }>,
 ): Promise<ReplyJson> {
+  // L3 — few-shot: inject the user's most-recently-approved replies in this category.
+  const examplesBlock =
+    examples.length > 0
+      ? "\\n\\nThe user's most recent approved replies in this category — match this voice, structure, and tone:\\n" +
+        examples
+          .map((e, i) => `[example ${i + 1}]\\nSubject: ${(e.subject ?? "").slice(0, 200)}\\nReply: ${(e.reply_body ?? "").slice(0, 600)}`)
+          .join("\\n\\n")
+      : "";
+  // L1.5 — memory: things the user previously rejected; avoid repeating.
+  const memoryBlock =
+    memories.length > 0
+      ? "\\n\\nAvoid these patterns the user has rejected before:\\n" +
+        memories.slice(0, 10).map((m) => `- (${m.kind}) ${m.signal}`).join("\\n")
+      : "";
+
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -58,7 +75,9 @@ async function generateReply(
         "Only when a real human reply is warranted, write a concise 60-120 word reply that: " +
         "(a) acknowledges the specific ask, (b) answers or commits to a next step, " +
         "(c) is natural and direct — no over-formal corporate filler. " +
-        'Output ONLY JSON: {"reply":"<text or null>","confidence":0..1,"reason":"<short>"}. No prose.',
+        'Output ONLY JSON: {"reply":"<text or null>","confidence":0..1,"reason":"<short>"}. No prose.' +
+        examplesBlock +
+        memoryBlock,
       messages: [{ role: "user", content: JSON.stringify({ from, subject: subject ?? "", preview: preview ?? "", category }) }],
     }),
   });
@@ -137,8 +156,22 @@ serve(async (req: Request) => {
         reply_to_differs:    false, // requires reply_to vs from check, skip until we wire it through RPC
       };
 
+      // L3 — pull few-shot examples (recent approved drafts in this category).
+      const { data: examples } = await supabase.rpc("top_approved_for_category", {
+        p_user_id: r.user_id, p_category: r.category, p_limit: 3,
+      });
+      // L1.5 — pull last 10 user_memory entries (lessons from rejections).
+      const { data: memories } = await supabase
+        .from("user_memory")
+        .select("kind, signal")
+        .eq("user_id", r.user_id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+
       const { reply, confidence: rawConfidence, reason } = await generateReply(
         r.subject, r.body_preview, r.from_addr, r.category,
+        (examples as Array<{ subject: string | null; reply_body: string | null }>) ?? [],
+        (memories as Array<{ kind: string; signal: string }>) ?? [],
       );
 
       if (!reply || reply.trim() === "") {
