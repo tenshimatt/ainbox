@@ -128,6 +128,25 @@ async function generateReply(
 }
 
 /**
+ * AINBOX-52 — Quality L2: returns true when the greeting names a specific
+ * person who is NOT the receiving user. Only fires when a name can be
+ * positively extracted; generic greetings ("Hi there") pass through.
+ */
+function greetingNamesOther(preview: string | null, fullName: string | null): boolean {
+  if (!preview || !fullName) return false;
+  const first = fullName.trim().split(/\s+/)[0]?.toLowerCase();
+  if (!first || first.length < 2) return false;
+  const m = preview.match(
+    /(?:^|\n|\s)(hi|hello|hey|dear|good (?:morning|afternoon|evening))[ ,]+([\w]+)/i,
+  );
+  if (!m) return false;
+  const greeted = m[2].toLowerCase();
+  const generic = new Set(["there", "all", "team", "everyone", "folks", "sir", "madam", "friend"]);
+  if (generic.has(greeted)) return false;
+  return greeted !== first && greeted !== fullName.toLowerCase();
+}
+
+/**
  * L1.11 name-match: does the body greeting contain the user's first name?
  * Greedy regex on common greeting forms — Hi / Hey / Hello / Dear / Good morning, etc.
  */
@@ -185,6 +204,20 @@ serve(async (req: Request) => {
         .maybeSingle();
       const fullName = (profile as { full_name?: string } | null)?.full_name ?? null;
       const userEmail = (profile as { email?: string } | null)?.email ?? null;
+
+      // AINBOX-52 — Quality L2: hard-skip when greeting names someone else.
+      if (greetingNamesOther(r.body_preview, fullName)) {
+        await supabase.from("drafts").insert({
+          user_id: r.user_id,
+          email_id: r.id,
+          reply_body: "[hard-skip] greeting addresses someone other than the user",
+          confidence: 0,
+          status: "rejected",
+          model: MODEL,
+        });
+        out.skipped += 1;
+        continue;
+      }
 
       // Compute soft signals BEFORE the model call.
       const signals = {
