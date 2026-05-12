@@ -84,6 +84,8 @@ export interface PersistedMessageRow {
   subject_hash: string | null;
   /** Encrypted body — NEVER plaintext. */
   body_encrypted: string;
+  /** First ~400 chars of body, plaintext, used as prompt context. */
+  body_preview: string | null;
   size_bytes: number;
   label_ids: string[];
   received_at: string | null;
@@ -266,6 +268,9 @@ function rowFromMessage(userId: string, message: gmail_v1.Schema$Message): Persi
     subject: subject ?? null,
     subject_hash: hashSubject(subject),
     body_encrypted: encryptForUser(userId, body),
+    body_preview: body
+      ? body.replace(/\s+/g, ' ').trim().slice(0, 400)
+      : null,
     size_bytes: message.sizeEstimate ?? 0,
     label_ids: labelIds,
     received_at: internalDate ? new Date(Number(internalDate)).toISOString() : null,
