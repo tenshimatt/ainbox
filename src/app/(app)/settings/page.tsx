@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { SKILLS_LIBRARY, type Skill } from '@/lib/skills/skills';
 
 type Provider = {
   id: string;
@@ -11,9 +12,18 @@ type Provider = {
   connectedAt: string;
 };
 
+type SkillRow = Skill & { enabled: boolean };
+
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<'providers' | 'account'>('providers');
+  const [activeTab, setActiveTab] = useState<'providers' | 'skills' | 'account'>('providers');
   const [providers, setProviders] = useState<Provider[]>([]);
+  const [skills, setSkills] = useState<SkillRow[]>(() =>
+    SKILLS_LIBRARY.map((s) => ({ ...s, enabled: false })),
+  );
+  const [skillsSaving, setSkillsSaving] = useState(false);
+  const [skillsMessage, setSkillsMessage] = useState<string | null>(null);
+  const [skillsError, setSkillsError] = useState<string | null>(null);
+
   useEffect(() => {
     (async () => {
       const r = await fetch('/api/oauth/tokens', { credentials: 'include' });
@@ -23,6 +33,58 @@ export default function SettingsPage() {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetch('/api/skills', { credentials: 'include' });
+        if (!r.ok) return;
+        const data = (await r.json()) as { skills: SkillRow[] };
+        if (cancelled || !Array.isArray(data.skills)) return;
+        const incoming = new Map(data.skills.map((s) => [s.id, s.enabled]));
+        setSkills(SKILLS_LIBRARY.map((s) => ({ ...s, enabled: incoming.get(s.id) ?? false })));
+      } catch {
+        // best-effort — default to all disabled
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleSkillToggle = (skillId: string) => {
+    setSkills((prev) =>
+      prev.map((s) => (s.id === skillId ? { ...s, enabled: !s.enabled } : s)),
+    );
+    setSkillsMessage(null);
+    setSkillsError(null);
+  };
+
+  const handleSkillsSave = async () => {
+    setSkillsSaving(true);
+    setSkillsMessage(null);
+    setSkillsError(null);
+    try {
+      const resp = await fetch('/api/skills', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ skills: skills.map((s) => ({ skill_id: s.id, enabled: s.enabled })) }),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        setSkillsError((data as { error?: string }).error ?? `Save failed (${resp.status})`);
+      } else {
+        setSkillsMessage('Saved.');
+      }
+    } catch (e) {
+      setSkillsError(e instanceof Error ? e.message : 'Save failed');
+    } finally {
+      setSkillsSaving(false);
+    }
+  };
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [disconnectConfirm, setDisconnectConfirm] = useState<string | null>(null);
 
@@ -67,6 +129,7 @@ export default function SettingsPage() {
           <nav className="-mb-px flex gap-6" role="tablist">
             {[
               { id: 'providers' as const, label: 'Providers' },
+              { id: 'skills' as const, label: 'Skills' },
               { id: 'account' as const, label: 'Account' },
             ].map((tab) => (
               <button
@@ -141,6 +204,68 @@ export default function SettingsPage() {
                 Connect Microsoft
               </a>
             </div>
+          </div>
+        )}
+
+        {/* Skills tab */}
+        {activeTab === 'skills' && (
+          <div className="mt-6 space-y-4">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-700">Writing Skills</h2>
+              <p className="mt-1 text-xs text-slate-500">
+                Toggle the writing behaviours you want applied to every AI-drafted reply.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {skills.map((skill) => (
+                <div
+                  key={skill.id}
+                  data-testid="skill-row"
+                  className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4"
+                >
+                  <div className="flex-1 pr-4">
+                    <p className="text-sm font-medium text-slate-900">{skill.label}</p>
+                    <p className="text-xs text-slate-500">{skill.description}</p>
+                  </div>
+                  <button
+                    role="switch"
+                    aria-checked={skill.enabled}
+                    aria-label={`Toggle ${skill.label}`}
+                    data-testid={`skill-toggle-${skill.id}`}
+                    onClick={() => handleSkillToggle(skill.id)}
+                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+                      skill.enabled ? 'bg-slate-900' : 'bg-slate-200'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ${
+                        skill.enabled ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {skillsError && (
+              <p className="text-sm text-red-600" role="alert">
+                {skillsError}
+              </p>
+            )}
+            {skillsMessage && (
+              <p className="text-sm text-green-600" role="status">
+                {skillsMessage}
+              </p>
+            )}
+
+            <button
+              onClick={handleSkillsSave}
+              disabled={skillsSaving}
+              className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+            >
+              {skillsSaving ? 'Saving…' : 'Save skills'}
+            </button>
           </div>
         )}
 

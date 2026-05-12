@@ -33,6 +33,35 @@ function extractJson(s: string): ReplyJson {
   };
 }
 
+// L4 — skills: stable skill definitions mirrored from src/lib/skills/skills.ts.
+// Keep in sync with that file when adding/removing skills.
+const SKILLS_MAP: Record<string, string> = {
+  formal_tone:
+    'Use formal language throughout. Greet with "Dear [Name]" and close with "Kind regards" or "Sincerely".',
+  concise_replies:
+    "Keep the reply to 2-3 sentences maximum. Cut every filler phrase.",
+  bullet_structure:
+    "When addressing more than one point, use a short bulleted list rather than run-on sentences.",
+  empathy_opening:
+    'Open with a brief empathetic acknowledgement (e.g. "Thanks for reaching out — ") before the substance.',
+  next_step_close:
+    "Always close with one clear next step or call to action (e.g. \"Let me know if [X]\" or \"I'll follow up by [date]\").",
+  no_sign_off:
+    "Do not include any closing salutation or signature line — end at the last substantive sentence.",
+};
+
+function buildSkillsBlock(enabledIds: string[]): string {
+  if (enabledIds.length === 0) return "";
+  const instructions = enabledIds
+    .map((id) => SKILLS_MAP[id])
+    .filter((i): i is string => typeof i === "string" && i.length > 0);
+  if (instructions.length === 0) return "";
+  return (
+    "\n\nWriting style rules the user has enabled — follow these strictly:\n" +
+    instructions.map((i) => `- ${i}`).join("\n")
+  );
+}
+
 async function generateReply(
   subject: string | null,
   preview: string | null,
@@ -41,6 +70,7 @@ async function generateReply(
   examples: Array<{ subject: string | null; reply_body: string | null }>,
   memories: Array<{ kind: string; signal: string }>,
   voicePrompt: string | null,
+  skills: string[],
 ): Promise<ReplyJson> {
   // L3 — few-shot: inject the user's most-recently-approved replies in this category.
   const examplesBlock =
@@ -61,6 +91,8 @@ async function generateReply(
     voicePrompt
       ? `\\n\\nThis user's personal writing voice (apply to every reply):\\n${voicePrompt.slice(0, 400)}`
       : "";
+  // L4 — skills: user-configured writing behaviour rules.
+  const skillsBlock = buildSkillsBlock(skills);
 
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -84,7 +116,8 @@ async function generateReply(
         'Output ONLY JSON: {"reply":"<text or null>","confidence":0..1,"reason":"<short>"}. No prose.' +
         voiceBlock +
         examplesBlock +
-        memoryBlock,
+        memoryBlock +
+        skillsBlock,
       messages: [{ role: "user", content: JSON.stringify({ from, subject: subject ?? "", preview: preview ?? "", category }) }],
     }),
   });
@@ -181,12 +214,20 @@ serve(async (req: Request) => {
         .eq("user_id", r.user_id)
         .maybeSingle();
       const voicePrompt = (voiceRow as { voice_prompt?: string } | null)?.voice_prompt ?? null;
+      // L4 — pull enabled skills for this user.
+      const { data: userSkillRows } = await supabase
+        .from("user_skills")
+        .select("skill_id")
+        .eq("user_id", r.user_id)
+        .eq("enabled", true);
+      const enabledSkills = (userSkillRows ?? []).map((s: { skill_id: string }) => s.skill_id);
 
       const { reply, confidence: rawConfidence, reason } = await generateReply(
         r.subject, r.body_preview, r.from_addr, r.category,
         (examples as Array<{ subject: string | null; reply_body: string | null }>) ?? [],
         (memories as Array<{ kind: string; signal: string }>) ?? [],
         voicePrompt,
+        enabledSkills,
       );
 
       if (!reply || reply.trim() === "") {
