@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { OnboardingStepper } from '@/components/onboarding/OnboardingStepper';
 
 const SYNC_STEPS = [
   { id: 'connecting', label: 'Connecting to provider' },
@@ -112,6 +113,7 @@ export default function SyncPage() {
   return (
     <main className="flex min-h-screen flex-col bg-slate-50">
       <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-12 sm:px-6">
+        <OnboardingStepper currentStep={1} />
         <div className="text-center">
           <h1 className="text-2xl font-bold text-slate-900">Syncing your email</h1>
           <p className="mt-2 text-sm text-slate-500">

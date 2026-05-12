@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { KB_ITEM_TYPES, type KbItemType } from '@/lib/kb/extract';
+import { OnboardingStepper } from '@/components/onboarding/OnboardingStepper';
 
 interface KbItemRow {
   id: string;
@@ -156,6 +157,7 @@ export default function Page() {
 
   return (
     <main className="container mx-auto px-4 py-12 max-w-3xl">
+      <OnboardingStepper currentStep={2} />
       <h1 className="text-2xl font-bold">Knowledge base review</h1>
       <p className="mt-2 text-sm text-gray-600">
         Confirm what we learned from your inbox. Items you approve will be used to draft replies in your voice.
