@@ -31,6 +31,14 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // Allow Playwright e2e tests to bypass auth in non-production environments.
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    req.headers.get('x-e2e-test-bypass-auth') === 'true'
+  ) {
+    return NextResponse.next();
+  }
+
   const res = NextResponse.next();
   const supabase = getMiddlewareSupabase(req, res);
 
