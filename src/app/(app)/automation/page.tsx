@@ -33,6 +33,27 @@ interface CategoryRow {
 
 const FLOOR = 0.85;
 
+// Confidence threshold presets (AINBOX-58).
+// Permissive = floor; Balanced = mid; Strict = high.
+export const PRESETS = {
+  permissive: { label: 'Permissive', threshold: 0.85, description: 'Send when confidence ≥ 85% — highest volume.' },
+  balanced:   { label: 'Balanced',   threshold: 0.90, description: 'Send when confidence ≥ 90% — recommended.' },
+  strict:     { label: 'Strict',     threshold: 0.95, description: 'Send when confidence ≥ 95% — lowest risk.' },
+} as const;
+
+export type PresetKey = keyof typeof PRESETS;
+
+/** Returns the matching preset key if ALL rows share the same threshold, else null. */
+export function detectPreset(rows: CategoryRow[]): PresetKey | null {
+  if (rows.length === 0) return null;
+  const t = rows[0].threshold;
+  if (!rows.every((r) => r.threshold === t)) return null;
+  for (const [key, p] of Object.entries(PRESETS) as [PresetKey, (typeof PRESETS)[PresetKey]][]) {
+    if (p.threshold === t) return key;
+  }
+  return null;
+}
+
 export default function AutomationPage() {
   const [rows, setRows] = useState<CategoryRow[]>(() =>
     CATEGORIES.map((c) => ({ category: c, enabled: false, threshold: FLOOR })),
@@ -121,6 +142,40 @@ export default function AutomationPage() {
         <strong>{FLOOR}</strong> (cannot be lowered). Drafts are dispatched
         after a 60-second cooling delay so you can intercept from the inbox.
       </p>
+
+      {/* Preset selector — AINBOX-58 */}
+      <div className="mb-6">
+        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Quick presets</p>
+        <div className="flex flex-wrap gap-3" role="group" aria-label="Confidence threshold presets">
+          {(Object.entries(PRESETS) as [PresetKey, (typeof PRESETS)[PresetKey]][]).map(([key, preset]) => {
+            const active = !loading && detectPreset(rows) === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                data-testid={`preset-${key}`}
+                aria-pressed={active}
+                disabled={loading}
+                onClick={() =>
+                  setRows((prev) =>
+                    prev.map((r) => ({ ...r, threshold: preset.threshold })),
+                  )
+                }
+                className={`flex flex-col items-start rounded-lg border px-4 py-3 text-left transition-colors disabled:opacity-40 ${
+                  active
+                    ? 'border-slate-900 bg-slate-900 text-white'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-400'
+                }`}
+              >
+                <span className="text-sm font-semibold">{preset.label}</span>
+                <span className={`mt-0.5 text-xs ${active ? 'text-slate-300' : 'text-slate-500'}`}>
+                  {preset.description}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {loading ? (
         <p className="text-sm text-gray-500">Loading…</p>
