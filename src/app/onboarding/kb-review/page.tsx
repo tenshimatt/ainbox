@@ -352,10 +352,9 @@ export default function Page() {
                         ) : (
                           <p className="text-sm break-words">{it.content}</p>
                         )}
-                        <p className="mt-1 text-xs text-gray-500">
-                          confidence {(it.confidence * 100).toFixed(0)}%
-                          {it.human_verified ? ' · verified' : ''}
-                        </p>
+                        {it.human_verified && (
+                          <p className="mt-1 text-xs text-gray-500">verified</p>
+                        )}
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {isEditing ? (

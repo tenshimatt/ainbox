@@ -5,11 +5,11 @@ import Link from 'next/link';
 import { OnboardingStepper } from '@/components/onboarding/OnboardingStepper';
 
 const SYNC_STEPS = [
-  { id: 'connecting', label: 'Connecting to provider' },
-  { id: 'fetching', label: 'Fetching email metadata' },
-  { id: 'classifying', label: 'Classifying emails' },
-  { id: 'extracting', label: 'Extracting knowledge' },
-  { id: 'complete', label: 'Sync complete' },
+  { id: 'connecting', label: 'Getting started' },
+  { id: 'fetching', label: 'Reading your emails' },
+  { id: 'classifying', label: 'Organizing what we found' },
+  { id: 'extracting', label: 'Building your assistant' },
+  { id: 'complete', label: 'All set!' },
 ];
 
 type Counts = { synced: number; classified: number; drafts: number; kb: number };
@@ -125,9 +125,8 @@ export default function SyncPage() {
         <div className="mt-10" data-testid="sync-progress" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
           <div className="flex items-center justify-between text-sm">
             <span className="font-medium text-slate-700">
-              {syncStatus === 'complete' ? 'Sync complete' : `${progress}% complete`}
+              {syncStatus === 'complete' ? 'Sync complete' : 'In progress…'}
             </span>
-            <span className="text-slate-500">{progress}%</span>
           </div>
           <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-slate-200">
             <div
@@ -139,24 +138,6 @@ export default function SyncPage() {
           </div>
         </div>
 
-        {/* Live counters — what's actually happening on the backend */}
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4" data-testid="sync-counters">
-          {([
-            { k: 'synced',     label: 'Synced',       v: counts.synced,     accent: 'blue' },
-            { k: 'classified', label: 'Classified',   v: counts.classified, accent: 'indigo' },
-            { k: 'drafts',     label: 'Drafts ready', v: counts.drafts,     accent: 'amber' },
-            { k: 'kb',         label: 'KB items',     v: counts.kb,         accent: 'emerald' },
-          ] as const).map((c) => (
-            <div key={c.k} className="rounded-lg border border-slate-200 bg-white px-3 py-3">
-              <div className="text-2xl font-bold tabular-nums text-slate-900">
-                {c.v.toLocaleString()}
-              </div>
-              <div className="mt-0.5 text-xs uppercase tracking-wider text-slate-500">
-                {c.label}
-              </div>
-            </div>
-          ))}
-        </div>
 
         {/* Steps */}
         <div className="mt-8 space-y-4">
@@ -206,22 +187,6 @@ export default function SyncPage() {
           ))}
         </div>
 
-        {/* Batch events */}
-        <div className="mt-8 rounded-lg border border-slate-200 bg-white p-4">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Sync events
-          </h3>
-          <div className="mt-2 max-h-40 space-y-1 overflow-y-auto">
-            {batchEvents.map((event, idx) => (
-              <p key={idx} className="text-xs text-slate-600">
-                {event}
-              </p>
-            ))}
-            {syncStatus === 'in-progress' && batchEvents.length === 0 && (
-              <p className="text-xs text-slate-400">Waiting to start...</p>
-            )}
-          </div>
-        </div>
 
         {/* CTA */}
         <div className="mt-8 text-center">
