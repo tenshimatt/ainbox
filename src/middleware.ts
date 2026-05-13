@@ -31,6 +31,15 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // E2E test bypass: allows Playwright to navigate protected routes without a
+  // real Supabase session. Only active outside of production.
+  if (process.env.NODE_ENV !== 'production') {
+    const bypass = req.cookies.get('__e2e_auth_bypass__');
+    if (bypass?.value === 'true') {
+      return NextResponse.next();
+    }
+  }
+
   const res = NextResponse.next();
   const supabase = getMiddlewareSupabase(req, res);
 
