@@ -1,7 +1,7 @@
 /**
  * POST /api/drafts/[id]/edit
  *
- * AINBOX-36 — user edited the draft body before approving. Updates
+ * TASKRESPONSE-36 — user edited the draft body before approving. Updates
  * drafts.reply_body and inserts a draft_feedback row with the diff so
  * later layers can mine tone-substitution patterns.
  *

@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
  * /drafts — Approval queue (PRD §5.3, §7.11).
  *
  * Server component shell; the client `<DraftQueue>` fetches `/api/drafts`
- * (AINBOX-10) on mount, renders sorted by confidence DESC, then created_at DESC,
+ * (TASKRESPONSE-10) on mount, renders sorted by confidence DESC, then created_at DESC,
  * and stays in sync via Supabase Realtime. Approve/Reject/Edit buttons live in
  * <DraftRow>. Keyboard shortcuts j/k/a/r per PRD §8.3.
  */

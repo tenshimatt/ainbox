@@ -1,9 +1,9 @@
 /**
  * POST /api/drafts/[id]/approve
  *
- * AINBOX-11 (UI wiring) + AINBOX-36 (L1 feedback capture).
+ * TASKRESPONSE-11 (UI wiring) + TASKRESPONSE-36 (L1 feedback capture).
  *
- * Marks the draft 'approved'. The auto-send executor cron (AINBOX-31)
+ * Marks the draft 'approved'. The auto-send executor cron (TASKRESPONSE-31)
  * sends approved drafts past their cooling window. Captures a
  * draft_feedback row for personalization mining.
  */

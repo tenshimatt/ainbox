@@ -1,5 +1,5 @@
 /**
- * AINBOX-19: email-sync-gmail edge-function handler — feature spec.
+ * TASKRESPONSE-19: email-sync-gmail edge-function handler — feature spec.
  *
  * PRD anchors: §3.8, §4.2, §4.3, §7.3, §7.5.
  *
@@ -14,7 +14,7 @@
  *     - `handleGmailSync` result shape and delegation to the worker.
  *     - Error path: missing refresh token.
  *
- *   Fixture addresses use `@ainbox.test` TLD per factory-rules.md hard rule #8.
+ *   Fixture addresses use `@taskresponse.test` TLD per factory-rules.md hard rule #8.
  */
 
 import { test, expect } from '@playwright/test';
@@ -33,7 +33,7 @@ import type {
 } from '../../src/lib/sync/gmail';
 
 // Stable fixture master key — never real, 32 bytes.
-process.env.AINBOX_ENC_MASTER_KEY ??= Buffer.alloc(32, 0x42).toString('base64');
+process.env.TASKRESPONSE_ENC_MASTER_KEY ??= Buffer.alloc(32, 0x42).toString('base64');
 
 // ---------------------------------------------------------------------------
 // Helpers: minimal GmailLikeClient mock
@@ -49,8 +49,8 @@ function synthMessage(i: number) {
     labelIds: i % 3 === 0 ? ['SENT'] : ['INBOX'],
     payload: {
       headers: [
-        { name: 'From', value: `from-${i}@ainbox.test` },
-        { name: 'To', value: 'inbox@ainbox.test' },
+        { name: 'From', value: `from-${i}@taskresponse.test` },
+        { name: 'To', value: 'inbox@taskresponse.test' },
         { name: 'Subject', value: `Edge synth subject ${i}` },
       ],
       body: { data: Buffer.from(`Edge synth body ${i}`, 'utf8').toString('base64url') },
@@ -148,7 +148,7 @@ const noopSleep = async () => {};
 // Tests
 // ---------------------------------------------------------------------------
 
-test.describe('@feature AINBOX-19 email-sync-gmail edge handler', () => {
+test.describe('@feature TASKRESPONSE-19 email-sync-gmail edge handler', () => {
 
   test('§7.3 backfill mode selected when no prior sync state', async () => {
     const userId = 'edge-user-001';

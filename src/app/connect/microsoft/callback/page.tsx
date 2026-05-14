@@ -19,7 +19,7 @@
  *   ms-callback-error      — any failure; contains error text + recovery button
  *
  * PRD §4.2 (OAuth token storage) · §5.2 (Onboarding) · §7.2 (Microsoft OAuth)
- * AINBOX-18
+ * TASKRESPONSE-18
  */
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';

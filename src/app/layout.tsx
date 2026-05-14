@@ -1,7 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 export const metadata: Metadata = {
-  title: 'Ainbox',
+  title: 'TaskResponse',
   description: 'AI inbox operations — Gmail / Outlook drafting + classification',
 };
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -9,7 +9,7 @@ Pandomagic's three human gates (`prd`, `plan`, `pr`) exist to catch
 scope and security mistakes before they ship. They cost human attention,
 which is the bottleneck for MVP velocity.
 
-For Ainbox MVP, Matt explicitly authorised running the harness in
+For TaskResponse MVP, Matt explicitly authorised running the harness in
 **dark-factory mode**: gates auto-approve, halts still apply on hard
 failures, security review will be revisited iteratively *with the
 human* after each MVP milestone.

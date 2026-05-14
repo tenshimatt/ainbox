@@ -1,6 +1,6 @@
 /**
  * POST /api/edge/draft
- * AINBOX-22 — Generate an AI draft reply via LiteLLM for the authenticated user.
+ * TASKRESPONSE-22 — Generate an AI draft reply via LiteLLM for the authenticated user.
  *
  * PRD: §7.10 Reply drafting
  *
@@ -12,7 +12,7 @@
  * 3. Returns { ok, draft_id, confidence, retrieval_score, generation_score,
  *              kb_items_used, created_at }.
  *
- * Thresholding (auto-send ≥ 0.85) is enforced downstream by AINBOX-12.
+ * Thresholding (auto-send ≥ 0.85) is enforced downstream by TASKRESPONSE-12.
  */
 
 import { NextResponse } from 'next/server';

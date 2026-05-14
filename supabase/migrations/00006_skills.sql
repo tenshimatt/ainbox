@@ -1,4 +1,4 @@
--- AINBOX-46 / Personalization L4 — user_skills table
+-- TASKRESPONSE-46 / Personalization L4 — user_skills table
 -- Stores per-user skill-toggle state. Skill definitions (labels, descriptions,
 -- prompt instructions) live in src/lib/skills/skills.ts; only the ids live here.
 

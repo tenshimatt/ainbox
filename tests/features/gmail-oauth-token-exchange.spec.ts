@@ -1,5 +1,5 @@
 /**
- * AINBOX-17 — Gmail API OAuth: real token exchange + refresh.
+ * TASKRESPONSE-17 — Gmail API OAuth: real token exchange + refresh.
  *
  * PRD: §4.2 (OAuth token storage) · §7.1 (Provider OAuth — Google)
  *
@@ -19,7 +19,7 @@
  *
  *   page.route() intercepts the /api/oauth/gmail/tokens Next.js route call.
  *
- * Fixtures: @ainbox.test domain (factory-rules.md hard rule #8).
+ * Fixtures: @taskresponse.test domain (factory-rules.md hard rule #8).
  */
 
 import { test, expect, type Route } from '@playwright/test';
@@ -29,8 +29,8 @@ import { SYNTH_USER_GOOGLE } from '../fixtures/users';
 const APP_ORIGIN = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3001';
 const TOKEN_ENDPOINT = `${APP_ORIGIN}/api/oauth/gmail/tokens`;
 
-const SYNTH_GMAIL_REFRESH = 'synth-gmail-refresh-ainbox17';
-const SYNTH_GMAIL_ACCESS = 'synth-gmail-access-ainbox17';
+const SYNTH_GMAIL_REFRESH = 'synth-gmail-refresh-taskresponse17';
+const SYNTH_GMAIL_ACCESS = 'synth-gmail-access-taskresponse17';
 
 /**
  * Inject a Supabase mock into the browser via window.__SUPABASE_MOCK__ BEFORE any
@@ -109,7 +109,7 @@ async function injectSupabaseMock(
   );
 }
 
-test.describe('@features AINBOX-17 Gmail OAuth token exchange + refresh', () => {
+test.describe('@features TASKRESPONSE-17 Gmail OAuth token exchange + refresh', () => {
   test('§4.1 /api/oauth/gmail/tokens endpoint requires authentication', async ({ page }) => {
     // Direct unauthenticated request must be rejected (§4.1 tenant isolation).
     const resp = await page.request.post(`${APP_ORIGIN}/api/oauth/gmail/tokens`, {
@@ -139,7 +139,7 @@ test.describe('@features AINBOX-17 Gmail OAuth token exchange + refresh', () => 
     });
 
     // ?code= triggers the PKCE exchange; our patched fetch returns a session with tokens.
-    await page.goto('/connect/google/callback?code=synth-code-ainbox17');
+    await page.goto('/connect/google/callback?code=synth-code-taskresponse17');
     await page.waitForURL(/\/onboarding\/sync/, { timeout: 12_000 });
     expect(page.url()).toContain('/onboarding/sync');
 

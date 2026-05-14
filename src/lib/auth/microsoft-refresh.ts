@@ -1,5 +1,5 @@
 /**
- * AINBOX-18 — Microsoft Graph OAuth: real token exchange + refresh
+ * TASKRESPONSE-18 — Microsoft Graph OAuth: real token exchange + refresh
  *
  * PRD §4.2 OAuth token storage — refresh tokens stored encrypted; access tokens
  *          minted in-memory only and never persisted.
@@ -49,7 +49,7 @@ export interface RefreshResult {
  * Exchange an encrypted stored refresh token for a fresh Microsoft access token.
  *
  * @param encryptedRefreshToken - Ciphertext from `oauth_tokens.encrypted_refresh_token`
- * @param userId - Auth user ID (bound as AAD in AINBOX-5 crypto)
+ * @param userId - Auth user ID (bound as AAD in TASKRESPONSE-5 crypto)
  */
 export async function refreshMicrosoftToken(
   encryptedRefreshToken: string,

@@ -1,5 +1,5 @@
 /**
- * AINBOX-35 — Test Layer C: real test accounts + OAuth token replay (Google)
+ * TASKRESPONSE-35 — Test Layer C: real test accounts + OAuth token replay (Google)
  *
  * Layer C exercises the OAuth callback + token storage pipeline with real
  * provider token values rather than synthetic constants. Token values are
@@ -8,7 +8,7 @@
  *
  * How token replay works:
  *   The existing window.__SUPABASE_MOCK__ infrastructure (established in
- *   AINBOX-17) fires SIGNED_IN with a synthesised session object. Layer C
+ *   TASKRESPONSE-17) fires SIGNED_IN with a synthesised session object. Layer C
  *   reuses this exact mechanism but substitutes real token strings from env
  *   vars, so the callback page and storage endpoints are exercised with
  *   tokens that have the correct real-world format (length, prefix, entropy).
@@ -44,7 +44,7 @@ function hasLayerCGoogle(): boolean {
 
 /**
  * Inject Layer C Google tokens into window.__SUPABASE_MOCK__ BEFORE any
- * page scripts run. Uses the same mechanism as AINBOX-17's injectSupabaseMock
+ * page scripts run. Uses the same mechanism as TASKRESPONSE-17's injectSupabaseMock
  * but with real token values sourced from env vars.
  *
  * getBrowserSupabase() returns this mock (in non-production builds) so the
@@ -123,7 +123,7 @@ async function injectRealGoogleTokens(
 // Layer C — Google OAuth token replay tests
 // ---------------------------------------------------------------------------
 
-test.describe('@layer-c AINBOX-35 Google OAuth token replay', () => {
+test.describe('@layer-c TASKRESPONSE-35 Google OAuth token replay', () => {
   test('infrastructure: Layer C skips gracefully when env vars are absent', () => {
     // Documents and verifies the skip mechanism itself. Always passes.
     // When LAYER_C_ENABLED is not set, real-token tests are not executed —
@@ -240,7 +240,7 @@ test.describe('@layer-c AINBOX-35 Google OAuth token replay', () => {
     // Real token must not be a synthetic stub value from other test specs.
     expect(capturedRefresh).not.toContain('synth-');
     expect(capturedRefresh).not.toContain('fixture-');
-    expect(capturedRefresh).not.toContain('ainbox17');
+    expect(capturedRefresh).not.toContain('taskresponse17');
     // Must be non-trivial length.
     expect(capturedRefresh?.length).toBeGreaterThan(40);
   });

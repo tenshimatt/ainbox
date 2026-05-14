@@ -1,5 +1,5 @@
 /**
- * AINBOX-10 — Reply drafting + confidence scoring
+ * TASKRESPONSE-10 — Reply drafting + confidence scoring
  *
  * PRD: §4.4 Confidence model
  *      §7.10 Reply drafting
@@ -73,7 +73,7 @@ function makeDeps(opts: {
   };
 }
 
-test.describe('@feature AINBOX-10 reply drafting', () => {
+test.describe('@feature TASKRESPONSE-10 reply drafting', () => {
   test('§7.10 draftReply returns body, scores, and kb_items_used', async () => {
     const calls: SearchKbCall[] = [];
     const deps = makeDeps({ generationScore: 0.7, searchCalls: calls });
@@ -163,7 +163,7 @@ test.describe('@feature AINBOX-10 reply drafting', () => {
   });
 });
 
-test.describe('@feature AINBOX-10 createProviderDraft placeholder', () => {
+test.describe('@feature TASKRESPONSE-10 createProviderDraft placeholder', () => {
   test('returns a placeholder id with the correct provider', async () => {
     const out = await createProviderDraft('user-abc12345', 'gmail', 'hi');
     expect(out.provider).toBe('gmail');

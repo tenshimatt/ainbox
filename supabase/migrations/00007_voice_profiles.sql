@@ -1,4 +1,4 @@
--- AINBOX-47 / Personalization L5 — voice_profiles table
+-- TASKRESPONSE-47 / Personalization L5 — voice_profiles table
 -- Stores per-user synthesised voice prompt (200-word style guide)
 -- rebuilt nightly from verified KB items + approved drafts.
 CREATE TABLE IF NOT EXISTS public.voice_profiles (

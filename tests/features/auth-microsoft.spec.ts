@@ -1,5 +1,5 @@
 /**
- * AINBOX-3 — Microsoft 365 OAuth sign-in flow
+ * TASKRESPONSE-3 — Microsoft 365 OAuth sign-in flow
  *
  * PRD §3.9 Auth stack (Supabase Auth + Azure)
  * PRD §4.1 Tenant isolation
@@ -13,7 +13,7 @@
  *   2. /connect/microsoft/callback handles the redirect — happy path
  *      pushes the user to /onboarding/sync, deny path shows recovery UI.
  *
- * Network is fully mocked. Synthesised @ainbox.test fixtures only —
+ * Network is fully mocked. Synthesised @taskresponse.test fixtures only —
  * no real email content, no real refresh tokens. Honors CLAUDE.md
  * hard rule #6 + factory-rules.md fixture rules.
  */
@@ -21,7 +21,7 @@
 import { test, expect, type Route } from '@playwright/test';
 
 // All synthesised — never a real address. CLAUDE.md hard rule #6.
-const FIXTURE_USER_EMAIL = 'ms-fixture@ainbox.test';
+const FIXTURE_USER_EMAIL = 'ms-fixture@taskresponse.test';
 const FIXTURE_AUTH_CODE = 'fixture-ms-code-not-a-real-token';
 const FAKE_MS_LOGIN = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize?fixture=1';
 

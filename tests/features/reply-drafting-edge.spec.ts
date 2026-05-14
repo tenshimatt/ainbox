@@ -1,5 +1,5 @@
 /**
- * AINBOX-29 — §7.10 Reply drafting (edge function)
+ * TASKRESPONSE-29 — §7.10 Reply drafting (edge function)
  *
  * PRD: §7.10 Reply drafting
  *      §4.4  Confidence model
@@ -81,7 +81,7 @@ function makeDeps(overrides: Partial<HandlerDeps> = {}): HandlerDeps {
 
 // ---- Tests --------------------------------------------------------------
 
-test.describe('@feature AINBOX-29 §7.10 reply drafting edge function', () => {
+test.describe('@feature TASKRESPONSE-29 §7.10 reply drafting edge function', () => {
   // -- HTTP method --------------------------------------------------------
 
   test('OPTIONS preflight returns 200 with CORS headers', async () => {

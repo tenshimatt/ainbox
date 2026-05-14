@@ -1,4 +1,4 @@
-# Ainbox — Architecture pyramid (L1–L5)
+# TaskResponse — Architecture pyramid (L1–L5)
 
 > Used by the Pandomagic classifier node to decide the workflow lane
 > for an incoming feature request. Each level lists examples and the

@@ -1,12 +1,12 @@
-# Ainbox — Mission
+# TaskResponse — Mission
 
 > **Loaded into every Archon workflow context.** Don't bloat. If a thing
 > doesn't help an autonomous agent decide whether to build something,
 > it doesn't belong in this file. Detail goes in `docs/prd.md` (the PRD).
 
-## What Ainbox is
+## What TaskResponse is
 
-Ainbox is an AI-powered email operations platform. It connects to a user's
+TaskResponse is an AI-powered email operations platform. It connects to a user's
 Gmail or Outlook inbox, ingests recent communication history, builds a
 contextual business knowledge base in a vector store, classifies inbound
 email, and drafts replies in the user's own voice — gated by confidence
@@ -39,8 +39,8 @@ and does it for you."**
 - **Crypto / token economies / NFTs** — explicit no, multi-product rule
 - **Generic chat** — the assistant only operates on the user's inbox; no free-roaming AI
 - **Cross-tenant data sharing** — tenants are isolated end-to-end; no aggregated insights across users
-- **Marketing email blast features** — Ainbox is for operations, not outbound marketing
-- **Calendar booking / CRM-as-replacement** — hooks may be added (V2), but Ainbox is not a calendar or CRM
+- **Marketing email blast features** — TaskResponse is for operations, not outbound marketing
+- **Calendar booking / CRM-as-replacement** — hooks may be added (V2), but TaskResponse is not a calendar or CRM
 - **Voice/phone integrations** — V3 territory at earliest
 - **Generative image / content tooling** unrelated to inbox replies
 - **Auto-send at low confidence** — non-negotiable; even with explicit user opt-in, low-confidence drafts never auto-send
@@ -72,7 +72,7 @@ Rejected tickets get the `archon-failed` label + a comment explaining why.
 
 ## Dark-factory mode
 
-Ainbox runs in **dark-factory mode** by default: the three human gates
+TaskResponse runs in **dark-factory mode** by default: the three human gates
 (`gate-prd`, `gate-plan`, `gate-pr`) auto-approve so the harness runs
 end-to-end without human intervention. Hard failures still halt:
 - Test suite red after 25 implement cycles

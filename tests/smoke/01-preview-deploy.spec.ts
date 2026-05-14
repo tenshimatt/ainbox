@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
  * returns a healthy response and protected routes redirect
  * unauthenticated visitors to /connect.
  *
- * AINBOX-33 §Test-Layer-A
+ * TASKRESPONSE-33 §Test-Layer-A
  */
 
 test.describe('@smoke preview-deploy', () => {

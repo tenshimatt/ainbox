@@ -2,7 +2,7 @@
  * kb-extract edge function — Anthropic Claude Sonnet 4.6.
  * Mines sent mail for durable KB items, upserts kb_items. pg_cron every 5 min.
  *
- * AINBOX-51: Before inserting, compute the item's embedding via LiteLLM and
+ * TASKRESPONSE-51: Before inserting, compute the item's embedding via LiteLLM and
  * call kb_near_duplicate_exists. If an item of the same kb_type with cosine
  * similarity >= 0.9 already exists, skip the insert. Gracefully degrades
  * to exact-content dedup (via upsert conflict) when LITELLM_API_KEY is unset.
@@ -107,7 +107,7 @@ serve(async (req: Request) => {
       for (const it of items) {
         if (!VALID_TYPES.includes(it.kb_type) || typeof it.content !== "string" || !it.content.trim()) continue;
 
-        // AINBOX-51: semantic near-duplicate guard (cosine >= 0.9, same kb_type)
+        // TASKRESPONSE-51: semantic near-duplicate guard (cosine >= 0.9, same kb_type)
         const embedding = await embedText(it.content);
         if (embedding !== null) {
           const { data: isDup } = await supabase.rpc("kb_near_duplicate_exists", {

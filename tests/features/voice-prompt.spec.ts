@@ -1,5 +1,5 @@
 /**
- * AINBOX-47 — Personalization L5: voice prompt synthesis
+ * TASKRESPONSE-47 — Personalization L5: voice prompt synthesis
  *
  * Tests:
  *  A. HTTP-level contract tests via page.route() mocking
@@ -21,7 +21,7 @@ import {
 
 // ── Section A: HTTP-level route contract tests ────────────────────────────
 
-test.describe('@feature AINBOX-47 §X.Y voice-prompt API route', () => {
+test.describe('@feature TASKRESPONSE-47 §X.Y voice-prompt API route', () => {
   test('route exists and returns non-404', async ({ page }) => {
     const resp = await page.request.post('/api/edge/voice-prompt', {
       data: {},
@@ -165,7 +165,7 @@ function makeRequest(opts: { method?: string; token?: string | null; body?: unkn
 
 // ---- Tests ---------------------------------------------------------------
 
-test.describe('@feature AINBOX-47 handler unit tests', () => {
+test.describe('@feature TASKRESPONSE-47 handler unit tests', () => {
   // -- HTTP method ----------------------------------------------------------
 
   test('OPTIONS preflight returns 200 with CORS headers', async () => {

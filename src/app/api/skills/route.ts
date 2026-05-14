@@ -1,7 +1,7 @@
 /**
  * Skills API — GET (list skill states) + PUT (toggle skills).
  *
- * AINBOX-46 / Personalization L4
+ * TASKRESPONSE-46 / Personalization L4
  *
  * GET  /api/skills  → { skills: Array<Skill & { enabled: boolean }> }
  * PUT  /api/skills  → { ok: true, count: number }

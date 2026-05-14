@@ -1,5 +1,5 @@
 /**
- * AINBOX-54 — KB review UX pass: friendly errors, bulk approve, branching empty states
+ * TASKRESPONSE-54 — KB review UX pass: friendly errors, bulk approve, branching empty states
  * PRD: §7.7
  */
 
@@ -47,7 +47,7 @@ function makeListResponse(items: ReturnType<typeof makeItem>[]) {
 
 // ─── Friendly errors ──────────────────────────────────────────────────────────
 
-test.describe('@feature AINBOX-54 friendly error messages', () => {
+test.describe('@feature TASKRESPONSE-54 friendly error messages', () => {
   test('shows friendly message when list API returns 500', async ({ page }) => {
     await page.route('**/api/kb/items', async (route) => {
       await route.fulfill({ status: 500, body: 'Internal Server Error' });
@@ -173,7 +173,7 @@ test.describe('@feature AINBOX-54 friendly error messages', () => {
 
 // ─── Bulk approve ─────────────────────────────────────────────────────────────
 
-test.describe('@feature AINBOX-54 bulk approve', () => {
+test.describe('@feature TASKRESPONSE-54 bulk approve', () => {
   test('Approve all button is visible when unverified items exist', async ({ page }) => {
     const items = [
       makeItem('p1', 'policy', 'Policy A'),
@@ -337,7 +337,7 @@ test.describe('@feature AINBOX-54 bulk approve', () => {
 
 // ─── Branching empty states ──────────────────────────────────────────────────
 
-test.describe('@feature AINBOX-54 branching empty states', () => {
+test.describe('@feature TASKRESPONSE-54 branching empty states', () => {
   test('shows pre-extract empty state before any extraction has run', async ({ page }) => {
     // Return empty items and make extract hang so we can observe the intermediate state
     await page.route('**/api/kb/items', async (route) => {

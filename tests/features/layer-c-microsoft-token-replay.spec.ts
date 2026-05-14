@@ -1,5 +1,5 @@
 /**
- * AINBOX-35 — Test Layer C: real test accounts + OAuth token replay (Microsoft)
+ * TASKRESPONSE-35 — Test Layer C: real test accounts + OAuth token replay (Microsoft)
  *
  * Layer C exercises the Microsoft OAuth callback + token storage pipeline with
  * real provider token values rather than synthetic constants. Token values are
@@ -8,7 +8,7 @@
  *
  * How token replay works:
  *   The existing window.__SUPABASE_MOCK__ infrastructure (established in
- *   AINBOX-18) fires SIGNED_IN with a synthesised session object. Layer C
+ *   TASKRESPONSE-18) fires SIGNED_IN with a synthesised session object. Layer C
  *   reuses this exact mechanism but substitutes real token strings from env
  *   vars, so the callback page and store-tokens endpoint are exercised with
  *   tokens that have the correct real-world format (JWT for access tokens,
@@ -44,7 +44,7 @@ function hasLayerCMicrosoft(): boolean {
 
 /**
  * Inject Layer C Microsoft tokens into window.__SUPABASE_MOCK__ BEFORE any
- * page scripts run. Uses the same mechanism as AINBOX-18's mockSupabaseAuth
+ * page scripts run. Uses the same mechanism as TASKRESPONSE-18's mockSupabaseAuth
  * helper but with real token values sourced from env vars.
  *
  * getBrowserSupabase() returns this mock (in non-production builds) so the
@@ -136,7 +136,7 @@ async function mockStoreTokensSuccess(page: Page): Promise<void> {
 // Layer C — Microsoft OAuth token replay tests
 // ---------------------------------------------------------------------------
 
-test.describe('@layer-c AINBOX-35 Microsoft OAuth token replay', () => {
+test.describe('@layer-c TASKRESPONSE-35 Microsoft OAuth token replay', () => {
   test('infrastructure: Layer C skips gracefully when env vars are absent', () => {
     // Documents and verifies the skip mechanism itself. Always passes.
     const configured = hasLayerCMicrosoft();

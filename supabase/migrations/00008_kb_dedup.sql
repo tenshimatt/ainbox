@@ -1,4 +1,4 @@
--- AINBOX-51: KB near-duplicate guard (cosine 0.9 threshold)
+-- TASKRESPONSE-51: KB near-duplicate guard (cosine 0.9 threshold)
 --
 -- Returns true when the user already has a KB item of the same kb_type
 -- whose embedding has cosine similarity >= p_threshold to p_embedding.

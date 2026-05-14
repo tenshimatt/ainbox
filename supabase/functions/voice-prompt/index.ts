@@ -1,6 +1,6 @@
 /**
  * Supabase Edge Function: voice-prompt
- * AINBOX-47: Personalization L5 — nightly voice prompt synthesis.
+ * TASKRESPONSE-47: Personalization L5 — nightly voice prompt synthesis.
  *
  * Triggered by pg_cron at 02:00 UTC every night. For each user with KB items,
  * synthesises a compact tone/voice description from their KB facts and

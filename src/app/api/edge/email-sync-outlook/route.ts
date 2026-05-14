@@ -1,5 +1,5 @@
 /**
- * AINBOX-20: POST /api/edge/email-sync-outlook — Outlook sync edge trigger.
+ * TASKRESPONSE-20: POST /api/edge/email-sync-outlook — Outlook sync edge trigger.
  *
  * PRD anchors: §3.8, §4.2, §4.3, §7.4 (backfill), §7.5 (incremental),
  *              §7.17 (retries), §7.18 (rate limits).
@@ -129,7 +129,7 @@ export async function POST(): Promise<NextResponse> {
     );
   }
 
-  // ------- Resolve OAuth token (depends on AINBOX-4 oauth_tokens table) -------
+  // ------- Resolve OAuth token (depends on TASKRESPONSE-4 oauth_tokens table) -------
   const getAccessToken = makeGetAccessToken(supabase, userId);
   try {
     await getAccessToken(); // validate token exists before starting sync

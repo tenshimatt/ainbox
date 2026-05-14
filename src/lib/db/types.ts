@@ -1,4 +1,4 @@
-// Ainbox DB types — keep in sync with supabase/migrations/0001_init.sql.
+// TaskResponse DB types — keep in sync with supabase/migrations/0001_init.sql.
 // PRD anchors: §4.1, §4.2, §4.3, §6.1.
 //
 // These are hand-written for now. Once the Supabase project is up,
@@ -116,7 +116,7 @@ export interface AuditLog {
 }
 
 /** Convenience aggregate type, mirroring `Database['public']['Tables']`. */
-export interface AinboxTables {
+export interface TaskResponseTables {
   oauth_tokens: OAuthToken;
   email_messages: EmailMessage;
   email_sync_state: EmailSyncState;
@@ -127,7 +127,7 @@ export interface AinboxTables {
 }
 
 /** Names of every tenant-scoped table — exhaustive list for contract tests. */
-export const TENANT_TABLES: ReadonlyArray<keyof AinboxTables> = [
+export const TENANT_TABLES: ReadonlyArray<keyof TaskResponseTables> = [
   'oauth_tokens',
   'email_messages',
   'email_sync_state',

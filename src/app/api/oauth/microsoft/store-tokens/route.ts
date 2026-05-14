@@ -1,5 +1,5 @@
 /**
- * AINBOX-18 — POST /api/oauth/microsoft/store-tokens
+ * TASKRESPONSE-18 — POST /api/oauth/microsoft/store-tokens
  *
  * Called by the Microsoft OAuth callback page immediately after
  * `supabase.auth.exchangeCodeForSession` succeeds. At that point the
@@ -8,7 +8,7 @@
  *
  *   1. Resolves the authenticated session server-side (never trust the client).
  *   2. Extracts `provider_refresh_token` — throws 400 if absent.
- *   3. Encrypts the refresh token via AINBOX-5 `encryptForUser` (per-user AES-256-GCM).
+ *   3. Encrypts the refresh token via TASKRESPONSE-5 `encryptForUser` (per-user AES-256-GCM).
  *   4. Upserts into `oauth_tokens` with provider='microsoft'.
  *
  * The access token (`provider_token`) is intentionally NOT persisted — it

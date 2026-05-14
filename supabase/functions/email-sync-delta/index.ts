@@ -1,7 +1,7 @@
 /**
  * Supabase Edge Function: email-sync-delta
  *
- * AINBOX-30: §7.5 Email sync — incremental delta (cron dispatcher).
+ * TASKRESPONSE-30: §7.5 Email sync — incremental delta (cron dispatcher).
  *
  * PRD: §7.5  Email sync — incremental delta — pg_cron + delta-token / historyId pattern.
  *      §4.1  Auth model — CRON_SECRET bearer (service-role system action exception).
@@ -54,9 +54,9 @@ const IV_LEN = 12;
 const TAG_LEN = 16;
 
 function getMasterKey(): Buffer {
-  const raw = _Deno?.env.get('AINBOX_ENC_MASTER_KEY') ?? '';
+  const raw = _Deno?.env.get('TASKRESPONSE_ENC_MASTER_KEY') ?? '';
   if (!raw || raw.length < 32) {
-    throw new Error('AINBOX_ENC_MASTER_KEY must be >= 32 bytes');
+    throw new Error('TASKRESPONSE_ENC_MASTER_KEY must be >= 32 bytes');
   }
   if (/^[0-9a-fA-F]+$/.test(raw) && raw.length % 2 === 0) return Buffer.from(raw, 'hex');
   try {
@@ -68,7 +68,7 @@ function getMasterKey(): Buffer {
 
 function deriveUserKey(userId: string): Buffer {
   const master = getMasterKey();
-  const okm = hkdfSync('sha256', master, Buffer.from(userId, 'utf8'), Buffer.from('ainbox-v1'), KEY_LEN);
+  const okm = hkdfSync('sha256', master, Buffer.from(userId, 'utf8'), Buffer.from('taskresponse-v1'), KEY_LEN);
   return Buffer.from(okm);
 }
 

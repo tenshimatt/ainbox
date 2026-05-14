@@ -1,5 +1,5 @@
 /**
- * Edge function HTTP handler — AINBOX-30: §7.5 Email sync — incremental delta.
+ * Edge function HTTP handler — TASKRESPONSE-30: §7.5 Email sync — incremental delta.
  *
  * PRD: §7.5  Email sync — incremental delta (cron dispatcher)
  *      §4.1  Auth model — CRON_SECRET bearer token (service-role system action exception)

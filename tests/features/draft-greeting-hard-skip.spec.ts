@@ -1,5 +1,5 @@
 /**
- * AINBOX-52 — Quality L2: draft hard-skip when body greeting names someone
+ * TASKRESPONSE-52 — Quality L2: draft hard-skip when body greeting names someone
  * other than the user.
  *
  * Tests `generateDraftForEmail` (LiteLLM path) and the standalone
@@ -17,12 +17,12 @@ import {
 
 // ---- synthesised fixtures (no real PII) ----
 
-const FIXTURE_USER_ID  = 'user-ainbox52-fixture-001';
-const FIXTURE_EMAIL_ID = 'email-ainbox52-fixture-001';
-const FIXTURE_DRAFT_ID = 'draft-ainbox52-fixture-001';
+const FIXTURE_USER_ID  = 'user-taskresponse52-fixture-001';
+const FIXTURE_EMAIL_ID = 'email-taskresponse52-fixture-001';
+const FIXTURE_DRAFT_ID = 'draft-taskresponse52-fixture-001';
 
 const FIXTURE_KB_RPC_DATA = [
-  { id: 'kb-ainbox52-a', content: 'SLA policy: 24h standard tier.', similarity: 0.85 },
+  { id: 'kb-taskresponse52-a', content: 'SLA policy: 24h standard tier.', similarity: 0.85 },
 ];
 
 /** Build a minimal Supabase-like mock. */
@@ -39,7 +39,7 @@ function makeSupabase(opts: {
         user_id: FIXTURE_USER_ID,
         subject: 'Synthetic enquiry about support',
         body_preview: opts.bodyPreview ?? 'Synthesised body text with no greeting name.',
-        sender: 'synth at ainbox52.test',
+        sender: 'synth at taskresponse52.test',
         category: 'support',
       };
 
@@ -92,7 +92,7 @@ function makeSupabase(opts: {
   };
 }
 
-function makeCallLlm(body = 'Synthetic reply from AINBOX-52 test.', generationScore = 0.80) {
+function makeCallLlm(body = 'Synthetic reply from TASKRESPONSE-52 test.', generationScore = 0.80) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return async (_prompt: any) => ({ body, generation_score: generationScore });
 }
@@ -103,7 +103,7 @@ function makeEmbedder() {
 
 // ---- greetingNamesOther unit tests ----
 
-test.describe('@feature AINBOX-52 greetingNamesOther utility', () => {
+test.describe('@feature TASKRESPONSE-52 greetingNamesOther utility', () => {
   test('returns false when preview is null', () => {
     expect(greetingNamesOther(null, 'Alice Smith')).toBe(false);
   });
@@ -159,7 +159,7 @@ test.describe('@feature AINBOX-52 greetingNamesOther utility', () => {
 
 // ---- generateDraftForEmail integration tests ----
 
-test.describe('@feature AINBOX-52 generateDraftForEmail hard-skip integration', () => {
+test.describe('@feature TASKRESPONSE-52 generateDraftForEmail hard-skip integration', () => {
   test('hard-skips when greeting names someone other than the user', async () => {
     const supabase = makeSupabase({
       bodyPreview: 'Hi Bob, could you review the attached contract?',

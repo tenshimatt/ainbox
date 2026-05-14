@@ -16,7 +16,7 @@
  * directly — middleware will re-check auth on protected routes.
  *
  * PRD §4.2 (OAuth token storage) · §5.2 (Onboarding) · §7.1 (Google OAuth)
- * AINBOX-17
+ * TASKRESPONSE-17
  */
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';

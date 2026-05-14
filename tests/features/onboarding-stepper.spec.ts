@@ -1,5 +1,5 @@
 /**
- * AINBOX-53 — Onboarding L1: numbered stepper + 'Step N of M' header
+ * TASKRESPONSE-53 — Onboarding L1: numbered stepper + 'Step N of M' header
  *
  * Acceptance criteria:
  * - /onboarding/sync shows "Step 1 of 2" and step-1 pill is active
@@ -9,7 +9,7 @@
 
 import { test, expect } from '@playwright/test';
 
-test.describe('@feature AINBOX-53 onboarding stepper', () => {
+test.describe('@feature TASKRESPONSE-53 onboarding stepper', () => {
   test('sync page shows Step 1 of 2 with step-1 active', async ({ page }) => {
     // Intercept the sync API calls so the page doesn't hang
     await page.route('/api/sync/*', (route) => route.fulfill({ status: 200, body: JSON.stringify({ ok: true }) }));

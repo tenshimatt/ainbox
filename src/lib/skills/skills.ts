@@ -1,5 +1,5 @@
 /**
- * AINBOX-46 / Personalization L4 — Skills library.
+ * TASKRESPONSE-46 / Personalization L4 — Skills library.
  *
  * A skill is a user-toggleable writing behaviour that gets injected as an
  * instruction clause into the draft system prompt when enabled.

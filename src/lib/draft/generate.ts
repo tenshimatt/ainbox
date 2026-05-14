@@ -1,5 +1,5 @@
 /**
- * AINBOX-22 — Orchestration helper: generate a draft reply for a single email.
+ * TASKRESPONSE-22 — Orchestration helper: generate a draft reply for a single email.
  *
  * PRD: §7.10 Reply drafting
  *
@@ -32,7 +32,7 @@ export interface GenerateDraftOptions {
   /** Override clock — tests inject a fixed timestamp. */
   now?: () => Date;
   /**
-   * AINBOX-52 — Quality L2: user's full name (e.g. "Alice Smith").
+   * TASKRESPONSE-52 — Quality L2: user's full name (e.g. "Alice Smith").
    * When provided, draft generation hard-skips if the email's body greeting
    * explicitly addresses someone other than this user.
    */
@@ -40,7 +40,7 @@ export interface GenerateDraftOptions {
 }
 
 /**
- * AINBOX-52 — Returns true when the body preview contains a greeting that
+ * TASKRESPONSE-52 — Returns true when the body preview contains a greeting that
  * names a specific person who is NOT the receiving user.
  *
  * Only skips when a name is positively identified AND it does not match the
@@ -121,7 +121,7 @@ export async function generateDraftForEmail(
 
   const emailRow = row as EmailRow;
 
-  // AINBOX-52 — Quality L2: hard-skip when greeting names someone else.
+  // TASKRESPONSE-52 — Quality L2: hard-skip when greeting names someone else.
   if (opts.userFullName != null && greetingNamesOther(emailRow.body_preview, opts.userFullName)) {
     throw new Error('generateDraftForEmail: hard-skip: greeting names other');
   }
@@ -173,7 +173,7 @@ export async function generateDraftForEmail(
 
   const nowIso = now().toISOString();
 
-  // 4. Persist draft row — status='pending', awaiting approval or auto-send (AINBOX-12).
+  // 4. Persist draft row — status='pending', awaiting approval or auto-send (TASKRESPONSE-12).
   const { data: draft, error: insertErr } = await supabase
     .from('drafts')
     .insert({

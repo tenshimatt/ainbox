@@ -1,6 +1,6 @@
--- Consolidated Ainbox Schema (00002)
+-- Consolidated TaskResponse Schema (00002)
 -- Replaces and supersedes 00001_init_schema.sql, 0001_init.sql,
--- 0002_embeddings_trigger.sql, 20250608_ainbox_schema.sql.
+-- 0002_embeddings_trigger.sql, 20250608_taskresponse_schema.sql.
 --
 -- These prior migrations were produced in parallel by different agents
 -- and disagree on table names + column names. This file is the union of

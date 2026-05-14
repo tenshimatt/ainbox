@@ -1,5 +1,5 @@
 /**
- * AINBOX-5: AES-256-GCM per-user encryption helpers.
+ * TASKRESPONSE-5: AES-256-GCM per-user encryption helpers.
  *
  * PRD anchors:
  *   §4.2 OAuth token storage — refresh tokens stored encrypted (Supabase Vault in prod;
@@ -7,7 +7,7 @@
  *   §4.3 Email content handling — bodies encrypted at rest in `email_messages.body_encrypted`.
  *
  * Threat model:
- *   - Master key `AINBOX_ENC_MASTER_KEY` lives only in the edge-function / server runtime
+ *   - Master key `TASKRESPONSE_ENC_MASTER_KEY` lives only in the edge-function / server runtime
  *     (Supabase secrets, Vercel server env). Never shipped to the browser.
  *   - Per-user data key derived via HKDF-SHA256(master, salt=user_id). This means a leak of
  *     a single ciphertext never directly exposes the master, and tenants are cryptographically
@@ -29,9 +29,9 @@ const IV_LEN = 12; // GCM standard
 const TAG_LEN = 16;
 
 function getMasterKey(): Buffer {
-  const raw = process.env.AINBOX_ENC_MASTER_KEY;
+  const raw = process.env.TASKRESPONSE_ENC_MASTER_KEY;
   if (!raw || raw.length < 32) {
-    throw new Error('AINBOX_ENC_MASTER_KEY must be set to a base64 or hex string of >=32 bytes');
+    throw new Error('TASKRESPONSE_ENC_MASTER_KEY must be set to a base64 or hex string of >=32 bytes');
   }
   // Accept hex, base64, or raw — normalise to a Buffer of >=32 bytes.
   if (/^[0-9a-fA-F]+$/.test(raw) && raw.length % 2 === 0) {
@@ -53,7 +53,7 @@ function getMasterKey(): Buffer {
 function deriveUserKey(userId: string): Buffer {
   const master = getMasterKey();
   // hkdfSync returns ArrayBuffer; wrap in Buffer for convenience.
-  const okm = hkdfSync('sha256', master, Buffer.from(userId, 'utf8'), Buffer.from('ainbox-v1'), KEY_LEN);
+  const okm = hkdfSync('sha256', master, Buffer.from(userId, 'utf8'), Buffer.from('taskresponse-v1'), KEY_LEN);
   return Buffer.from(okm);
 }
 

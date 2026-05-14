@@ -1,5 +1,5 @@
 /**
- * Edge function HTTP handler — AINBOX-31: §7.12 Auto-send executor.
+ * Edge function HTTP handler — TASKRESPONSE-31: §7.12 Auto-send executor.
  *
  * PRD: §7.12 Auto-send mode
  *      §4.4  Confidence model — MIN(retrieval_score, generation_score)

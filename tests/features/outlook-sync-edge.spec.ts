@@ -1,5 +1,5 @@
 /**
- * AINBOX-20 — /api/edge/email-sync-outlook edge trigger
+ * TASKRESPONSE-20 — /api/edge/email-sync-outlook edge trigger
  * PRD §3.8 §4.2 §4.3 §7.4 §7.5 §7.17 §7.18
  *
  * Tests the HTTP contract of the edge function trigger:
@@ -17,7 +17,7 @@ import { test, expect } from '@playwright/test';
 
 const EDGE_URL = '/api/edge/email-sync-outlook';
 
-test.describe('@feature §7.4 §7.5 AINBOX-20 outlook edge trigger', () => {
+test.describe('@feature §7.4 §7.5 TASKRESPONSE-20 outlook edge trigger', () => {
   test('endpoint exists and does not return 404', async ({ page }) => {
     const resp = await page.request.post(EDGE_URL, {
       data: {},

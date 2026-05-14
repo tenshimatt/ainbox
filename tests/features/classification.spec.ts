@@ -1,5 +1,5 @@
 /**
- * AINBOX-9 — Inbound classification engine
+ * TASKRESPONSE-9 — Inbound classification engine
  * PRD §7.9
  *
  * Verifies:
@@ -7,7 +7,7 @@
  *   - a sales-y email yields category=sales with a numeric confidence
  *   - batch helper persists category + classified_at and writes audit_log
  *
- * Synthesised @ainbox.test fixtures only — no real email content.
+ * Synthesised @taskresponse.test fixtures only — no real email content.
  */
 
 import { test, expect } from '@playwright/test';
@@ -50,7 +50,7 @@ test.describe('@feature §7.9 classification engine', () => {
         id: 'msg-1',
         subject: 'Interested in your enterprise plan pricing',
         body: 'Hi team, can you share pricing tiers and a demo slot? Thanks.',
-        from: 'prospect@ainbox.test',
+        from: 'prospect@taskresponse.test',
       },
       { fetchImpl, baseUrl: 'http://mock', apiKey: 'k' },
     );
@@ -65,7 +65,7 @@ test.describe('@feature §7.9 classification engine', () => {
   test('classifyEmail clamps out-of-range confidence and falls back to "other"', async () => {
     const { fetchImpl } = mockLiteLLMFetch('not-a-real-category', 5);
     const result = await classifyEmail(
-      { id: 'x', subject: 's', body: 'b', from: 'a@ainbox.test' },
+      { id: 'x', subject: 's', body: 'b', from: 'a@taskresponse.test' },
       { fetchImpl, baseUrl: 'http://mock', apiKey: 'k' },
     );
     expect(result.category).toBe('other');
@@ -76,7 +76,7 @@ test.describe('@feature §7.9 classification engine', () => {
   test('classifyEmail sends model + structured output instruction to LiteLLM', async () => {
     const { fetchImpl, calls } = mockLiteLLMFetch('support', 0.81);
     await classifyEmail(
-      { id: 'x', subject: 'help', body: 'i cannot log in', from: 'user@ainbox.test' },
+      { id: 'x', subject: 'help', body: 'i cannot log in', from: 'user@taskresponse.test' },
       { fetchImpl, baseUrl: 'http://mock', apiKey: 'k' },
     );
     expect(calls).toHaveLength(1);
@@ -94,13 +94,13 @@ test.describe('@feature §7.9 classification engine', () => {
         id: 'e1',
         subject: 'Quote request for 50 seats',
         body: 'Looking to buy.',
-        from_address: 'buyer@ainbox.test',
+        from_address: 'buyer@taskresponse.test',
       },
       {
         id: 'e2',
         subject: 'Login broken',
         body: 'Cannot reset password',
-        from_address: 'user@ainbox.test',
+        from_address: 'user@taskresponse.test',
       },
     ];
 

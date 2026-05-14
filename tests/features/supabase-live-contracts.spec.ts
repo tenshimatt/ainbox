@@ -1,5 +1,5 @@
 /**
- * AINBOX-34: Layer B — live Supabase test-project contract tests.
+ * TASKRESPONSE-34: Layer B — live Supabase test-project contract tests.
  *
  * PRD anchors: §4.1 (RLS), §4.2 (OAuth encryption), §4.4 (auto-send floor).
  *
@@ -14,7 +14,7 @@
  *   SUPABASE_SERVICE_ROLE_KEY — high-privilege key (used for seeding only)
  *
  * Synthetic users only:
- *   Two fixture users are created via `auth.admin.createUser` with @ainbox.test
+ *   Two fixture users are created via `auth.admin.createUser` with @taskresponse.test
  *   sentinel addresses. They are deleted in `afterAll`; cascade deletes remove
  *   all associated rows.
  *
@@ -37,11 +37,11 @@ const SKIP_REASON =
   'Skipping Layer B live contract: set SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY to run against a real Supabase test project.';
 
 // ---------------------------------------------------------------------------
-// Fixture identities — synthetic @ainbox.test sentinel domain.
+// Fixture identities — synthetic @taskresponse.test sentinel domain.
 // ---------------------------------------------------------------------------
 
-const LB_ALICE_EMAIL = 'lb-alice@ainbox.test';
-const LB_BOB_EMAIL = 'lb-bob@ainbox.test';
+const LB_ALICE_EMAIL = 'lb-alice@taskresponse.test';
+const LB_BOB_EMAIL = 'lb-bob@taskresponse.test';
 
 // Populated in beforeAll once admin.createUser resolves.
 let ALICE_ID = '';
@@ -83,7 +83,7 @@ function synthPwd(): string {
 // Suite
 // ---------------------------------------------------------------------------
 
-test.describe('@feature AINBOX-34 Layer B live Supabase contract tests', () => {
+test.describe('@feature TASKRESPONSE-34 Layer B live Supabase contract tests', () => {
   // ---- lifecycle: create / destroy synthetic fixture users ---------------
 
   test.beforeAll(async () => {

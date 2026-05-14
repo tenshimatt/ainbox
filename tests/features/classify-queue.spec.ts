@@ -1,5 +1,5 @@
 /**
- * AINBOX-28 — Classification engine (edge function)
+ * TASKRESPONSE-28 — Classification engine (edge function)
  * PRD §7.9
  *
  * Verifies the queue-aware classify processor (`src/lib/classify/queue.ts`):
@@ -12,7 +12,7 @@
  *   - On failure: increments attempts; marks 'failed' when attempts >= max_attempts
  *   - Returns { total, classified, failed } counts
  *
- * All fixtures use synthesised @ainbox.test addresses — no real email content.
+ * All fixtures use synthesised @taskresponse.test addresses — no real email content.
  */
 
 import { test, expect } from '@playwright/test';
@@ -142,7 +142,7 @@ function stubClassifier(
 // Tests
 // ---------------------------------------------------------------------------
 
-test.describe('@feature §7.9 classify-queue (AINBOX-28)', () => {
+test.describe('@feature §7.9 classify-queue (TASKRESPONSE-28)', () => {
   test('processes pending tasks and marks them completed', async () => {
     const store = makeStore();
 
@@ -180,7 +180,7 @@ test.describe('@feature §7.9 classify-queue (AINBOX-28)', () => {
           user_id: 'u1',
           subject: 'Pricing enquiry for 100 seats',
           body_plain_preview: 'Hi, we need enterprise pricing.',
-          from_address: 'buyer@ainbox.test',
+          from_address: 'buyer@taskresponse.test',
           ai_processed: false,
           ai_classification: null,
         },
@@ -189,7 +189,7 @@ test.describe('@feature §7.9 classify-queue (AINBOX-28)', () => {
           user_id: 'u1',
           subject: 'Login issue',
           body_plain_preview: 'Cannot sign in.',
-          from_address: 'user@ainbox.test',
+          from_address: 'user@taskresponse.test',
           ai_processed: false,
           ai_classification: null,
         },
@@ -254,7 +254,7 @@ test.describe('@feature §7.9 classify-queue (AINBOX-28)', () => {
           user_id: 'u2',
           subject: 'Invoice overdue',
           body_plain_preview: 'Payment reminder.',
-          from_address: 'billing@ainbox.test',
+          from_address: 'billing@taskresponse.test',
           ai_processed: false,
           ai_classification: null,
         },
@@ -308,7 +308,7 @@ test.describe('@feature §7.9 classify-queue (AINBOX-28)', () => {
           user_id: 'u1',
           subject: 'Meeting request',
           body_plain_preview: 'Can we schedule a call?',
-          from_address: 'partner@ainbox.test',
+          from_address: 'partner@taskresponse.test',
           ai_processed: false,
           ai_classification: null,
         },
@@ -360,7 +360,7 @@ test.describe('@feature §7.9 classify-queue (AINBOX-28)', () => {
           user_id: 'u1',
           subject: 'Test fail',
           body_plain_preview: 'body',
-          from_address: 'x@ainbox.test',
+          from_address: 'x@taskresponse.test',
           ai_processed: false,
           ai_classification: null,
         },
@@ -417,7 +417,7 @@ test.describe('@feature §7.9 classify-queue (AINBOX-28)', () => {
           user_id: 'u1',
           subject: 'Exhausted',
           body_plain_preview: 'body',
-          from_address: 'x@ainbox.test',
+          from_address: 'x@taskresponse.test',
           ai_processed: false,
           ai_classification: null,
         },
@@ -477,7 +477,7 @@ test.describe('@feature §7.9 classify-queue (AINBOX-28)', () => {
         user_id: 'u1',
         subject: `Subject ${i}`,
         body_plain_preview: 'body',
-        from_address: `sender${i}@ainbox.test`,
+        from_address: `sender${i}@taskresponse.test`,
         ai_processed: false,
         ai_classification: null,
       })),

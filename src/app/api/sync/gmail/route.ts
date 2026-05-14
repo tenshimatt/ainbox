@@ -1,11 +1,11 @@
 /**
- * AINBOX-5: POST /api/sync/gmail — kick off Gmail backfill for the authenticated user.
+ * TASKRESPONSE-5: POST /api/sync/gmail — kick off Gmail backfill for the authenticated user.
  *
  * PRD anchors: §3.8, §4.2, §4.3, §7.3, §7.17, §7.18.
  *
  * Flow:
  *   1. Resolve the authenticated user from the Supabase server client (RLS-scoped, §4.1).
- *   2. Read the user's Gmail refresh token from `oauth_tokens` (depends on AINBOX-4 migration).
+ *   2. Read the user's Gmail refresh token from `oauth_tokens` (depends on TASKRESPONSE-4 migration).
  *   3. Mint a Gmail API client (access tokens minted in-memory, never persisted — §4.2).
  *   4. Run `runGmailBackfill` which paginates Gmail API at ≤250 quota/sec (§7.18),
  *      persists encrypted bodies (§4.3), and emits per-batch Realtime progress.
@@ -83,7 +83,7 @@ function makeProgress(supabase: SupabaseLike): ProgressEmitter {
 }
 
 async function loadRefreshToken(supabase: SupabaseLike, userId: string): Promise<string> {
-  // depends on AINBOX-4 migration (oauth_tokens table + column-level encryption).
+  // depends on TASKRESPONSE-4 migration (oauth_tokens table + column-level encryption).
   // Column is `encrypted_refresh_token` (AES-256-GCM via encryptForUser — §4.2).
   const { data, error } = await supabase
     .from('oauth_tokens')

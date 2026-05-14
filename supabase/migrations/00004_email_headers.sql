@@ -1,4 +1,4 @@
--- AINBOX-41 / Eligibility L1.7
+-- TASKRESPONSE-41 / Eligibility L1.7
 -- Add the recipient + header columns needed for hard-skip rules.
 -- Populated by the Gmail backfill (src/lib/sync/gmail.ts rowFromMessage).
 

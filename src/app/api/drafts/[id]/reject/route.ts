@@ -1,7 +1,7 @@
 /**
  * POST /api/drafts/[id]/reject
  *
- * AINBOX-11 + AINBOX-36 — marks the draft 'rejected' and captures
+ * TASKRESPONSE-11 + TASKRESPONSE-36 — marks the draft 'rejected' and captures
  * a draft_feedback row.
  */
 import { NextResponse } from 'next/server';

@@ -1,5 +1,5 @@
 /**
- * AINBOX-16 — Edge function: kb-extract
+ * TASKRESPONSE-16 — Edge function: kb-extract
  * PRD: §4.4 §7.6 §7.7
  *
  * Verifies:

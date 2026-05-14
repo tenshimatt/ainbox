@@ -1,7 +1,7 @@
 /**
  * OnboardingStepper — numbered step indicator for the onboarding flow.
  * Displays "Step N of M" header and a row of step pills.
- * PRD: §AINBOX-53
+ * PRD: §TASKRESPONSE-53
  */
 
 interface Step {

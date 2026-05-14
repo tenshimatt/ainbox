@@ -1,4 +1,4 @@
-# Ainbox — Supabase migrations
+# TaskResponse — Supabase migrations
 
 Schema lives in `supabase/migrations/`. PRD anchors: §4.1 (tenant
 isolation), §4.2 (OAuth tokens), §4.3 (email content), §6.1 (data
@@ -9,7 +9,7 @@ inventory).
 - `migrations/0001_init.sql` — initial schema. 7 tables, RLS on every
   one, pgvector + pgcrypto extensions, audit log append-only.
 - `seed.sql` — local-dev test data. Synthetic addresses only
-  (`@ainbox.test`). Idempotent — skips if synthetic users absent.
+  (`@taskresponse.test`). Idempotent — skips if synthetic users absent.
 
 ## Run locally
 
@@ -25,7 +25,7 @@ supabase db reset             # applies migrations + seed.sql
 # DB:     postgresql://postgres:postgres@localhost:54322/postgres
 ```
 
-## Run against ainbox-prod
+## Run against taskresponse-prod
 
 The dark-factory does NOT push migrations directly. Workflow:
 
@@ -33,7 +33,7 @@ The dark-factory does NOT push migrations directly. Workflow:
 2. GitHub Actions (`.github/workflows/db-migrate.yml`, separate ticket)
    diffs `supabase/migrations/` against the deployed schema.
 3. On a manual `workflow_dispatch`, applies pending migrations to
-   `ainbox-prod` using the project's service-role connection string
+   `taskresponse-prod` using the project's service-role connection string
    stored in GH Secrets.
 
 No service-role calls run inside user-facing edge functions — see

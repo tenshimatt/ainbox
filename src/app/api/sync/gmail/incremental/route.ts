@@ -1,5 +1,5 @@
 /**
- * AINBOX-5: POST /api/sync/gmail/incremental — delta-sync since last historyId.
+ * TASKRESPONSE-5: POST /api/sync/gmail/incremental — delta-sync since last historyId.
  *
  * PRD anchors: §3.8, §4.2, §4.3, §7.5 (delta sync), §7.17 (retries), §7.18 (rate limits).
  *
@@ -64,7 +64,7 @@ function makeProgress(supabase: SupabaseLike) {
 }
 
 async function loadRefreshToken(supabase: SupabaseLike, userId: string): Promise<string> {
-  // depends on AINBOX-4 migration.
+  // depends on TASKRESPONSE-4 migration.
   const { data, error } = await supabase
     .from('oauth_tokens')
     .select('refresh_token')

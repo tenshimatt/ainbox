@@ -1,5 +1,5 @@
 /**
- * AINBOX-14 — Audit log UI + CSV export
+ * TASKRESPONSE-14 — Audit log UI + CSV export
  * PRD: §5.3 §7.14 §6.1
  *
  * Verifies:
@@ -110,7 +110,7 @@ async function mockAuditApi(page: import('@playwright/test').Page, rows: AuditRo
   });
 }
 
-test.describe('@feature AINBOX-14 audit log', () => {
+test.describe('@feature TASKRESPONSE-14 audit log', () => {
   test('table renders rows from /api/audit', async ({ page }) => {
     await mockAuditApi(page, FIXTURE);
     await page.goto('/audit');

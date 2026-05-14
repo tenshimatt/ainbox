@@ -1,4 +1,4 @@
--- AINBOX-42 + AINBOX-44 / Eligibility L1.8 + L1.10
+-- TASKRESPONSE-42 + TASKRESPONSE-44 / Eligibility L1.8 + L1.10
 -- Hard-skip + thread-suppression rules baked into draftable_candidates().
 -- Replaces the previous (looser) version of the same function.
 

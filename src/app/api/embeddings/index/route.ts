@@ -7,7 +7,7 @@
  * For every item:
  *   1. chunk via chunkText (~500 tokens / chunk)
  *   2. embed all chunks via embedChunks (LiteLLM → Ollama bge-m3, 1024-d)
- *   3. AINBOX-51: skip any chunk whose embedding is within cosine 0.9 of an
+ *   3. TASKRESPONSE-51: skip any chunk whose embedding is within cosine 0.9 of an
  *      existing kb_item of the same type (kb_near_duplicate_exists RPC)
  *   4. upsert each non-duplicate chunk into kb_items as a row with the
  *      embedding vector, scoped to the calling user (RLS). The route uses
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
     }> = [];
 
     for (let i = 0; i < chunks.length; i++) {
-      // AINBOX-51: skip near-duplicates (cosine >= 0.9, same kb_type)
+      // TASKRESPONSE-51: skip near-duplicates (cosine >= 0.9, same kb_type)
       const { data: isDup } = await supabase.rpc('kb_near_duplicate_exists', {
         p_user_id:   userId,
         p_kb_type:   item.type,

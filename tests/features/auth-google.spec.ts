@@ -1,12 +1,12 @@
 /**
- * AINBOX-2 — Supabase Auth + Google OAuth flow.
+ * TASKRESPONSE-2 — Supabase Auth + Google OAuth flow.
  *
  * PRD: §3.9 (Auth stack) · §4.1 (Tenant isolation) · §4.2 (OAuth tokens)
  *      §5.2 (Onboarding) · §7.1 (Provider OAuth — Google)
  *
  * We DO NOT hit real Google. All Supabase HTTP traffic is intercepted
  * via Playwright's `page.route()` so the spec is hermetic. Fixtures use
- * the `@ainbox.test` domain (factory-rules.md hard rule #8).
+ * the `@taskresponse.test` domain (factory-rules.md hard rule #8).
  */
 
 import { test, expect, type Route } from '@playwright/test';
@@ -73,7 +73,7 @@ async function mockSupabaseDeny(page: import('@playwright/test').Page) {
   });
 }
 
-test.describe('@features AINBOX-2 Supabase Auth + Google OAuth', () => {
+test.describe('@features TASKRESPONSE-2 Supabase Auth + Google OAuth', () => {
   test('§7.1 /connect renders Google + Microsoft buttons', async ({ page }) => {
     const resp = await page.goto('/connect');
     expect(resp?.status()).toBeLessThan(500);

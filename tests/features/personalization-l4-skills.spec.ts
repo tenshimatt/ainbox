@@ -1,5 +1,5 @@
 /**
- * AINBOX-46 — Personalization L4: Skills library + /settings toggle UI
+ * TASKRESPONSE-46 — Personalization L4: Skills library + /settings toggle UI
  *
  * Covers:
  *   1. SKILLS_LIBRARY has the expected shape (id, label, description, prompt_instruction).
@@ -24,7 +24,7 @@ import {
 
 // ---- pure-function tests ---------------------------------------------------
 
-test.describe('@feature AINBOX-46 skills library', () => {
+test.describe('@feature TASKRESPONSE-46 skills library', () => {
   test('every skill has id, label, description and prompt_instruction', () => {
     expect(SKILLS_LIBRARY.length).toBeGreaterThanOrEqual(1);
     for (const skill of SKILLS_LIBRARY) {
@@ -53,7 +53,7 @@ test.describe('@feature AINBOX-46 skills library', () => {
   });
 });
 
-test.describe('@feature AINBOX-46 buildSkillsBlock', () => {
+test.describe('@feature TASKRESPONSE-46 buildSkillsBlock', () => {
   test('returns empty string when no skills enabled', () => {
     expect(buildSkillsBlock([])).toBe('');
   });
@@ -203,7 +203,7 @@ async function simulatePut(
   return { ok: true, count: rows.length };
 }
 
-test.describe('@feature AINBOX-46 skills API contract', () => {
+test.describe('@feature TASKRESPONSE-46 skills API contract', () => {
   test('GET returns all library skills disabled by default (no rows in DB)', () => {
     const store = new FakeStore();
     const result = simulateGet(store, 'user-abc');

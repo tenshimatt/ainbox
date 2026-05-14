@@ -32,8 +32,8 @@ const SAFE_DOMAINS = [
   'test.com',
   'fake.com',
   'noreply.com',
-  'ainbox.test',
-  'ainbox.example',
+  'taskresponse.test',
+  'taskresponse.example',
 ];
 
 test.describe('@contract C-8 fixture PII check', () => {

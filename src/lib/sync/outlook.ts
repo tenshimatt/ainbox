@@ -11,21 +11,21 @@
  *  - §7.18 Rate-limit handling (Graph: 10k req / 10 min sliding window)
  *
  * Dependencies on sibling tickets:
- *  - encryptForUser() from src/lib/crypto.ts is owned by AINBOX-5.
+ *  - encryptForUser() from src/lib/crypto.ts is owned by TASKRESPONSE-5.
  *    If it's not yet present at import time, callers should fail loud.
- *  - oauth_tokens table + email_sync_state table are owned by AINBOX-4.
+ *  - oauth_tokens table + email_sync_state table are owned by TASKRESPONSE-4.
  */
 
 import { Client, type ClientOptions } from '@microsoft/microsoft-graph-client';
 
-// AINBOX-5 dependency: src/lib/crypto.ts exports encryptForUser.
-// Import lazily so this module loads even before AINBOX-5 lands.
+// TASKRESPONSE-5 dependency: src/lib/crypto.ts exports encryptForUser.
+// Import lazily so this module loads even before TASKRESPONSE-5 lands.
 type EncryptForUser = (userId: string, plaintext: string) => Promise<string>;
 async function getEncryptForUser(): Promise<EncryptForUser> {
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     // Use a runtime-constructed specifier so tsc doesn't try to resolve the
-    // (intentionally optional) module at build time. AINBOX-5 owns the file.
+    // (intentionally optional) module at build time. TASKRESPONSE-5 owns the file.
     const specifier = '@' + '/lib/crypto';
     const mod = (await import(/* webpackIgnore: true */ specifier)) as Record<
       string,
@@ -36,10 +36,10 @@ async function getEncryptForUser(): Promise<EncryptForUser> {
     }
     return mod.encryptForUser as EncryptForUser;
   } catch (err) {
-    // depends on AINBOX-5 lib/crypto.ts — fall back to a guard that throws on use
+    // depends on TASKRESPONSE-5 lib/crypto.ts — fall back to a guard that throws on use
     return async () => {
       throw new Error(
-        'encryptForUser is unavailable — depends on AINBOX-5 lib/crypto.ts',
+        'encryptForUser is unavailable — depends on TASKRESPONSE-5 lib/crypto.ts',
       );
     };
   }
@@ -124,7 +124,7 @@ export interface OutlookSyncDeps {
   pacer?: GraphPacer;
   /** Backfill cap; defaults to 1000 per PRD §7.4. */
   backfillCap?: number;
-  /** Optional encrypt override (for tests). Defaults to AINBOX-5 lib/crypto.ts. */
+  /** Optional encrypt override (for tests). Defaults to TASKRESPONSE-5 lib/crypto.ts. */
   encryptForUser?: EncryptForUser;
 }
 

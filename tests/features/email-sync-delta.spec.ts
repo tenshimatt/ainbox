@@ -1,5 +1,5 @@
 /**
- * AINBOX-30: §7.5 Email sync — incremental delta (edge function + pg_cron).
+ * TASKRESPONSE-30: §7.5 Email sync — incremental delta (edge function + pg_cron).
  *
  * PRD: §7.5  Email sync — incremental delta
  *      §4.1  Auth model — CRON_SECRET bearer (service-role exception)
@@ -79,7 +79,7 @@ function outlookUser(i: number): ReadyUserRow {
 // Tests
 // ---------------------------------------------------------------------------
 
-test.describe('@feature AINBOX-30 §7.5 email-sync-delta handler', () => {
+test.describe('@feature TASKRESPONSE-30 §7.5 email-sync-delta handler', () => {
 
   // ── Auth ──────────────────────────────────────────────────────────────────
 

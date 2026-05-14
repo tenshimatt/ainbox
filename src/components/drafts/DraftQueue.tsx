@@ -22,7 +22,7 @@ export function DraftQueue({ initial }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch the queue from the AINBOX-10 endpoint on mount. Falls back silently
+  // Fetch the queue from the TASKRESPONSE-10 endpoint on mount. Falls back silently
   // if the endpoint isn't deployed yet — keeps /drafts renderable in dev.
   useEffect(() => {
     let cancelled = false;

@@ -1,8 +1,8 @@
 /**
- * Provider draft creation — placeholder for AINBOX-10.
+ * Provider draft creation — placeholder for TASKRESPONSE-10.
  *
  * The real implementations of Gmail draft + MS Graph draft are
- * scoped to AINBOX-5 / AINBOX-6 sync libs and have not landed yet.
+ * scoped to TASKRESPONSE-5 / TASKRESPONSE-6 sync libs and have not landed yet.
  * This module exposes a stable signature so the drafting worker
  * (src/lib/draft/draft.ts) and the API route (src/app/api/drafts)
  * can call it today and be wired to the real provider calls later.
@@ -26,7 +26,7 @@ export interface ProviderDraftResult {
  * Placeholder behaviour: returns a deterministic-ish fake id so the
  * outer flow (persist row, return JSON) can be exercised end-to-end
  * without an outbound network call. The real implementation will
- * delegate to a Gmail or MS Graph client built in AINBOX-5/6.
+ * delegate to a Gmail or MS Graph client built in TASKRESPONSE-5/6.
  */
 export async function createProviderDraft(
   userId: string,

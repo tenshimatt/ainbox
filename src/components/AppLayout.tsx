@@ -37,7 +37,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       >
         <div className="flex h-16 items-center justify-between border-b border-slate-200 px-4">
           <Link href="/inbox" className="text-lg font-bold text-slate-900">
-            Ainbox
+            TaskResponse
           </Link>
           <button
             className="rounded p-1 text-slate-500 hover:bg-slate-100 lg:hidden"

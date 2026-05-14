@@ -1,5 +1,5 @@
 /**
- * AINBOX-6 — Outlook (MS Graph) sync + delta
+ * TASKRESPONSE-6 — Outlook (MS Graph) sync + delta
  * PRD §3.8 §4.2 §4.3 §7.4 §7.5 §7.17 §7.18
  *
  * These tests mock Microsoft Graph at the SDK boundary by injecting a fake
@@ -80,7 +80,7 @@ function buildFakeClient(pagesByUrl: Record<string, PageSpec>): {
 }
 
 // Fake encrypt function — passed to the worker via the `encryptForUser` dep.
-// AINBOX-5 owns the real implementation; we test the worker's contract here.
+// TASKRESPONSE-5 owns the real implementation; we test the worker's contract here.
 const fakeEncrypt = async (userId: string, plaintext: string) =>
   `enc(${userId}):${Buffer.from(plaintext).toString('base64')}`;
 

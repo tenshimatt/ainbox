@@ -1,5 +1,5 @@
 /**
- * AINBOX-11 — Approval queue UI at /drafts
+ * TASKRESPONSE-11 — Approval queue UI at /drafts
  * PRD: §4.5 Component contracts, §5.3 App pages, §7.11 Approval queue, §8.3 Accessibility
  *
  * Verifies:
@@ -53,7 +53,7 @@ async function mockDraftsApi(page: import('@playwright/test').Page) {
   });
 }
 
-test.describe('@feature AINBOX-11 approval queue UI', () => {
+test.describe('@feature TASKRESPONSE-11 approval queue UI', () => {
   test('renders drafts sorted by confidence DESC', async ({ page }) => {
     await mockDraftsApi(page);
     await page.goto('/drafts');

@@ -1,7 +1,7 @@
 /**
  * PATCH /api/kb/items/[id]
  * DELETE /api/kb/items/[id]
- * AINBOX-8 — User verifies / edits / discards an extracted KB item.
+ * TASKRESPONSE-8 — User verifies / edits / discards an extracted KB item.
  * PRD: §7.7
  */
 
@@ -42,7 +42,7 @@ interface PatchBody {
 
 async function maybeReembed(content: string): Promise<void> {
   try {
-    // optional dependency from AINBOX-7 — embed module may not exist in test env
+    // optional dependency from TASKRESPONSE-7 — embed module may not exist in test env
     const mod: { embedChunks?: (texts: string[]) => Promise<number[][]> } =
       await import('@/lib/embeddings/embed').catch(() => ({}));
     if (typeof mod.embedChunks === 'function') {

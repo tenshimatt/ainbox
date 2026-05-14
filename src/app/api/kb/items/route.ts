@@ -1,6 +1,6 @@
 /**
  * GET /api/kb/items
- * AINBOX-8 — Paginated list of kb_items for the authenticated user,
+ * TASKRESPONSE-8 — Paginated list of kb_items for the authenticated user,
  * grouped by type, ordered by confidence DESC.
  * PRD: §7.6 §7.7
  */

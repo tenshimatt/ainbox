@@ -1,4 +1,4 @@
-# Ainbox
+# TaskResponse
 
 AI-powered email operations. Connects to Gmail / Outlook, builds a
 contextual knowledge base, classifies inbound email, drafts replies in

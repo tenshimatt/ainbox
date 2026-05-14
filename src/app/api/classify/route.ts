@@ -1,6 +1,6 @@
 /**
  * POST /api/classify
- * AINBOX-9 — Classify a single email by id for the authenticated user.
+ * TASKRESPONSE-9 — Classify a single email by id for the authenticated user.
  * Updates `email_messages.category` + `classified_at`, writes audit_log row.
  * PRD: §7.9
  */

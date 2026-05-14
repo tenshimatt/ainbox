@@ -1,5 +1,5 @@
 /**
- * AINBOX-5: Gmail backfill + delta sync — feature spec.
+ * TASKRESPONSE-5: Gmail backfill + delta sync — feature spec.
  *
  * PRD anchors: §3.8, §4.2, §4.3, §7.3, §7.5, §7.17, §7.18.
  *
@@ -9,7 +9,7 @@
  *   is equivalent to vi.mock at the import boundary but works inside Playwright's
  *   Node-driven test runner without adding vitest/msw as a dep.
  *
- *   Fixture addresses use the synthesised `@ainbox.test` TLD per factory-rules.md hard
+ *   Fixture addresses use the synthesised `@taskresponse.test` TLD per factory-rules.md hard
  *   rule #8 / PRD §4.3 — never real email content.
  */
 
@@ -31,7 +31,7 @@ import {
 import { decryptForUser, isCiphertext } from '../../src/lib/crypto';
 
 // Master key required for crypto. Stable, base64, 32 bytes — fixture only.
-process.env.AINBOX_ENC_MASTER_KEY ??= Buffer.alloc(32, 7).toString('base64');
+process.env.TASKRESPONSE_ENC_MASTER_KEY ??= Buffer.alloc(32, 7).toString('base64');
 
 // --- helpers ---------------------------------------------------------------
 
@@ -53,8 +53,8 @@ function synthMessage(i: number): FakeMessage {
     threadId: `t-${Math.floor(i / 5)}`,
     historyId: String(1000 + i),
     internalDate: String(1_700_000_000_000 + i * 60_000),
-    from: `sender-${i}@ainbox.test`,
-    to: `recipient@ainbox.test`,
+    from: `sender-${i}@taskresponse.test`,
+    to: `recipient@taskresponse.test`,
     subject: `Synth subject ${i}`,
     body: `Synth body ${i} — non-PII fixture content for test pass.`,
     labels: i % 2 === 0 ? ['INBOX'] : ['SENT'],

@@ -3,7 +3,7 @@ import Link from 'next/link';
 const COMPLIANCE_ITEMS = [
   {
     title: 'SOC 2 Type II',
-    description: 'Ainbox undergoes annual SOC 2 Type II audits, verifying our controls for security, availability, and confidentiality.',
+    description: 'TaskResponse undergoes annual SOC 2 Type II audits, verifying our controls for security, availability, and confidentiality.',
     status: 'Certified',
     statusColor: 'text-green-600',
   },
@@ -87,10 +87,10 @@ export default function SecurityPage() {
             If you discover a security vulnerability, please report it to our security team immediately. We follow a responsible disclosure policy.
           </p>
           <Link
-            href="mailto:security@ainbox.app"
+            href="mailto:security@taskresponse.app"
             className="mt-4 inline-block rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
           >
-            security@ainbox.app
+            security@taskresponse.app
           </Link>
         </div>
       </div>

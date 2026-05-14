@@ -1,7 +1,7 @@
 /**
  * POST /api/sync/outlook/incremental — delta poll (PRD §7.5).
  *
- * AINBOX-18: getAccessToken now performs a real Microsoft token refresh.
+ * TASKRESPONSE-18: getAccessToken now performs a real Microsoft token refresh.
  *   1. Read the encrypted refresh token from oauth_tokens.
  *   2. Decrypt + exchange via Microsoft's /token endpoint (refreshMicrosoftToken).
  *   3. If Microsoft issues a new refresh token, persist it back to oauth_tokens.
@@ -49,7 +49,7 @@ export async function POST(): Promise<NextResponse> {
   }
 
   /**
-   * AINBOX-18: real token refresh.
+   * TASKRESPONSE-18: real token refresh.
    * Read encrypted_refresh_token → decrypt → exchange with Microsoft → return
    * fresh access token. Persists a rotated refresh token if Microsoft issued one.
    */

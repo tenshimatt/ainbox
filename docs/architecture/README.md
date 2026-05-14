@@ -1,4 +1,4 @@
-# Ainbox — Architecture Diagrams
+# TaskResponse — Architecture Diagrams
 
 > BDATSI 6-view architecture for the AI Inbox Operations platform.
 > Each file is an Excalidraw JSON — drag-and-drop onto [excalidraw.com](https://excalidraw.com) to view/edit.
@@ -7,7 +7,7 @@
 
 | # | View | File | What it shows |
 |---|---|---|---|
-| 1 | **Boundary** | `01-boundary-view.excalidraw` | System context: actors, external services, and the Ainbox system boundary |
+| 1 | **Boundary** | `01-boundary-view.excalidraw` | System context: actors, external services, and the TaskResponse system boundary |
 | 2 | **Data** | `02-data-view.excalidraw` | Database schema: all tables, columns, relationships, retention policy |
 | 3 | **Application** | `03-application-view.excalidraw` | Page hierarchy: marketing, onboarding, app pages, shared components |
 | 4 | **Technology** | `04-technology-view.excalidraw` | Stack layers: framework, hosting, infra, APIs, version pins |
@@ -16,7 +16,7 @@
 
 ## Theme
 
-All diagrams use the **Ainbox/Dreelio** design palette (warm creamy background `#f4f1ee`, semantic fills, `#8855ff` accent purple) for consistency with the web app.
+All diagrams use the **TaskResponse/Dreelio** design palette (warm creamy background `#f4f1ee`, semantic fills, `#8855ff` accent purple) for consistency with the web app.
 
 ## How to view
 

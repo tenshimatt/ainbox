@@ -1,5 +1,5 @@
 /**
- * AINBOX-22 — Edge function: draft — generate AI draft replies via LiteLLM
+ * TASKRESPONSE-22 — Edge function: draft — generate AI draft replies via LiteLLM
  *
  * PRD: §7.10 Reply drafting
  *      §4.4 Confidence model
@@ -22,22 +22,22 @@ import {
 
 // ---- synthesised fixtures (no real PII) ----
 
-const FIXTURE_USER_ID = 'user-ainbox22-fixture-001';
-const FIXTURE_EMAIL_ID = 'email-ainbox22-fixture-001';
-const FIXTURE_DRAFT_ID = 'draft-ainbox22-fixture-001';
+const FIXTURE_USER_ID = 'user-taskresponse22-fixture-001';
+const FIXTURE_EMAIL_ID = 'email-taskresponse22-fixture-001';
+const FIXTURE_DRAFT_ID = 'draft-taskresponse22-fixture-001';
 
 const FIXTURE_EMAIL_ROW = {
   id: FIXTURE_EMAIL_ID,
   user_id: FIXTURE_USER_ID,
   subject: 'Synthetic question about support SLA',
-  body_preview: 'Fully synthesised body used only in AINBOX-22 tests.',
-  sender: 'synthetic at ainbox.test',
+  body_preview: 'Fully synthesised body used only in TASKRESPONSE-22 tests.',
+  sender: 'synthetic at taskresponse.test',
   category: 'support',
 };
 
 const FIXTURE_KB_RPC_DATA = [
-  { id: 'kb-ainbox22-a', content: 'Support SLA is 24h for standard tier.', similarity: 0.88 },
-  { id: 'kb-ainbox22-b', content: 'Support contacts are available 9–5 weekdays.', similarity: 0.72 },
+  { id: 'kb-taskresponse22-a', content: 'Support SLA is 24h for standard tier.', similarity: 0.88 },
+  { id: 'kb-taskresponse22-b', content: 'Support contacts are available 9–5 weekdays.', similarity: 0.72 },
 ];
 
 // ---- mock builders ----
@@ -134,7 +134,7 @@ function makeSupabase(opts: {
 }
 
 /** Mock LLM that returns a synthetic draft body and self-rated generation_score. */
-function makeCallLlm(body = 'Synthetic draft reply from AINBOX-22 test.', generationScore = 0.78) {
+function makeCallLlm(body = 'Synthetic draft reply from TASKRESPONSE-22 test.', generationScore = 0.78) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return async (_prompt: any) => ({ body, generation_score: generationScore });
 }
@@ -146,7 +146,7 @@ function makeEmbedder() {
 
 // ---- tests ----
 
-test.describe('@feature AINBOX-22 generateDraftForEmail', () => {
+test.describe('@feature TASKRESPONSE-22 generateDraftForEmail', () => {
   test('§7.10 generates a draft, persists to drafts table, and writes audit log', async () => {
     const draftInserts: Record<string, unknown>[] = [];
     const auditInserts: Record<string, unknown>[] = [];
@@ -166,8 +166,8 @@ test.describe('@feature AINBOX-22 generateDraftForEmail', () => {
     expect(result.confidence).toBeGreaterThanOrEqual(0);
     expect(result.confidence).toBeLessThanOrEqual(1);
     expect(Array.isArray(result.kb_items_used)).toBe(true);
-    expect(result.kb_items_used).toContain('kb-ainbox22-a');
-    expect(result.kb_items_used).toContain('kb-ainbox22-b');
+    expect(result.kb_items_used).toContain('kb-taskresponse22-a');
+    expect(result.kb_items_used).toContain('kb-taskresponse22-b');
     expect(typeof result.created_at).toBe('string');
 
     // Draft row persisted with correct fields
@@ -239,7 +239,7 @@ test.describe('@feature AINBOX-22 generateDraftForEmail', () => {
       generateDraftForEmail(
         supabase,
         FIXTURE_USER_ID,
-        'email-missing-ainbox22',
+        'email-missing-taskresponse22',
         { callLlm: makeCallLlm(), embedder: makeEmbedder() },
       ),
     ).rejects.toThrow(/not found/);

@@ -1,6 +1,6 @@
 -- Migration: §X.Y Personalization L5 — voice prompt synthesis
 --
--- AINBOX-47: Nightly job synthesises a per-user tone/voice guide from their
+-- TASKRESPONSE-47: Nightly job synthesises a per-user tone/voice guide from their
 -- KB items (especially tone-samples) and stores it in voice_profiles.
 -- The draft edge function injects this prompt to match the user's writing voice.
 --

@@ -1,4 +1,4 @@
--- AINBOX-36 / Personalization Layer 1
+-- TASKRESPONSE-36 / Personalization Layer 1
 -- Capture every user action on a draft (approve/reject/edit/send/snooze)
 -- so subsequent layers (rules, few-shot, voice) have signal to mine.
 --

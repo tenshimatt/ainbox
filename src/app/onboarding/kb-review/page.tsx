@@ -2,9 +2,9 @@
 
 /**
  * /onboarding/kb-review
- * AINBOX-8 — Surface extracted KB items grouped by type, with
+ * TASKRESPONSE-8 — Surface extracted KB items grouped by type, with
  * Approve / Edit / Discard buttons. Approve sets human_verified=true.
- * AINBOX-54 — Friendly errors, bulk approve, branching empty states.
+ * TASKRESPONSE-54 — Friendly errors, bulk approve, branching empty states.
  * PRD: §7.6 §7.7
  */
 

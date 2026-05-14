@@ -12,7 +12,7 @@
  *   5. Append an `audit_log` row (no email body — metadata only).
  *
  * Auto-send threshold (≥0.85) is NOT enforced here — it lives in
- * AINBOX-12. This endpoint records the score and stores the draft.
+ * TASKRESPONSE-12. This endpoint records the score and stores the draft.
  */
 
 import { NextResponse, type NextRequest } from 'next/server';
@@ -173,7 +173,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Provider draft (placeholder — AINBOX-5/6 will replace).
+  // Provider draft (placeholder — TASKRESPONSE-5/6 will replace).
   const provider = (emailRow.provider as EmailProvider) ?? 'gmail';
   const providerDraft = await createProviderDraft(user.id, provider, draft.body);
 
@@ -220,7 +220,7 @@ export async function POST(req: NextRequest) {
 function buildDeps(supabase: ReturnType<typeof createServerClient>): DraftDeps {
   return {
     searchKb: async (userId, query, topN) => {
-      // Server-side call to AINBOX-7 KB embedding search.
+      // Server-side call to TASKRESPONSE-7 KB embedding search.
       const baseUrl =
         process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3001';
       const resp = await fetch(

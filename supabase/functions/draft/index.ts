@@ -128,7 +128,7 @@ async function generateReply(
 }
 
 /**
- * AINBOX-52 — Quality L2: returns true when the greeting names a specific
+ * TASKRESPONSE-52 — Quality L2: returns true when the greeting names a specific
  * person who is NOT the receiving user. Only fires when a name can be
  * positively extracted; generic greetings ("Hi there") pass through.
  */
@@ -205,7 +205,7 @@ serve(async (req: Request) => {
       const fullName = (profile as { full_name?: string } | null)?.full_name ?? null;
       const userEmail = (profile as { email?: string } | null)?.email ?? null;
 
-      // AINBOX-52 — Quality L2: hard-skip when greeting names someone else.
+      // TASKRESPONSE-52 — Quality L2: hard-skip when greeting names someone else.
       if (greetingNamesOther(r.body_preview, fullName)) {
         await supabase.from("drafts").insert({
           user_id: r.user_id,

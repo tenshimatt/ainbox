@@ -1,5 +1,5 @@
 /**
- * AINBOX-18 — Microsoft Graph OAuth: real token exchange + refresh
+ * TASKRESPONSE-18 — Microsoft Graph OAuth: real token exchange + refresh
  *
  * PRD §4.2 OAuth token storage — refresh tokens land in oauth_tokens encrypted;
  *          access tokens are minted in-memory only and never persisted.
@@ -15,7 +15,7 @@
  *   7. Sync route (backfill) returns 500 when token exchange fails (no stored token)
  *
  * All network is mocked — no real tokens, no real Supabase project, no real
- * Microsoft endpoints. Synthesised @ainbox.test fixtures only (CLAUDE.md §6).
+ * Microsoft endpoints. Synthesised @taskresponse.test fixtures only (CLAUDE.md §6).
  */
 
 import { test, expect, type Route, type Page } from '@playwright/test';
@@ -57,7 +57,7 @@ async function mockSupabaseAuth(page: Page) {
         expires_in: 3600,
         provider_token: FIXTURE_ACCESS_TOKEN,
         provider_refresh_token: FIXTURE_REFRESH_TOKEN,
-        user: { id: FIXTURE_USER_ID, email: 'ms-fixture@ainbox.test' },
+        user: { id: FIXTURE_USER_ID, email: 'ms-fixture@taskresponse.test' },
       }),
     });
   });
@@ -106,7 +106,7 @@ async function mockStoreTokensFailure(page: Page, errorCode = 'no_provider_refre
 // Tests — store-tokens API endpoint
 // ---------------------------------------------------------------------------
 
-test.describe('@feature AINBOX-18 store-tokens API', () => {
+test.describe('@feature TASKRESPONSE-18 store-tokens API', () => {
   test('returns 401 when called without an active session', async ({ request }) => {
     // No cookies → Supabase returns no session → 401 expected.
     // We can't mock Supabase at the HTTP layer in API-only requests easily,
@@ -119,10 +119,10 @@ test.describe('@feature AINBOX-18 store-tokens API', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests — callback page with store-tokens integration (AINBOX-18)
+// Tests — callback page with store-tokens integration (TASKRESPONSE-18)
 // ---------------------------------------------------------------------------
 
-test.describe('@feature AINBOX-18 callback page — exchange + store-tokens', () => {
+test.describe('@feature TASKRESPONSE-18 callback page — exchange + store-tokens', () => {
   test('successful exchange + successful token store → redirect to /onboarding/sync', async ({ page }) => {
     await mockSupabaseAuth(page);
     await mockStoreTokensSuccess(page);
@@ -195,7 +195,7 @@ test.describe('@feature AINBOX-18 callback page — exchange + store-tokens', ()
 // Tests — Outlook sync routes (verify 401 without auth)
 // ---------------------------------------------------------------------------
 
-test.describe('@feature AINBOX-18 Outlook sync routes — unauthenticated guard', () => {
+test.describe('@feature TASKRESPONSE-18 Outlook sync routes — unauthenticated guard', () => {
   test('POST /api/sync/outlook returns 401 without session', async ({ request }) => {
     const res = await request.post('/api/sync/outlook');
     // 401 = unauthenticated; 500 = Supabase unavailable in test env.
@@ -213,7 +213,7 @@ test.describe('@feature AINBOX-18 Outlook sync routes — unauthenticated guard'
 // Tests — refreshMicrosoftToken helper (via the sync route + mocked MS endpoint)
 // ---------------------------------------------------------------------------
 
-test.describe('@feature AINBOX-18 token refresh — Microsoft token endpoint mocked', () => {
+test.describe('@feature TASKRESPONSE-18 token refresh — Microsoft token endpoint mocked', () => {
   test('sync route surfaces microsoft_token_refresh_failed when MS endpoint errors', async ({
     page,
     request,

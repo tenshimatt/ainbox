@@ -1,7 +1,7 @@
-# Ainbox — factory rules
+# TaskResponse — factory rules
 
 > **Loaded into every Archon workflow context.** How the autonomous
-> implement / review / merge process works for Ainbox. Operating
+> implement / review / merge process works for TaskResponse. Operating
 > constraints, not product scope. Product scope is `mission.md`.
 
 ## Hard rules — NO EXCEPTIONS
@@ -39,7 +39,7 @@
    `archon/<feature-slug>`.
 
 7. **Workflow-created PRs reference both Plane + PRD** in the body —
-   `Plane tickets: AINBOX-N1, AINBOX-N2, ...` and `PRD: §X.Y`.
+   `Plane tickets: TASKRESPONSE-N1, TASKRESPONSE-N2, ...` and `PRD: §X.Y`.
 
 8. **Email PII boundary** — no test fixture, log line, or commit may
    contain real email content. Synthesised fixtures only. Pre-commit
@@ -92,7 +92,7 @@
 
 ## Logging + audit
 
-- Every workflow run logs to `/var/log/archon/ainbox-<ticket>.log` on CT 111.
+- Every workflow run logs to `/var/log/archon/taskresponse-<ticket>.log` on CT 111.
 - Every gate decision (auto-approve / halt + reason) is posted as a
   Plane comment so the audit trail stays in the ticket.
 - The PR description summarises the full chain: PRD §, plan file,
@@ -114,6 +114,6 @@ The workflow halts immediately and labels the ticket `archon-failed` if:
 ## When this file changes
 
 Same governance as `mission.md`. Material edits → discussion → edit →
-update memory file `archon_ainbox_workflow.md` to match.
+update memory file `archon_taskresponse_workflow.md` to match.
 
 **Last reviewed: 2026-05-08**

@@ -1,7 +1,7 @@
 /**
  * Supabase Edge Function: auto-send
  *
- * AINBOX-31: §7.12 Auto-send executor (edge function).
+ * TASKRESPONSE-31: §7.12 Auto-send executor (edge function).
  *
  * PRD: §7.12 Auto-send mode — 60-second cooling delay before send.
  *      §4.4  Confidence model — floor is 0.85, never lower.

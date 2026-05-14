@@ -1,5 +1,5 @@
 /**
- * Reply drafting worker — AINBOX-10.
+ * Reply drafting worker — TASKRESPONSE-10.
  *
  * PRD: §4.4 Confidence model
  *      §7.10 Reply drafting
@@ -13,7 +13,7 @@
  * confidence = min(retrieval_score, generation_score)   // NOT average
  *
  * Note: thresholding (auto-send ≥ 0.85) is enforced downstream by
- * AINBOX-12. This worker only RECORDS the score.
+ * TASKRESPONSE-12. This worker only RECORDS the score.
  */
 
 export interface InboundEmail {
@@ -47,7 +47,7 @@ export interface DraftResult {
 }
 
 export interface DraftDeps {
-  /** AINBOX-7 KB embeddings search. */
+  /** TASKRESPONSE-7 KB embeddings search. */
   searchKb: (
     userId: string,
     query: string,

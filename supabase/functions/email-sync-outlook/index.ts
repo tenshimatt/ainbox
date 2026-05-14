@@ -1,5 +1,5 @@
 /**
- * AINBOX-27: email-sync-outlook — Supabase Edge Function (Deno 2).
+ * TASKRESPONSE-27: email-sync-outlook — Supabase Edge Function (Deno 2).
  *
  * PRD anchors:
  *   §3.8 Email APIs — @microsoft/microsoft-graph-client is the locked Outlook SDK.
@@ -58,9 +58,9 @@ const IV_LEN = 12;
 const TAG_LEN = 16;
 
 function getMasterKey(): Buffer {
-  const raw = _Deno?.env.get('AINBOX_ENC_MASTER_KEY') ?? '';
+  const raw = _Deno?.env.get('TASKRESPONSE_ENC_MASTER_KEY') ?? '';
   if (!raw || raw.length < 32) {
-    throw new Error('AINBOX_ENC_MASTER_KEY must be >= 32 bytes');
+    throw new Error('TASKRESPONSE_ENC_MASTER_KEY must be >= 32 bytes');
   }
   if (/^[0-9a-fA-F]+$/.test(raw) && raw.length % 2 === 0) return Buffer.from(raw, 'hex');
   try {
@@ -72,7 +72,7 @@ function getMasterKey(): Buffer {
 
 function deriveUserKey(userId: string): Buffer {
   const master = getMasterKey();
-  const okm = hkdfSync('sha256', master, Buffer.from(userId, 'utf8'), Buffer.from('ainbox-v1'), KEY_LEN);
+  const okm = hkdfSync('sha256', master, Buffer.from(userId, 'utf8'), Buffer.from('taskresponse-v1'), KEY_LEN);
   return Buffer.from(okm);
 }
 

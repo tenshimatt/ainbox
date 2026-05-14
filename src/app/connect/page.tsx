@@ -23,7 +23,7 @@ export default function ConnectPage() {
       <h1 className="text-2xl font-bold mb-6">Connect provider</h1>
       <p className="text-sm text-slate-600 mb-6">
         Sign in with your inbox provider. We request mail-read, mail-modify, and
-        mail-send scopes so Ainbox can draft and send replies on your behalf.
+        mail-send scopes so TaskResponse can draft and send replies on your behalf.
       </p>
       <div className="space-y-3">
         <button

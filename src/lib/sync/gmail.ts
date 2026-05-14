@@ -1,9 +1,9 @@
 /**
- * AINBOX-5: Gmail backfill + incremental delta sync worker.
+ * TASKRESPONSE-5: Gmail backfill + incremental delta sync worker.
  *
  * PRD anchors:
  *   §3.8 Email APIs — `googleapis` is the locked Gmail SDK.
- *   §4.2 OAuth token storage — refresh token read from `oauth_tokens` (depends on AINBOX-4 migration).
+ *   §4.2 OAuth token storage — refresh token read from `oauth_tokens` (depends on TASKRESPONSE-4 migration).
  *   §4.3 Email content handling — body persisted only via `encryptForUser` (never plaintext on disk).
  *   §7.3 Email sync — Gmail backfill — pulls last 1,000 messages, persists metadata + encrypted body,
  *        emits per-batch progress event, resumable on failure.
@@ -16,9 +16,9 @@
  *   realtime emitter). The route handlers wire production deps; tests inject mocks at the
  *   network boundary so we never hit real Google or Supabase.
  *
- * NOTE: `oauth_tokens` and `email_sync_state` tables are assumed to exist. If AINBOX-4
+ * NOTE: `oauth_tokens` and `email_sync_state` tables are assumed to exist. If TASKRESPONSE-4
  * migration has not yet landed, the route handlers will surface a clear error from the
- * supabase-js call rather than crashing. (depends on AINBOX-4 migration)
+ * supabase-js call rather than crashing. (depends on TASKRESPONSE-4 migration)
  */
 
 import type { gmail_v1 } from 'googleapis';
@@ -488,7 +488,7 @@ export async function runGmailIncremental(userId: string, deps: SyncDeps): Promi
 
 /**
  * Build a Gmail client from a refresh token. The refresh token is loaded from
- * `oauth_tokens` (depends on AINBOX-4 migration). Access tokens are minted at
+ * `oauth_tokens` (depends on TASKRESPONSE-4 migration). Access tokens are minted at
  * request time and never persisted — per §4.2.
  */
 export async function buildGmailClient(refreshToken: string): Promise<GmailLikeClient> {
