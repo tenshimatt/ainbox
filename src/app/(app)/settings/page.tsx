@@ -120,9 +120,9 @@ export default function SettingsPage() {
 
   return (
     <>
-      <div className="mx-auto w-full max-w-full px-4 py-6 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-full px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
+          <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">Settings</h1>
           <span
             data-testid="app-version-badge"
             className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600"
@@ -134,8 +134,8 @@ export default function SettingsPage() {
         <p className="mt-1 text-sm text-slate-500">Manage your account and connected providers</p>
 
         {/* Tabs */}
-        <div className="mt-6 border-b border-slate-200">
-          <nav className="-mb-px flex gap-6" role="tablist">
+        <div className="border-b border-slate-200">
+          <nav className="-mb-px flex gap-4 sm:gap-6" role="tablist">
             {[
               { id: 'providers' as const, label: 'Providers' },
               { id: 'skills' as const, label: 'Skills' },
@@ -199,7 +199,7 @@ export default function SettingsPage() {
             ))}
 
             <h2 className="mt-8 text-sm font-semibold text-slate-700">Add Provider</h2>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <a
                 href="/connect/google"
                 className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
@@ -355,7 +355,7 @@ export default function SettingsPage() {
             </div>
           </div>
         )}
-      </div>
+      </main>
     </>
   );
 }
