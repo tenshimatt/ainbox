@@ -234,8 +234,19 @@ export default function Page() {
       <OnboardingStepper currentStep={2} />
       <h1 className="text-2xl font-bold">Knowledge base review</h1>
       <p className="mt-2 text-sm text-gray-600">
-        Confirm what we learned from your inbox. Items you approve will be used to draft replies in your voice.
+        These are facts we extracted from your sent emails — your FAQs, prices,
+        tone of voice. Approving an item tells the AI it&apos;s correct, so it can
+        use it when drafting replies for you.
       </p>
+      <div
+        className="mt-4 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-800"
+        data-testid="kb-no-send-notice"
+        role="note"
+      >
+        <strong>Nothing is sent here.</strong> Approving a fact only marks it as
+        verified. Email drafting and sending happens later, on the Drafts screen,
+        and always requires your approval.
+      </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-3" data-testid="kb-toolbar">
         <button
@@ -257,6 +268,7 @@ export default function Page() {
           <button
             onClick={() => void bulkApprove()}
             disabled={bulkApproving}
+            title="Mark every extracted fact as verified. Nothing is sent."
             className="rounded bg-emerald-600 text-white px-3 py-1.5 text-sm disabled:opacity-50"
             data-testid="kb-bulk-approve"
           >
@@ -323,6 +335,7 @@ export default function Page() {
                 {sectionUnverified.length > 1 && (
                   <button
                     onClick={() => void Promise.all(sectionUnverified.map((r) => approve(r.id)))}
+                    title="Mark every fact in this section as verified. Nothing is sent."
                     className="rounded border border-emerald-500 text-emerald-700 px-2 py-0.5 text-xs"
                     data-testid={`kb-bulk-approve-${t}`}
                   >
@@ -379,6 +392,7 @@ export default function Page() {
                           <>
                             <button
                               onClick={() => approve(it.id)}
+                              title={it.human_verified ? 'Already verified' : 'Mark this fact as correct. Nothing is sent.'}
                               className="rounded bg-emerald-600 text-white px-3 py-1 text-xs disabled:opacity-50"
                               disabled={it.human_verified}
                               data-testid={`kb-approve-${it.id}`}
