@@ -121,7 +121,16 @@ export default function SettingsPage() {
   return (
     <>
       <div className="mx-auto w-full max-w-full px-4 py-6 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
+          <span
+            data-testid="app-version-badge"
+            className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600"
+          >
+            <span className="font-semibold text-slate-800">Ainbox</span>
+            <span className="text-slate-400">v0.1.0</span>
+          </span>
+        </div>
         <p className="mt-1 text-sm text-slate-500">Manage your account and connected providers</p>
 
         {/* Tabs */}
