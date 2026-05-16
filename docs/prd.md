@@ -5,7 +5,7 @@
 > change to the audit trail — bump the `Last reviewed` date.
 
 **Version:** 0.1 · MVP scope locked
-**Last reviewed:** 2026-05-08
+**Last reviewed:** 2026-05-13 (added §7.21–§7.25, §9.11, §12.11–§12.14; tightened §13.6; flagged §9.1 pending ADR-0002)
 
 ---
 
@@ -247,6 +247,21 @@ Every feature ships with @smoke and L4 contract tests where applicable.
 ### §7.20 Production observability
 Sentry (frontend) + Supabase logs (backend). PII redacted at log-emission.
 
+### §7.21 Free trial + billing tiers
+Free tier caps email-processing at the lower of **100 emails** or a $20 per-tenant cumulative cost during the trial window. Paid tiers (Starter / Pro / Business) raise the cap and unlock auto-send + skills. Cost is computed in `cost_ledger` per tenant per day. When a trial tenant hits the cap, classification + drafting auto-pause and the user sees a clear "upgrade to continue" CTA — no silent failure. Source: 2026-05-13 product call (Samuel + Matt).
+
+### §7.22 Per-tenant cost kill switch
+Hard daily kill switch at $20/day default (raise per paid tier). On trip: classify + draft halt for that tenant for the rest of the UTC day; user notified once in-app + email. Global kill switch at $50/day (across all tenants) for catastrophic-overrun protection. Both implemented as a pg_cron sweep over `cost_ledger`. Tightens prior §13.6 from soft cap to hard kill.
+
+### §7.23 RAG — uploaded documents + website scrape
+User can drop policy / pricing / product docs OR enter a website URL on `/knowledge`; the system scrapes / parses, chunks, embeds (Ollama bge-m3, §3.7), upserts into `kb_items` with `source='upload'` or `source='scrape'`. Reused by §7.10 retrieval the same way email-derived items are. Hard size cap: 10 MB / doc, 50 docs / tenant on trial.
+
+### §7.24 Command-center dashboard
+At `/inbox` top strip: emails handled, drafts approved, hours saved (drafts approved × 4 min default, configurable), $ saved (hours × user-configured hourly rate, default £40). Live-updated via the same Supabase Realtime channel as the inbox feed. No new schema — derives from `drafts.status` + `audit_log`.
+
+### §7.25 Simplified confidence threshold UI
+On `/automation`, replace the numeric 0.85–1.00 slider with three named tiers: **Strict** (0.95), **Balanced** (0.90), **Permissive** (0.85). The floor of 0.85 (§4.4, §9.2) is unchanged — users can't pick lower. The internal value is still stored as a float; the UI is the only abstraction.
+
 ---
 
 ## §8 Non-functional
@@ -277,7 +292,7 @@ Sentry (frontend) + Supabase logs (backend). PII redacted at log-emission.
 ## §9 Anti-patterns — DO NOT INTRODUCE
 
 ### §9.1 Cross-tenant aggregation
-Even anonymised. Forbidden in v1.
+Even anonymised. Forbidden in v1. **Under review** following the 2026-05-13 product call — a cross-user heuristic-learning database was proposed. Status: pending ADR `docs/decisions/0001-cross-user-learning.md`. Until that ADR resolves, this rule stands.
 
 ### §9.2 Auto-send below 0.85 confidence
 Non-negotiable — even with explicit user opt-in.
@@ -305,6 +320,9 @@ Explicit no (Beyond Pandora portfolio rule).
 
 ### §9.10 Hardcoded model names in business logic
 All model selection goes via the LiteLLM gateway routing.
+
+### §9.11 Exposing backend technical state to the user
+Onboarding / sync UIs MUST NOT show percentages, message counts being processed, "classifying email N of M", history-id tokens, or any other implementation detail. User-facing progress is named phases only ("Connecting" → "Reading your inbox" → "Building your knowledge base" → "Ready"). Source: 2026-05-13 product call — "I don't want the customer to see any of this. They must just see a little taskbar… phase one, two, three, and then it's done."
 
 ---
 
@@ -362,6 +380,18 @@ Capacitor wrap of the Next.js app, with native push notifications.
 ### §12.10 Whitelabel / agency mode
 Resell Ainbox under a partner brand.
 
+### §12.11 Social media management — LinkedIn + Instagram
+After email v1, extend the assistant to draft posts + DM replies on LinkedIn and Instagram. **Explicit no** to Facebook and other platforms. Source: 2026-05-13 call.
+
+### §12.12 CRM history pull
+Beyond inbox: pull conversation/order history from Shopify, Zoho, WordPress, HubSpot when authorised, feed into KB for richer replies. Generalisation of §12.2.
+
+### §12.13 Local-AI option (Apple Studio)
+For data-sensitive clients (family offices, dental, property): ship a $2k Apple Studio rack node that runs models locally. Hard sales lever, not MVP. Source: 2026-05-13 call.
+
+### §12.14 Telegram-driven idea pipeline
+Co-founder voice-notes feature ideas / bug reports into a Telegram group; an agent on CT 111 transcribes, classifies, drops into Plane as `archon-ready` tickets. Already partly built via the PLAUD pipeline; this would extend that to live Telegram audio. Source: 2026-05-13 call.
+
 ---
 
 ## §13 Risks
@@ -382,7 +412,7 @@ Mitigations: 60-second cooling delay before send, confidence floor 0.85, per-cat
 Mitigation: pacing in sync workers, exponential backoff, surfacing "rate-limited" state to user with ETA.
 
 ### §13.6 Cost overrun on a per-tenant basis
-Mitigation: $5/day per-tenant cap, $50/day global cap, both hard-halt on trip.
+Mitigation: **$20/day per-tenant kill switch** (free tier) / **$5/day cap** (paid baseline, raised per tier), **$50/day global kill switch** — all hard-halt on trip. See §7.21 and §7.22 for implementation. Tightened from a soft cap on 2026-05-13.
 
 ### §13.7 Model degradation
 DeepSeek model deprecation breaks drafting. Mitigation: LiteLLM model abstraction, ADR-driven model swaps.
