@@ -85,6 +85,16 @@ export default function SettingsPage() {
     }
   };
 
+  // ── Duplicate account detection (AINBOX-50) ──────────────────────────────
+  type DuplicateAccount = { id: string; email: string; created_at: string };
+  const [duplicates, setDuplicates] = useState<DuplicateAccount[]>([]);
+  const [duplicatesLoading, setDuplicatesLoading] = useState(false);
+  const [duplicatesError, setDuplicatesError] = useState<string | null>(null);
+  const [mergeConfirm, setMergeConfirm] = useState<DuplicateAccount | null>(null);
+  const [mergeLoading, setMergeLoading] = useState(false);
+  const [mergeError, setMergeError] = useState<string | null>(null);
+  const [mergeSuccess, setMergeSuccess] = useState<string | null>(null);
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [disconnectConfirm, setDisconnectConfirm] = useState<string | null>(null);
 
@@ -107,6 +117,56 @@ export default function SettingsPage() {
       );
     }
     setDisconnectConfirm(null);
+  };
+
+  // Load duplicates whenever the user switches to the Account tab
+  useEffect(() => {
+    if (activeTab !== 'account') return;
+    let cancelled = false;
+    setDuplicatesLoading(true);
+    setDuplicatesError(null);
+    (async () => {
+      try {
+        const r = await fetch('/api/account/duplicates', { credentials: 'include' });
+        if (cancelled) return;
+        if (!r.ok) {
+          setDuplicatesError("Couldn't check for duplicate accounts. Try refreshing.");
+          return;
+        }
+        const data = (await r.json()) as { duplicates: DuplicateAccount[] };
+        if (!cancelled) setDuplicates(data.duplicates ?? []);
+      } catch {
+        if (!cancelled) setDuplicatesError("Couldn't check for duplicate accounts. Try refreshing.");
+      } finally {
+        if (!cancelled) setDuplicatesLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [activeTab]);
+
+  const handleMerge = async (dup: DuplicateAccount) => {
+    setMergeLoading(true);
+    setMergeError(null);
+    setMergeSuccess(null);
+    try {
+      const resp = await fetch('/api/account/merge', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ duplicate_user_id: dup.id }),
+      });
+      if (!resp.ok) {
+        setMergeError("Couldn't merge account. Try again.");
+      } else {
+        setDuplicates((prev) => prev.filter((d) => d.id !== dup.id));
+        setMergeSuccess(`Merged successfully. Data from ${dup.email} has been consolidated.`);
+      }
+    } catch {
+      setMergeError("Couldn't merge account. Try again.");
+    } finally {
+      setMergeLoading(false);
+      setMergeConfirm(null);
+    }
   };
 
   const handleDeleteAccount = async () => {
@@ -281,6 +341,86 @@ export default function SettingsPage() {
         {/* Account tab */}
         {activeTab === 'account' && (
           <div className="mt-6 space-y-6">
+
+            {/* Duplicate account detection */}
+            <div
+              data-testid="account-duplicates-section"
+              className="rounded-lg border border-slate-200 bg-white p-4"
+            >
+              <h2 className="text-sm font-semibold text-slate-700">Duplicate Accounts</h2>
+              <p className="mt-1 text-xs text-slate-500">
+                If you signed in with multiple methods using the same email, we can merge those
+                accounts so all your data lives in one place.
+              </p>
+
+              {duplicatesLoading && (
+                <p data-testid="account-duplicates-loading" className="mt-3 text-xs text-slate-400">
+                  Checking for duplicates…
+                </p>
+              )}
+
+              {!duplicatesLoading && duplicatesError && (
+                <p
+                  data-testid="account-duplicates-error"
+                  role="alert"
+                  className="mt-3 text-sm text-red-600"
+                >
+                  {duplicatesError}
+                </p>
+              )}
+
+              {!duplicatesLoading && !duplicatesError && duplicates.length === 0 && (
+                <p data-testid="account-duplicates-none" className="mt-3 text-xs text-slate-500">
+                  No duplicate accounts detected.
+                </p>
+              )}
+
+              {!duplicatesLoading && !duplicatesError && duplicates.length > 0 && (
+                <ul className="mt-3 space-y-2" data-testid="account-duplicates-list">
+                  {duplicates.map((dup) => (
+                    <li
+                      key={dup.id}
+                      data-testid={`account-duplicate-row-${dup.id}`}
+                      className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 px-3 py-2"
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-slate-800">{dup.email}</p>
+                        <p className="text-xs text-slate-400">
+                          Created {new Date(dup.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <button
+                        data-testid={`account-merge-btn-${dup.id}`}
+                        onClick={() => setMergeConfirm(dup)}
+                        className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-white"
+                      >
+                        Merge
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {mergeError && (
+                <p
+                  data-testid="account-merge-error"
+                  role="alert"
+                  className="mt-3 text-sm text-red-600"
+                >
+                  {mergeError}
+                </p>
+              )}
+              {mergeSuccess && (
+                <p
+                  data-testid="account-merge-success"
+                  role="status"
+                  className="mt-3 text-sm text-green-600"
+                >
+                  {mergeSuccess}
+                </p>
+              )}
+            </div>
+
             <div className="rounded-lg border border-red-200 bg-red-50 p-4">
               <h2 className="text-sm font-semibold text-red-700">Danger Zone</h2>
               <p className="mt-1 text-xs text-red-600">
@@ -292,6 +432,44 @@ export default function SettingsPage() {
               >
                 Delete everything
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Merge confirmation dialog (AINBOX-50) */}
+        {mergeConfirm && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+            role="dialog"
+            aria-label="confirm merge account"
+            data-testid="account-merge-dialog"
+          >
+            <div className="mx-4 w-full max-w-sm rounded-lg bg-white p-6 shadow-xl">
+              <h3 className="text-lg font-semibold text-slate-900">Merge account?</h3>
+              <p className="mt-2 text-sm text-slate-500">
+                All emails, drafts, and knowledge base items from{' '}
+                <span className="font-medium text-slate-700">{mergeConfirm.email}</span> will be
+                moved into your current account. The duplicate account profile will be removed.
+                This cannot be undone.
+              </p>
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  data-testid="account-merge-cancel"
+                  onClick={() => setMergeConfirm(null)}
+                  disabled={mergeLoading}
+                  className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  data-testid="account-merge-confirm"
+                  onClick={() => handleMerge(mergeConfirm)}
+                  disabled={mergeLoading}
+                  className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+                >
+                  {mergeLoading ? 'Merging…' : 'Merge account'}
+                </button>
+              </div>
             </div>
           </div>
         )}
