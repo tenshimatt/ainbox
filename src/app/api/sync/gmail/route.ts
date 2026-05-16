@@ -26,6 +26,7 @@ import {
   type SyncStorage,
 } from '@/lib/sync/gmail';
 import { decryptForUser } from '@/lib/crypto';
+import { makePipelineKick } from '@/lib/sync/pipeline-kick';
 
 export const runtime = 'nodejs';
 
@@ -171,10 +172,22 @@ export async function POST(): Promise<Response> {
   }
 
   const gmail = await buildGmailClient(refreshToken);
+
+  // TASK7544-79: kick classify + draft after the first batch to meet 4-min
+  // time-to-first-draft. Only wired when CRON_SECRET is configured.
+  const pipelineKick =
+    process.env.CRON_SECRET && process.env.NEXT_PUBLIC_SUPABASE_URL
+      ? makePipelineKick({
+          supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+          cronSecret: process.env.CRON_SECRET,
+        })
+      : undefined;
+
   const deps: SyncDeps = {
     gmail,
     storage: makeStorage(supabase),
     progress: makeProgress(supabase),
+    pipelineKick,
   };
 
   // Fire-and-forget: kick the backfill off; return 202 immediately so the

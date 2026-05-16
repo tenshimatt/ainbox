@@ -110,6 +110,13 @@ export interface SyncDeps {
   sleep?: (ms: number) => Promise<void>;
   /** Override for tests; default uses Date.now. */
   now?: () => number;
+  /**
+   * TASK7544-79: Called once, fire-and-forget, after the first batch of messages
+   * is persisted during a backfill. Used to kick classify + draft immediately so
+   * the user sees their first draft within 4 minutes rather than waiting for
+   * the next pg_cron cycle.
+   */
+  pipelineKick?: (userId: string) => Promise<void>;
 }
 
 export interface BackfillResult {
@@ -308,6 +315,7 @@ export async function runGmailBackfill(userId: string, deps: SyncDeps): Promise<
   let pageToken: string | undefined;
   let highestHistoryId: string | null = null;
   let attemptsTotal = 0;
+  let pipelineKicked = false;
 
   while (processed < BACKFILL_TARGET) {
     await pacer.consume(COST_MESSAGES_LIST);
@@ -343,6 +351,15 @@ export async function runGmailBackfill(userId: string, deps: SyncDeps): Promise<
       }
       processed++;
       if (processed >= BACKFILL_TARGET) break;
+    }
+
+    // TASK7544-79: kick classify + draft in parallel after the first batch
+    // so the user gets their first draft in < 4 min instead of waiting for cron.
+    if (!pipelineKicked && processed > 0 && deps.pipelineKick) {
+      pipelineKicked = true;
+      void deps.pipelineKick(userId).catch((err) => {
+        console.error('[sync/gmail] pipelineKick threw:', (err as Error).message);
+      });
     }
 
     await deps.progress.emit(userId, {
