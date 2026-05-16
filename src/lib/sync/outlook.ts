@@ -126,6 +126,12 @@ export interface OutlookSyncDeps {
   backfillCap?: number;
   /** Optional encrypt override (for tests). Defaults to AINBOX-5 lib/crypto.ts. */
   encryptForUser?: EncryptForUser;
+  /**
+   * TASK7544-79: Called once, fire-and-forget, after the first page of messages
+   * is persisted during a backfill. Kicks classify + draft immediately so the
+   * user sees their first draft within 4 minutes instead of waiting for pg_cron.
+   */
+  pipelineKick?: (userId: string) => Promise<void>;
 }
 
 export interface PersistedMessage {
@@ -216,6 +222,7 @@ export async function runOutlookBackfill(
 
   let persisted = 0;
   let pages = 0;
+  let pipelineKicked = false;
   let url: string | null = `/me/messages?$top=100&$select=${encodeURIComponent(
     'id,subject,receivedDateTime,from,body,bodyPreview,internetMessageId,conversationId',
   )}`;
@@ -250,6 +257,15 @@ export async function runOutlookBackfill(
         body_encrypted: encryptedBody,
       });
       persisted += 1;
+    }
+
+    // TASK7544-79: kick classify + draft in parallel after the first page
+    // so the user gets their first draft in < 4 min instead of waiting for cron.
+    if (!pipelineKicked && persisted > 0 && deps.pipelineKick) {
+      pipelineKicked = true;
+      void deps.pipelineKick(deps.userId).catch((err) => {
+        console.error('[sync/outlook] pipelineKick threw:', (err as Error).message);
+      });
     }
 
     const next = (res as { ['@odata.nextLink']?: string })['@odata.nextLink'] ?? null;
