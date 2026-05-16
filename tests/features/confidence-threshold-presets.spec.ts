@@ -16,7 +16,7 @@ import {
   PRESETS,
   detectPreset,
   type PresetKey,
-} from '../../src/app/(app)/automation/page';
+} from '../../src/lib/automation/presets';
 
 // ---------------------------------------------------------------------------
 // Pure-function tests — no browser navigation needed, always GREEN
