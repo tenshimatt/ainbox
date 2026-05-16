@@ -94,6 +94,10 @@ export default function SyncPage() {
               setSyncStatus('complete');
               setBatchEvents((p) => [...p, `Sync complete — ${lastCount} messages.`]);
               if (pollTimer) clearInterval(pollTimer);
+              // Auto-verify top KB items so /onboarding/kb-review is off the critical path.
+              fetch('/api/kb/auto-verify', { method: 'POST', credentials: 'same-origin' }).catch(() => {
+                /* fire-and-forget — sidebar progress updates asynchronously */
+              });
             }
           } catch { /* keep polling */ }
         }, 4000);
@@ -227,10 +231,10 @@ export default function SyncPage() {
         <div className="mt-8 text-center">
           {syncStatus === 'complete' ? (
             <Link
-              href="/onboarding/kb-review"
+              href="/inbox"
               className="inline-block rounded-lg bg-slate-900 px-6 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
             >
-              Continue to Knowledge Review
+              Go to inbox
             </Link>
           ) : (
             <button
