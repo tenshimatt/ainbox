@@ -11,8 +11,14 @@ type Provider = {
   connectedAt: string;
 };
 
+function relinkUrl(provider: Provider): string {
+  return provider.type === 'google' ? '/connect/google' : '/connect/microsoft';
+}
+
 export default function SettingsProvidersPage() {
   const [providers, setProviders] = useState<Provider[]>([]);
+  const [disconnectConfirm, setDisconnectConfirm] = useState<string | null>(null);
+
   useEffect(() => {
     (async () => {
       const r = await fetch('/api/oauth/tokens', { credentials: 'include' });
@@ -22,7 +28,6 @@ export default function SettingsProvidersPage() {
       }
     })();
   }, []);
-  const [disconnectConfirm, setDisconnectConfirm] = useState<string | null>(null);
 
   const handleDisconnect = async (providerId: string) => {
     try {
@@ -46,11 +51,21 @@ export default function SettingsProvidersPage() {
 
   return (
     <>
-      <div className="mx-auto w-full max-w-full px-4 py-6 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold text-slate-900">Providers</h1>
-        <p className="mt-1 text-sm text-slate-500">Manage your connected email accounts</p>
+      <main className="mx-auto w-full max-w-full px-4 py-6 sm:px-6 lg:px-8">
+        <header>
+          <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">Providers</h1>
+          <p className="mt-1 text-sm text-slate-500">Manage your connected email accounts</p>
+        </header>
 
         <div className="mt-6 space-y-4">
+          <h2 className="text-sm font-semibold text-slate-700">Connected Accounts</h2>
+
+          {providers.length === 0 && (
+            <p className="text-sm text-slate-500" data-testid="no-providers-message">
+              No mailboxes connected yet. Add one below.
+            </p>
+          )}
+
           {providers.map((provider) => (
             <div
               key={provider.id}
@@ -81,22 +96,36 @@ export default function SettingsProvidersPage() {
                     </button>
                   </>
                 ) : (
-                  <span className="text-xs text-slate-400">Not connected</span>
+                  <>
+                    <span className="flex items-center gap-1 text-xs text-amber-600">
+                      <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                      Disconnected
+                    </span>
+                    <a
+                      href={relinkUrl(provider)}
+                      data-testid="relink-button"
+                      className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-100"
+                    >
+                      Re-link
+                    </a>
+                  </>
                 )}
               </div>
             </div>
           ))}
 
-          <h2 className="mt-8 text-sm font-semibold text-slate-700">Add another provider</h2>
-          <div className="flex gap-3">
+          <h2 className="mt-8 text-sm font-semibold text-slate-700">Add mailbox</h2>
+          <div className="flex flex-wrap gap-3">
             <a
               href="/connect/google"
+              data-testid="add-google"
               className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
               Connect Google
             </a>
             <a
               href="/connect/microsoft"
+              data-testid="add-microsoft"
               className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
               Connect Microsoft
@@ -133,7 +162,7 @@ export default function SettingsProvidersPage() {
             </div>
           </div>
         )}
-      </div>
+      </main>
     </>
   );
 }

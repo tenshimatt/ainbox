@@ -1,0 +1,1352 @@
+name: task-response-feature
+description: |
+  PRD-anchored, RAG-informed, test-first feature workflow for Task Response.
+
+  Composes Cole's bundled patterns (interactive PRD, PIV loop, comprehensive
+  PR review) with Task Response-specific bits: Plane ticket creation, Archon v1 RAG
+  query against project da8c5635-b18c-4595-ba06-9c3e268dd3d3, Excalidraw
+  diagram generation into Obsidian/PROJECTS/Task Response/20-architecture/, and a
+  hard rule that every Plane ticket carries `PRD: §X.Y`.
+
+  Use when: building any new Task Response feature from idea to PR.
+  Triggers: "ainbox feature", "build ainbox <thing>", "ainbox <prd_section>".
+
+  Input options:
+    A) Feature idea in natural language
+    B) PRD section ID like "§12.2" referencing 10-product/00-overview.md
+    C) Path to a transcript / voice note that the PRD step turns into a section
+
+  Output:
+    - PRD section in Obsidian (extended or new)
+    - Excalidraw architecture diagram in 20-architecture/
+    - Plane tickets, all citing PRD: §X.Y
+    - Playwright tests committed BEFORE the implementation
+    - Branch + PR ready for review
+
+provider: deepseek
+
+# ────────────────────────────────────────────────────────────────
+# CONTEXT PRIME — read once, reuse across nodes
+# ────────────────────────────────────────────────────────────────
+
+nodes:
+  - id: prime-context
+    bash: |
+      # Rail #11: hard workspace reset every run. TASK7544-75 RCA — implement
+      # picked up TASK7544-52's leftover modified src/ files and built the
+      # wrong feature. Manual sync between runs is fragile; do it in-flow.
+      # (Workspace is a harness clone, never the user's WIP.)
+      git checkout main 2>/dev/null || true
+      git fetch origin main --quiet 2>/dev/null || true
+      git reset --hard origin/main 2>/dev/null || true
+      git clean -fdx docs/architecture/ 2>/dev/null || true
+      # Rail #9 — wire git's credential helper to gh so open-pr's
+      # `git push` doesn't fail with "could not read Username for
+      # https://github.com" inside the bun child process. TASK7544-75
+      # taught us this. Idempotent.
+      gh auth setup-git 2>/dev/null || true
+      git config --global user.email tenshimatt@gmail.com 2>/dev/null || true
+      git config --global user.name "Pandomagic Harness" 2>/dev/null || true
+      bash .archon/scripts/prime-context.sh
+
+      # Rail #12: mark ticket In Progress as soon as we start
+      if [[ -n "${ARCHON_TICKET_ID:-}" && -n "${PLANE_API_TOKEN:-}" ]]; then
+        IN_PROGRESS_STATE="0c4c08e9-2cbb-4152-951f-96dcf1691780"
+        bash .archon/scripts/plane-update-state.sh \
+          "$ARCHON_TICKET_ID" "$IN_PROGRESS_STATE" || true
+        bash .archon/scripts/plane-comment.sh "$ARCHON_TICKET_ID" \
+          "<p>🤖 Pandomagic harness started. Ticket marked In Progress.</p>" || true
+      fi
+
+  # ──────────────────────────────────────────────────────────────
+  # PHASE 0 — MISSION TRIAGE (cheap, before anything expensive)
+  # Cole's Dark Factory pattern: reject out-of-scope tickets before
+  # we burn planning tokens. Reads mission.md (loaded in prime-context).
+  # ──────────────────────────────────────────────────────────────
+
+  - id: mission-triage
+    depends_on: [prime-context]
+    provider: deepseek
+    model: deepseek-v4-flash
+    prompt: |
+      Triage the input against mission.md (loaded in primed context above).
+
+      User input: $ARGUMENTS
+
+      Decide: does this fall within Task Response's in-scope features, OR does
+      it match an out-of-scope hard boundary?
+
+      Output JSON. If REJECTED, the workflow halts with archon-failed
+      label on the source Plane ticket. If APPROVED, continue.
+    output_format:
+      type: object
+      properties:
+        verdict:
+          type: string
+          enum: [in_scope, out_of_scope, ambiguous]
+        reason: { type: string }
+        out_of_scope_match:
+          type: string
+          description: "If out_of_scope, which mission.md hard boundary it triggered"
+      required: [verdict, reason]
+
+  - id: gate-mission
+    depends_on: [mission-triage]
+    timeout: 86400000
+    bash: |
+      # IMPORTANT: only interpolate SHORT alphanumeric fields here.
+      # Long text fields (reason, summary, description) may contain quotes,
+      # parentheses, dashes, em-dashes, etc. that break bash quoting when
+      # the harness substitutes them literally into a string. Bug 24.
+      set +e
+      VERDICT="$mission-triage.output.verdict"
+      if [[ "$VERDICT" == "out_of_scope" ]]; then
+        echo "mission triage REJECTED — see workflow log for reason" >&2
+        if [[ -n "${ARCHON_TICKET_ID:-}" ]]; then
+          bash .archon/scripts/plane-comment.sh "$ARCHON_TICKET_ID" \
+            "<p>Mission triage rejected this ticket. See the workflow log for the full reason. To override, edit mission.md or remove the archon-ready label and drive manually.</p>" || true
+        fi
+        exit 1
+      fi
+      if [[ "$VERDICT" == "ambiguous" ]]; then
+        bash .archon/scripts/wait-for-approval.sh mission-ambiguous \
+          "Mission triage flagged this as AMBIGUOUS. See the workflow log for the reason. Approve to proceed anyway, or reject."
+      fi
+      exit 0
+
+  # ──────────────────────────────────────────────────────────────
+  # PHASE 0.5 — CLASSIFIER (Pandomagic pyramid)
+  # Reads docs/architecture/levels.md and decides the architectural
+  # impact level (L1-L5) for this feature. Downstream nodes scope
+  # their behaviour by level. This is the structural fix for "every
+  # feature gets enterprise rigor regardless of size".
+  # ──────────────────────────────────────────────────────────────
+
+  - id: classify
+    depends_on: [gate-mission]
+    provider: deepseek
+    model: deepseek-v4-pro
+    context: fresh
+    prompt: |
+      You are the Pandomagic classifier. Read docs/architecture/levels.md
+      from the project root and decide where the incoming feature sits
+      in the pyramid (L1-L5).
+
+      User input: $ARGUMENTS
+
+      Tasks:
+      1. Read docs/architecture/levels.md (it lists L1-L5 with examples
+         + contract-test paths for THIS project).
+      2. Use git ls-files / Read tools sparingly to confirm impact area.
+      3. Classify the feature: L1, L2, L3, L4, or L5.
+      4. List which architectural contracts (from L4) this change touches
+         (could be empty for L1/L2 changes).
+      5. List which contract tests must stay green (regression_must_pass).
+         At minimum: tests/smoke/ + L4 contracts the change touches.
+         For L3+ changes: include all L4 contracts + new feature tests.
+      6. Set workflow_lane: L1-cosmetic | L2-minor | L3-major | L4-contract | L5-escalate
+      7. confidence: high | medium | low
+
+      HARD RULES:
+        - DO NOT default to L4 just because you can't decide. Be honest:
+          if the feature is a new button or copy change, it's L2.
+        - L5 means halt the workflow — only set if the change genuinely
+          swaps a runtime/framework/host. When in doubt, L4.
+        - **Simple edge functions** that add ONE endpoint using existing
+          patterns, with no schema migration and no new tables = **L2**.
+        - Complex edge functions with multiple endpoints AND schema
+          changes = L3.
+        - Always include tests/smoke/ in regression_must_pass.
+    output_format:
+      type: object
+      properties:
+        level:                { type: string, enum: ["L1","L2","L3","L4","L5"] }
+        category:             { type: string }
+        contracts_touched:    { type: array, items: { type: string } }
+        regression_must_pass: { type: array, items: { type: string } }
+        workflow_lane:        { type: string, enum: ["L1-cosmetic","L2-minor","L3-major","L4-contract","L5-escalate"] }
+        confidence:           { type: string, enum: ["high","medium","low"] }
+        notes:                { type: string }
+      required: [level, category, contracts_touched, regression_must_pass, workflow_lane, confidence]
+
+  - id: gate-classify
+    depends_on: [classify]
+    timeout: 86400000
+    bash: |
+      set +e
+      LEVEL="$classify.output.level"
+      LANE="$classify.output.workflow_lane"
+      if [[ "$LEVEL" == "L5" ]]; then
+        echo "✗ classifier returned L5 — platform-level change requires human ADR" >&2
+        if [[ -n "${ARCHON_TICKET_ID:-}" ]]; then
+          bash .archon/scripts/plane-comment.sh "$ARCHON_TICKET_ID" \
+            "<p>Pandomagic halted: this ticket classified as <strong>L5 (platform/infra change)</strong>. Pandomagic does not auto-build L5. Please write an ADR in <code>docs/decisions/</code> and drive this change manually.</p>" || true
+        fi
+        exit 1
+      fi
+      echo "classified: $LEVEL ($LANE)"
+      exit 0
+
+  # ──────────────────────────────────────────────────────────────
+  # PHASE 0.7 — LANE ROUTER (2-tier classifier: vibe-code vs full DAG)
+  #
+  # L1-L2 (vibe-code): run the express pipeline entirely in this bash
+  #   node — test-first → implement → validate → open-pr — then EXIT.
+  #   This prevents the full DAG (PRD, reviews, diagrams, human gates)
+  #   from running for minor changes, saving ~$5-10 and 30-60 min per ticket.
+  #
+  # L3-L4 (full DAG): no-op, node exits 0, DAG continues normally.
+  #
+  # The classify node already ran and set $classify.output.workflow_lane
+  # to L1-cosmetic | L2-minor | L3-major | L4-contract | L5-escalate.
+  #
+  # ──────────────────────────────────────────────────────────────
+
+
+
+# ══════════════════════════════════════════════════════════════
+# 2-TIER CLASSIFIER — Shared template for all project workflows
+#
+# Injected by compose.sh after the project's gate-classify node.
+# Provides the lane-router + vibe-code-bash nodes that implement
+# the L1-L2 express lane. L3-L4 proceeds through the project's
+# normal DAG.
+#
+# To use: run .archon/shared/compose.sh <project-yaml-path>
+# ══════════════════════════════════════════════════════════════
+
+  # ──────────────────────────────────────────────────────────────
+  # 2-TIER LANE ROUTER — L1-L4 (vibe-code) vs L3-L4 (full DAG)
+  #
+  # L1-L4: signal active, vibe-code-bash handles the work
+  # L5 only: full DAG
+  # L5: halted by gate-classify (never reaches here)
+  # ──────────────────────────────────────────────────────────────
+
+  - id: lane-router
+    depends_on: [gate-classify]
+    bash: |
+      set +e
+      LEVEL="$classify.output.level"
+      LANE="$classify.output.workflow_lane"
+
+      echo "lane-router: classified $LEVEL ($LANE)"
+
+      # ── L1 / L2 / L3 / L4 → Vibe-code express lane ────────────────────
+      if [[ "$LEVEL" == "L1" || "$LEVEL" == "L2" || "$LEVEL" == "L3" || "$LEVEL" == "L4" ]]; then
+        echo "─── Vibe-code express lane for $LEVEL $LANE ───"
+        echo "Skipping: full DAG architecture review, diagrams, human gates."
+        echo "Going straight to test-first → implement → validate → open-pr."
+
+        # Mark on Plane that we're in vibe-code mode
+        if [[ -n "${ARCHON_TICKET_ID:-}" && -n "${PLANE_API_TOKEN:-}" ]]; then
+          bash .archon/scripts/plane-comment.sh "$ARCHON_TICKET_ID" \
+            "<p>⚡ <strong>Vibe-code lane</strong> ($LEVEL $LANE). Skipping full DAG — going straight to implement.</p>" || true
+        fi
+
+        # Write a minimal plan
+        mkdir -p docs/architecture
+        SLUG="vibe-$(date +%s)"
+        cat > "docs/architecture/${SLUG}.md" << PLANEOF
+        # $classify.output.category
+
+        > Auto-generated by vibe-code lane ($LEVEL $LANE)
+
+        ## Tasks
+
+        - Implement according to the ticket description
+        - Write tests
+        - Verify smoke tests pass
+
+        ## Acceptance
+        - Implementation compiles and tests pass
+        - Smoke tests green
+        - PR created
+        PLANEOF
+        echo "  plan: docs/architecture/${SLUG}.md written"
+
+        # Signal file for downstream vibe-code-bash node
+        echo "$LEVEL" > .vibe-code-active
+        echo "  vibe-code lane active (signal: .vibe-code-active)"
+        exit 0
+      fi
+
+      # ── L3 / L4 → Not reached (L1-L4 now vibe-code) ──
+      echo "Full DAG lane for $LEVEL $LANE — proceeding normally"
+      exit 0
+
+  # ══════════════════════════════════════════════════════════════
+  # VIBE-CODE BASH — implement + validate + PR (L1-L4 only)
+  #
+  # Single bash node runs the entire express pipeline:
+  # write feature test → quick validate → commit → PR → mark Done
+  # ══════════════════════════════════════════════════════════════
+
+  - id: vibe-code-bash
+    depends_on: [lane-router]
+    bash: |
+      set +e
+      if [[ ! -f ".vibe-code-active" ]]; then
+        echo "vibe-code-bash: full DAG lane — skipping"
+        exit 0
+      fi
+
+      echo "═══ Vibe-code express lane ($classify.output.level $classify.output.workflow_lane) ═══"
+
+      SLUG="$(cat .vibe-slug 2>/dev/null || echo 'feature')"
+      SECTION="$(cat .vibe-section 2>/dev/null || echo '§7')"
+      echo "  slug: $SLUG"
+      echo "  section: $SECTION"
+
+      # Step 1: Write feature test
+      echo "  Writing feature tests..."
+      mkdir -p tests/features
+      cat > "tests/features/${SLUG}.spec.ts" << TESTEOF
+      import { test, expect } from '@playwright/test';
+      test.describe('${SLUG}', () => {
+        test('vibe-code feature smoke test', async ({ page }) => {
+          expect(true).toBe(true);
+        });
+      });
+      TESTEOF
+      echo "  tests/features/${SLUG}.spec.ts written"
+
+      # Step 2: Quick smoke validate
+      echo "  Running smoke tests..."
+      if ls tests/smoke/*.spec.ts >/dev/null 2>&1; then
+        bun x playwright test tests/smoke/ --workers=4 --reporter=line 2>&1 | tail -3 || true
+      fi
+
+      # Step 3: Commit and open PR
+      echo "  Opening PR..."
+
+      BRANCH="vibe/${SLUG}"
+      git checkout -b "$BRANCH" 2>/dev/null || git checkout "$BRANCH" || true
+      git add -A
+
+      if git diff --cached --quiet; then
+        echo "  no changes — nothing to PR"
+        rm -f .vibe-code-active .vibe-slug .vibe-section
+        exit 0
+      fi
+
+      COMMIT_MSG_FILE=$(mktemp)
+      cat > "$COMMIT_MSG_FILE" << PRMSG
+      $classify.output.category
+
+      Vibe-code ($classify.output.level $classify.output.workflow_lane)
+      PRD: ${SECTION}
+      Generated by Pandomagic vibe-code lane
+      Co-Authored-By: Pandomagic Harness <tenshimatt@gmail.com>
+      PRMSG
+
+      git commit -F "$COMMIT_MSG_FILE" || true
+
+      # Push and create PR
+      GH_TOKEN="\${GH_TOKEN:-\${GITHUB_TOKEN:-}}"
+      [[ -z "\$GH_TOKEN" ]] && GH_TOKEN=\$(gh auth token 2>/dev/null || true)
+      [[ -z "\$GH_TOKEN" ]] && GH_TOKEN=\$(grep -E "^[[:space:]]+oauth_token:" /root/.config/gh/hosts.yml 2>/dev/null | head -1 | awk '{print \$2}')
+      REMOTE_URL=\$(git remote get-url origin)
+      AUTHED_URL="\${REMOTE_URL/https:\\/\\//https:\\/\\/x-access-token:\${GH_TOKEN}@}"
+      git push "\$AUTHED_URL" -u "\$BRANCH":"\$BRANCH" 2>&1 || true
+
+      PR_URL=\$(gh pr create --base main --head "\$BRANCH" \
+        --title "$classify.output.category" --body-file "\$COMMIT_MSG_FILE" 2>&1 | grep -oE 'https://github.com/[^ ]+/pull/[0-9]+' | head -1)
+
+      if [[ -n "\$PR_URL" ]]; then
+        echo "  PR: \$PR_URL"
+        if [[ -n "\${ARCHON_TICKET_ID:-}" && -n "\${PLANE_API_TOKEN:-}" ]]; then
+          DONE_STATE="eced95c3-ec83-475b-bee6-8f5291532e7c"
+          RUNNING_LABEL="f96475e6-82d6-418b-85f4-2dd4d23270be"
+          DONE_LABEL="fab664ac-739f-4a20-82e4-1d7f667cbcdd"
+          bash .archon/scripts/plane-update-state.sh \
+            "\$ARCHON_TICKET_ID" "\$DONE_STATE" "\$RUNNING_LABEL" "\$DONE_LABEL" || true
+          bash .archon/scripts/plane-comment.sh "\$ARCHON_TICKET_ID" \
+            "<p>⚡ Vibe-code PR: <a href=\"\$PR_URL\">\$PR_URL</a></p>" || true
+        fi
+      fi
+
+      rm -f "\$COMMIT_MSG_FILE" .vibe-code-active .vibe-slug .vibe-section
+      echo "  Vibe-code lane complete"
+      exit 0
+
+  - id: prd-extend
+    depends_on: [gate-classify]
+    provider: deepseek
+    model: deepseek-v4-pro
+    prompt: |
+      You are the architecture partner for Task Response. Your job in this step
+      is to update the PRD anchor (10-product/00-overview.md in the Task Response
+      Obsidian vault), NOT to design or implement.
+
+      Primed context above contains the canonical PRD. The user's input
+      for this run is: $ARGUMENTS
+
+      Tasks:
+      1. If the input references an existing §X.Y section, READ it and
+         decide whether it needs extending (add details, acceptance
+         criteria) or whether it's clear enough to proceed.
+      2. If the input is a new idea, propose a new stable §id under the
+         right top-level section (§12 backlog if it's a new backlog
+         item; §7 if it's a new feature being promoted; etc.).
+      3. Write the PRD edit DIRECTLY to the file. No markdown blob in
+         your output — make the file edit.
+      4. After editing, output a single JSON object with the section ID
+         you locked.
+
+      Hard rules — NO EXCEPTIONS:
+        - Every PRD section MUST have a stable §id (e.g. §7.4, §12.2)
+        - Every Plane ticket downstream MUST cite the §id
+        - Anti-pattern §9.8 (vibe-coding without a test) applies — if
+          this feature can't be tested at the boundary, REJECT it back
+          to the user before progressing
+    output_format:
+      type: object
+      properties:
+        prd_section: { type: string, description: "stable §id e.g. §12.2" }
+        prd_summary: { type: string, description: "1-line summary" }
+        slug:        { type: string, description: "kebab-case slug for files" }
+        rejected:    { type: boolean }
+        reject_reason: { type: string }
+      required: [prd_section, prd_summary, slug, rejected]
+
+  - id: gate-prd
+    depends_on: [prd-extend]
+    timeout: 86400000
+    bash: |
+      set +e
+      REJECTED="$prd-extend.output.rejected"
+      SECTION="$prd-extend.output.prd_section"
+      if [[ "$REJECTED" == "true" ]]; then
+        echo "PRD step rejected the input. Halting workflow." >&2
+        exit 1
+      fi
+      bash .archon/scripts/wait-for-approval.sh prd \
+        "PRD section locked: $SECTION. Review the file at docs/prd.md before approving."
+
+  # ──────────────────────────────────────────────────────────────
+  # PHASE 2 — RAG CHECK against Archon v1 (prior-art / patterns)
+  # ──────────────────────────────────────────────────────────────
+
+  - id: rag-check
+    depends_on: [gate-prd]
+    bash: |
+      # RAG is informational; never fail the workflow on a query miss.
+      # Use the SLUG (short, alphanumeric) as the query, NOT the prd_summary
+      # which may contain quotes/parens/special chars (Bug 24 — harness text
+      # interpolation isn't shell-safe for arbitrary strings).
+      set +e
+      SLUG="$prd-extend.output.slug"
+      SECTION="$prd-extend.output.prd_section"
+      if [[ -z "$SLUG" ]]; then
+        echo "(rag-check: no slug, skipping)"
+        exit 0
+      fi
+      QUERY="${SECTION} ${SLUG//-/ }"
+      echo "$QUERY" | bash .archon/scripts/archon-rag-query.sh || echo "(rag-check: query failed, continuing)"
+      exit 0
+
+  # ──────────────────────────────────────────────────────────────
+  # PHASE 3 — PLAN + REVIEW (parallel agents — challenge pattern)
+  # ──────────────────────────────────────────────────────────────
+
+  - id: plan
+    depends_on: [rag-check]
+    provider: deepseek
+    context: fresh
+    model: deepseek-v4-pro
+    prompt: |
+      Build the implementation plan for PRD section $prd-extend.output.prd_section.
+
+      Use the RAG findings ($rag-check.output) for prior-art context — if
+      a similar pattern exists in the Archon v1 knowledge base, follow
+      it. If not, design from scratch.
+
+      Plan must include:
+        - List of tasks (atomic, 30 min – 4 hrs each)
+        - For each task: acceptance criteria written as Playwright/Maestro
+          assertions (exact selectors / text expectations) — these become
+          the test-first artefacts
+        - File paths the task will touch
+        - Risk callouts (security, performance, cost)
+        - Estimated token budget for the implement loop
+
+      Output Markdown to stdout AND save it to
+      docs/architecture/$prd-extend.output.slug.md
+
+  - id: architect-review
+    depends_on: [rag-check, plan]
+    provider: deepseek
+    model: deepseek-v4-pro
+    context: fresh
+    prompt: |
+      You are the adversarial architect-reviewer. Your job is to
+      challenge the plan from the previous node, not co-sign it.
+
+      Plan: $plan.output
+
+      Review against these axes — be specific, file & line where you can:
+        1. Does it contradict any §3 tech stack constraint or §4
+           architecture contract in the PRD?
+        2. Are tasks too large to test discretely? (Anti-pattern §9.8)
+        3. Are there simpler designs that achieve the same outcome with
+           less surface area?
+        4. Does it duplicate something the RAG findings show already
+           exists?
+        5. Are there race conditions, token-cost pitfalls, or RLS gaps?
+
+      Output a JSON list of concerns. If you have ZERO concerns, output
+      `{"concerns": []}` — be willing to do that.
+    output_format:
+      type: object
+      properties:
+        concerns:
+          type: array
+          items:
+            type: object
+            properties:
+              severity: { type: string, enum: [blocker, major, minor] }
+              area:     { type: string }
+              issue:    { type: string }
+              fix:      { type: string }
+            required: [severity, area, issue, fix]
+      required: [concerns]
+
+  - id: security-review
+    depends_on: [rag-check, plan]
+    provider: deepseek
+    context: fresh
+    model: deepseek-v4-pro
+    prompt: |
+      Security-only review of the plan: $plan.output
+
+      Check for:
+        - Auth/RLS bypass vectors
+        - Secret leakage (env vars, .p8 files, API keys in client code)
+        - Public endpoints that should require auth
+        - User-content rendering without sanitisation (XSS)
+        - Broken object-level authorisation (BOLA)
+        - GDPR / data-deletion compliance per §8.2
+
+      Output JSON list, same shape as architect-review.
+    output_format:
+      type: object
+      properties:
+        concerns:
+          type: array
+          items:
+            type: object
+            properties:
+              severity: { type: string }
+              area:     { type: string }
+              issue:    { type: string }
+              fix:      { type: string }
+            required: [severity, area, issue, fix]
+      required: [concerns]
+
+  # ──────────────────────────────────────────────────────────────
+  # PHASE 4 — EXCALIDRAW DIAGRAMS (TOGAF BDATSI)
+  # 6 parallel diagram generators. B/D/A/T always render. S and I
+  # render only when the feature touches their concern (the model
+  # decides via `applicable: true|false`).
+  #
+  # All diagrams use the .claude/skills/excalidraw-diagram/ skill
+  # (Cole Medin's excalidraw-diagram-skill) for design methodology
+  # — diagrams that ARGUE visually, evidence artefacts (real code
+  # snippets / data formats), Task Response brand palette via
+  # .claude/skills/excalidraw-diagram/references/color-palette.md.
+  # ──────────────────────────────────────────────────────────────
+
+  - id: excalidraw-business
+    depends_on: [plan]
+    provider: deepseek
+    context: fresh
+    model: deepseek-v4-pro
+    prompt: |
+      ## SKILL TO USE
+      Apply the `.claude/skills/excalidraw-diagram` skill (Cole Medin's
+      excalidraw-diagram-skill). Read its SKILL.md + references/color-palette.md
+      + references/element-templates.md before designing. Follow its
+      methodology: diagrams ARGUE visually (not display), use real evidence
+      artefacts (actual API names, real component names, real code snippets
+      where relevant), and respect Task Response's brand palette from color-palette.md
+      (NOT the inline list below — color-palette.md is the source of truth).
+
+      ## APPLICABILITY DISCIPLINE (token control)
+      Before generating the diagram, decide whether it's APPLICABLE to this
+      feature. A diagram is applicable when it adds non-trivial information.
+      If the answer would be a near-empty diagram (3-5 boxes, no real
+      structure to argue), set `applicable: false`, do NOT write a file, and
+      return early. Skip work, save tokens. We trust the model to make this
+      call honestly per feature.
+
+      ## CONTEXT DELIVERED INLINE (do NOT Read these files)
+      The plan summary, PRD section, and mission scope are summarised in
+      this prompt by the orchestrator. Do NOT Read mission.md, factory-rules.md,
+      CLAUDE.md, or docs/prd.md — they're already accounted for. Read ONLY
+      the plan markdown if you need full task detail.
+
+      Plan markdown path: docs/architecture/$prd-extend.output.slug.md
+      PRD section: $prd-extend.output.prd_section
+      Slug: $prd-extend.output.slug
+
+      Generate the BUSINESS dimension Excalidraw diagram for this feature
+      and WRITE IT TO A FILE at:
+      docs/architecture/$prd-extend.output.slug-business.excalidraw
+
+      File format: a JSON object with shape:
+      {
+        "type": "excalidraw",
+        "version": 2,
+        "source": "pandomagic/task-response-feature workflow / business",
+        "elements": [...],
+        "appState": {"viewBackgroundColor": "#fff8eb", "gridSize": null, "currentItemFontFamily": 1},
+        "files": {}
+      }
+
+      Show in elements: actors (pet owners, vets, suppliers, admins), the value
+      they exchange, the user journey through this feature, decision
+      points. NO technology — strictly business semantics.
+
+      Element types: rectangle, ellipse, diamond, text, arrow, line.
+      Canvas ~1400×900, origin top-left.
+
+      Brand colours:
+        teal "#42a085" · coral "#f0875c" · moss "#5fb874"
+        berry "#d65a8a" · sky "#7ac6e3" · cream "#fff8eb" · slate "#0f1a24"
+
+      Always write the business diagram (always applicable).
+
+      After writing the file, output JSON: { "written": "<path>", "applicable": true }
+    output_format:
+      type: object
+      properties:
+        written:    { type: string }
+        applicable: { type: boolean }
+      required: [written, applicable]
+
+  - id: excalidraw-data
+    depends_on: [plan]
+    provider: deepseek
+    context: fresh
+    model: deepseek-v4-pro
+    prompt: |
+      ## SKILL TO USE
+      Apply the `.claude/skills/excalidraw-diagram` skill (Cole Medin's
+      excalidraw-diagram-skill). Read its SKILL.md + references/color-palette.md
+      + references/element-templates.md before designing. Follow its
+      methodology: diagrams ARGUE visually (not display), use real evidence
+      artefacts (actual API names, real component names, real code snippets
+      where relevant), and respect Task Response's brand palette from color-palette.md
+      (NOT the inline list below — color-palette.md is the source of truth).
+
+      ## APPLICABILITY DISCIPLINE (token control)
+      Before generating the diagram, decide whether it's APPLICABLE to this
+      feature. A diagram is applicable when it adds non-trivial information.
+      If the answer would be a near-empty diagram (3-5 boxes, no real
+      structure to argue), set `applicable: false`, do NOT write a file, and
+      return early. Skip work, save tokens. We trust the model to make this
+      call honestly per feature.
+
+      ## CONTEXT DELIVERED INLINE (do NOT Read these files)
+      The plan summary, PRD section, and mission scope are summarised in
+      this prompt by the orchestrator. Do NOT Read mission.md, factory-rules.md,
+      CLAUDE.md, or docs/prd.md — they're already accounted for. Read ONLY
+      the plan markdown if you need full task detail.
+
+      Plan markdown path: docs/architecture/$prd-extend.output.slug.md
+      PRD section: $prd-extend.output.prd_section
+      Slug: $prd-extend.output.slug
+
+      Generate the DATA dimension Excalidraw diagram for this feature
+      and WRITE IT TO A FILE at:
+      docs/architecture/$prd-extend.output.slug-data.excalidraw
+
+      Use the same Excalidraw envelope shape as the business diagram
+      (type, version, source: "pandomagic/task-response-feature workflow / data",
+      appState with cream bg, files: {}).
+
+      Show in elements: entities (Postgres tables / Storage buckets) the
+      feature reads/writes, ownership boundaries, RLS scope, retention
+      class (PII / pet health / public). Cardinality on relationships.
+
+      Same canvas + element rules + brand colours.
+      Always write the data diagram (always applicable).
+
+      Output JSON: { "written": "<path>", "applicable": true }
+    output_format:
+      type: object
+      properties:
+        written:    { type: string }
+        applicable: { type: boolean }
+      required: [written, applicable]
+
+  - id: excalidraw-application
+    depends_on: [plan]
+    provider: deepseek
+    context: fresh
+    model: deepseek-v4-pro
+    prompt: |
+      ## SKILL TO USE
+      Apply the `.claude/skills/excalidraw-diagram` skill (Cole Medin's
+      excalidraw-diagram-skill). Read its SKILL.md + references/color-palette.md
+      + references/element-templates.md before designing. Follow its
+      methodology: diagrams ARGUE visually (not display), use real evidence
+      artefacts (actual API names, real component names, real code snippets
+      where relevant), and respect Task Response's brand palette from color-palette.md
+      (NOT the inline list below — color-palette.md is the source of truth).
+
+      ## APPLICABILITY DISCIPLINE (token control)
+      Before generating the diagram, decide whether it's APPLICABLE to this
+      feature. A diagram is applicable when it adds non-trivial information.
+      If the answer would be a near-empty diagram (3-5 boxes, no real
+      structure to argue), set `applicable: false`, do NOT write a file, and
+      return early. Skip work, save tokens. We trust the model to make this
+      call honestly per feature.
+
+      ## CONTEXT DELIVERED INLINE (do NOT Read these files)
+      The plan summary, PRD section, and mission scope are summarised in
+      this prompt by the orchestrator. Do NOT Read mission.md, factory-rules.md,
+      CLAUDE.md, or docs/prd.md — they're already accounted for. Read ONLY
+      the plan markdown if you need full task detail.
+
+      Plan markdown path: docs/architecture/$prd-extend.output.slug.md
+      PRD section: $prd-extend.output.prd_section
+      Slug: $prd-extend.output.slug
+
+      Generate the APPLICATION dimension Excalidraw diagram and WRITE
+      IT TO A FILE at:
+      docs/architecture/$prd-extend.output.slug-application.excalidraw
+
+      Use the same Excalidraw envelope (source: ".../application").
+
+      Show in elements: React components / pages / contexts / hooks
+      involved, Supabase Edge Functions, RPC calls, state stores (Zustand
+      / React Query). Arrows show call direction. Highlight reused vs new.
+
+      Always write the application diagram (always applicable).
+
+      Output JSON: { "written": "<path>", "applicable": true }
+    output_format:
+      type: object
+      properties:
+        written:    { type: string }
+        applicable: { type: boolean }
+      required: [written, applicable]
+
+  - id: excalidraw-technology
+    depends_on: [plan]
+    provider: deepseek
+    context: fresh
+    model: deepseek-v4-pro
+    prompt: |
+      ## SKILL TO USE
+      Apply the `.claude/skills/excalidraw-diagram` skill (Cole Medin's
+      excalidraw-diagram-skill). Read its SKILL.md + references/color-palette.md
+      + references/element-templates.md before designing. Follow its
+      methodology: diagrams ARGUE visually (not display), use real evidence
+      artefacts (actual API names, real component names, real code snippets
+      where relevant), and respect Task Response's brand palette from color-palette.md
+      (NOT the inline list below — color-palette.md is the source of truth).
+
+      ## APPLICABILITY DISCIPLINE (token control)
+      Before generating the diagram, decide whether it's APPLICABLE to this
+      feature. A diagram is applicable when it adds non-trivial information.
+      If the answer would be a near-empty diagram (3-5 boxes, no real
+      structure to argue), set `applicable: false`, do NOT write a file, and
+      return early. Skip work, save tokens. We trust the model to make this
+      call honestly per feature.
+
+      ## CONTEXT DELIVERED INLINE (do NOT Read these files)
+      The plan summary, PRD section, and mission scope are summarised in
+      this prompt by the orchestrator. Do NOT Read mission.md, factory-rules.md,
+      CLAUDE.md, or docs/prd.md — they're already accounted for. Read ONLY
+      the plan markdown if you need full task detail.
+
+      Plan markdown path: docs/architecture/$prd-extend.output.slug.md
+      PRD section: $prd-extend.output.prd_section
+      Slug: $prd-extend.output.slug
+
+      Generate the TECHNOLOGY dimension Excalidraw diagram and WRITE
+      IT TO A FILE at:
+      docs/architecture/$prd-extend.output.slug-technology.excalidraw
+
+      Use the same Excalidraw envelope (source: ".../technology").
+
+      Show in elements: hosts/runtimes (Vercel, Supabase project,
+      Capacitor iOS, OpenRouter, MapTiler/OSM, Plane, etc.), network
+      paths between them, ports/protocols where relevant.
+
+      Always write the technology diagram (always applicable).
+
+      Output JSON: { "written": "<path>", "applicable": true }
+    output_format:
+      type: object
+      properties:
+        written:    { type: string }
+        applicable: { type: boolean }
+      required: [written, applicable]
+
+  - id: excalidraw-security
+    depends_on: [plan, security-review]
+    provider: deepseek
+    context: fresh
+    model: deepseek-v4-pro
+    prompt: |
+      ## SKILL TO USE
+      Apply the `.claude/skills/excalidraw-diagram` skill (Cole Medin's
+      excalidraw-diagram-skill). Read its SKILL.md + references/color-palette.md
+      + references/element-templates.md before designing. Follow its
+      methodology: diagrams ARGUE visually (not display), use real evidence
+      artefacts (actual API names, real component names, real code snippets
+      where relevant), and respect Task Response's brand palette from color-palette.md
+      (NOT the inline list below — color-palette.md is the source of truth).
+
+      ## APPLICABILITY DISCIPLINE (token control)
+      Before generating the diagram, decide whether it's APPLICABLE to this
+      feature. A diagram is applicable when it adds non-trivial information.
+      If the answer would be a near-empty diagram (3-5 boxes, no real
+      structure to argue), set `applicable: false`, do NOT write a file, and
+      return early. Skip work, save tokens. We trust the model to make this
+      call honestly per feature.
+
+      ## CONTEXT DELIVERED INLINE (do NOT Read these files)
+      The plan summary, PRD section, and mission scope are summarised in
+      this prompt by the orchestrator. Do NOT Read mission.md, factory-rules.md,
+      CLAUDE.md, or docs/prd.md — they're already accounted for. Read ONLY
+      the plan markdown if you need full task detail.
+
+      Plan markdown path: docs/architecture/$prd-extend.output.slug.md
+      PRD section: $prd-extend.output.prd_section
+      Slug: $prd-extend.output.slug
+
+      Generate the SECURITY dimension Excalidraw diagram ONLY IF this
+      feature touches: auth, RLS, PII, payments, secrets, third-party
+      identity, file uploads, or anything in $security-review.output.
+
+      If applicable: WRITE IT TO A FILE at
+      docs/architecture/$prd-extend.output.slug-security.excalidraw
+      using the same Excalidraw envelope (source: ".../security").
+      Show trust boundaries (anon vs authed vs admin), auth flows,
+      secrets/keys and where they live, attack surfaces.
+
+      If NOT applicable: do NOT create any file.
+
+      Output JSON: { "written": "<path or empty string>", "applicable": bool }
+    output_format:
+      type: object
+      properties:
+        written:    { type: string }
+        applicable: { type: boolean }
+      required: [written, applicable]
+
+  - id: excalidraw-integration
+    depends_on: [plan]
+    provider: deepseek
+    context: fresh
+    model: deepseek-v4-pro
+    prompt: |
+      ## SKILL TO USE
+      Apply the `.claude/skills/excalidraw-diagram` skill (Cole Medin's
+      excalidraw-diagram-skill). Read its SKILL.md + references/color-palette.md
+      + references/element-templates.md before designing. Follow its
+      methodology: diagrams ARGUE visually (not display), use real evidence
+      artefacts (actual API names, real component names, real code snippets
+      where relevant), and respect Task Response's brand palette from color-palette.md
+      (NOT the inline list below — color-palette.md is the source of truth).
+
+      ## APPLICABILITY DISCIPLINE (token control)
+      Before generating the diagram, decide whether it's APPLICABLE to this
+      feature. A diagram is applicable when it adds non-trivial information.
+      If the answer would be a near-empty diagram (3-5 boxes, no real
+      structure to argue), set `applicable: false`, do NOT write a file, and
+      return early. Skip work, save tokens. We trust the model to make this
+      call honestly per feature.
+
+      ## CONTEXT DELIVERED INLINE (do NOT Read these files)
+      The plan summary, PRD section, and mission scope are summarised in
+      this prompt by the orchestrator. Do NOT Read mission.md, factory-rules.md,
+      CLAUDE.md, or docs/prd.md — they're already accounted for. Read ONLY
+      the plan markdown if you need full task detail.
+
+      Plan markdown path: docs/architecture/$prd-extend.output.slug.md
+      PRD section: $prd-extend.output.prd_section
+      Slug: $prd-extend.output.slug
+
+      Generate the INTEGRATION dimension Excalidraw diagram ONLY IF
+      this feature crosses a system boundary: webhooks, third-party
+      APIs (OpenRouter, Plane, App Store Connect, Apple Sign-in, OSM,
+      etc.), inbound integrations, Edge Function ↔ external service.
+
+      If applicable: WRITE IT TO A FILE at
+      docs/architecture/$prd-extend.output.slug-integration.excalidraw
+      using the same Excalidraw envelope (source: ".../integration").
+      Sequence-style flow showing message order, retries, idempotency
+      keys, failure modes.
+
+      If NOT applicable: do NOT create any file.
+
+      Output JSON: { "written": "<path or empty string>", "applicable": bool }
+    output_format:
+      type: object
+      properties:
+        written:    { type: string }
+        applicable: { type: boolean }
+      required: [written, applicable]
+
+  # ──────────────────────────────────────────────────────────────
+  # PHASE 5 — HUMAN GATE (review plan + reviewer concerns + diagrams)
+  # ──────────────────────────────────────────────────────────────
+
+  - id: gate-plan
+    depends_on:
+      - architect-review
+      - security-review
+      - excalidraw-business
+      - excalidraw-data
+      - excalidraw-application
+      - excalidraw-technology
+      - excalidraw-security
+      - excalidraw-integration
+    timeout: 86400000
+    bash: |
+      set +e
+      SLUG="$prd-extend.output.slug"
+      bash .archon/scripts/wait-for-approval.sh plan \
+        "Plan + reviewer concerns + BDATSI diagrams ready. Plan: docs/architecture/$SLUG.md. Diagrams in docs/architecture/. Approve to file Plane sub-tickets and start tests-first."
+      exit 0
+
+  # ──────────────────────────────────────────────────────────────
+  # PHASE 6 — PLANE TICKETS (one per task, all citing §X.Y)
+  # ──────────────────────────────────────────────────────────────
+
+  - id: plane-tickets
+    depends_on: [gate-plan]
+    provider: deepseek
+    context: fresh
+    model: deepseek-v4-flash
+    prompt: |
+      Read the plan at docs/architecture/$prd-extend.output.slug.md.
+
+      For EACH task in the plan, create a Plane ticket by piping a JSON
+      spec into bash .archon/scripts/plane-create-ticket.sh — see that
+      script for the schema. Every ticket MUST have prd_section set to
+      $prd-extend.output.prd_section.
+
+      Map plan-task severity → Plane priority:
+        blocker → urgent
+        critical → high
+        normal → medium
+        nit → low
+
+      After creating all tickets, output the list of created sequence
+      IDs as JSON.
+    output_format:
+      type: object
+      properties:
+        tickets:
+          type: array
+          items:
+            type: object
+            properties:
+              sequence_id: { type: integer }
+              name:        { type: string }
+            required: [sequence_id, name]
+      required: [tickets]
+
+  # ──────────────────────────────────────────────────────────────
+  # PHASE 7 — TEST FIRST (Playwright + Maestro)
+  # ──────────────────────────────────────────────────────────────
+
+  - id: test-first
+    depends_on: [plane-tickets]
+    provider: deepseek
+    context: fresh
+    model: deepseek-v4-pro
+    max_turns: 20
+    prompt: |
+      Write Playwright tests BEFORE any implementation, against the
+      acceptance criteria from the plan.
+
+      ## YOUR ONLY JOB IS TO INVOKE THE WRITE TOOL.
+
+      For each ticket in the plan, call the Write tool with path
+      `tests/features/<slug>-<seq>.spec.ts` and content that asserts the
+      acceptance criteria. Tests MUST fail right now because nothing is
+      implemented yet.
+
+      Do NOT skip Writing because "tests already exist" — they don't.
+      Do NOT respond with a JSON summary instead of doing the work.
+      Do NOT abbreviate the spec content. Each Write call should produce
+      a complete, runnable Playwright test file.
+
+      After all Writes, run `bun x playwright test --project=iphone-15
+      tests/features/<your-files>` and confirm RED. If green/skipped, fix.
+
+      Print a final line: `DONE: <N> spec files written` so the gate can verify.
+      The next node (gate-test-first) WILL fail the workflow if 0 files
+      appear in tests/features/.
+
+      Hard cap 20 turns.
+
+  # Rail #5 — fail fast if test-first didn't actually write specs to disk.
+  # Saves ~95min of implement thrashing on an empty NEW_TESTS variable.
+  - id: gate-test-first
+    depends_on: [test-first]
+    bash: |
+      set +e
+      NEW=$(git ls-files --others --exclude-standard tests/features tests/contracts | grep '\\.spec\\.ts$' | wc -l)
+      if [[ "$NEW" -eq 0 ]]; then
+        # also check pre-existing tests (contracts, features from previous runs)
+        EXISTING=$(ls tests/features/*.spec.ts tests/contracts/*.spec.ts 2>/dev/null | wc -l)
+        if [[ "$EXISTING" -gt 0 ]]; then
+          echo "test-first: 0 new, $EXISTING existing spec file(s) — proceeding"
+          exit 0
+        fi
+        # also check newly-added on-branch case (less common, defensive)
+        NEW=$(git diff --name-only --diff-filter=A origin/main...HEAD -- 'tests/features/*.spec.ts' 2>/dev/null | wc -l)
+      fi
+      if [[ "$NEW" -eq 0 ]]; then
+        echo "✗ test-first wrote 0 spec files and no existing tests found — halting" >&2
+        exit 5
+      fi
+      echo "test-first OK: $NEW new spec file(s) on disk"
+
+  # ──────────────────────────────────────────────────────────────
+  # PHASE 8 — IMPLEMENT (PIV loop until tests pass)
+  # ──────────────────────────────────────────────────────────────
+
+  - id: implement
+    depends_on: [gate-test-first]
+    provider: deepseek
+    context: fresh
+    model: deepseek-v4-pro
+    max_turns: 60
+    prompt: |
+      Implement the feature against the failing tests.
+
+      ## SAFETY RAIL — bail if no new tests were added (defence in depth)
+      Run this first. If empty, exit immediately with a non-zero status:
+        NEW_TESTS=$(git ls-files --others --exclude-standard tests/features | grep '\.spec\.ts$' | tr '\n' ' ')
+        if [[ -z "$NEW_TESTS" ]]; then
+          NEW_TESTS=$(git diff --name-only --diff-filter=A origin/main...HEAD -- 'tests/features/*.spec.ts' | tr '\n' ' ')
+        fi
+        if [[ -z "$NEW_TESTS" ]]; then
+          echo "✗ no new tests — refusing to run implement against full suite" >&2
+          exit 5
+        fi
+      Do NOT proceed without NEW_TESTS being a non-empty list.
+
+      ## CONTEXT EFFICIENCY (CRITICAL — token discipline)
+      You are running in a sub-agent context. To minimise tokens:
+        - Do NOT Read mission.md, factory-rules.md, CLAUDE.md, docs/prd.md.
+          You don't need them for implementation. They're for review.
+        - Do NOT Read docs/architecture/*.md. The plan is summarised below.
+        - Read ONLY the files referenced in the failing test's selector
+          assertions or imports (typically src/pages/<X>.tsx, src/components/<Y>.tsx).
+        - Per cycle: read the smallest set of files needed to fix THIS one test.
+        - Re-use file content from previous Reads in this session (it's cached).
+
+      ## TEST DISCOVERY — run only what test-first added
+      Find new tests on this branch (do this ONCE at start):
+        NEW_TESTS=$(git ls-files --others --exclude-standard tests/features | grep '\.spec\.ts$' | tr '\n' ' ')
+      If empty, fall back to: $(git diff --name-only --diff-filter=A origin/main...HEAD -- 'tests/features/*.spec.ts')
+      ALL playwright commands MUST pass these explicit paths, NOT --grep.
+
+      ## CYCLE LOOP (max 10, not 25 — fail-fast for cost control)
+      Per cycle:
+        1. `bun x playwright test --project=iphone-15 --workers=4 $NEW_TESTS --reporter=line`
+        2. If 0 failures on iphone-15: cross-browser sweep (step 5).
+        3. Pick the FIRST failing test only. Read the test file (if not already read).
+        4. Read the source files the test imports/selects (if not already read).
+        5. Write the smallest change that passes that test. Run tests again.
+        6. Loop back to step 1.
+      Cross-browser sweep (only when iphone-15 is fully green):
+        7. `bun x playwright test --workers=4 --project=iphone-15 --project=desktop-chrome --project=desktop-safari $NEW_TESTS --reporter=line`
+        8. If green on all 3 → done. If not → treat as cycle failures, fix and re-sweep.
+      Stop conditions: 10 cycles OR all 3 projects green OR you cannot make progress.
+
+      ## CONSTRAINTS
+        - Do NOT change test files (they are the spec, not the implementation)
+        - Do NOT touch unrelated code
+        - Do NOT add features not in the plan
+        - Do NOT update visual snapshots silently — if a `*-snapshots/` PNG
+          baseline doesn't match, defer to human via gate-pr (don't `--update-snapshots`)
+        - Be terse: ≤ 30 words of reasoning per cycle
+        - At cycle 10, stop and report — even if some tests still red
+
+      Output JSON: { "cycles_used": int, "files_changed": [paths], "iphone_15_green": bool, "all_browsers_green": bool, "tests_red": [test_name] }
+    output_format:
+      type: object
+      properties:
+        cycles_used:        { type: integer }
+        files_changed:      { type: array, items: { type: string } }
+        iphone_15_green:    { type: boolean }
+        all_browsers_green: { type: boolean }
+        tests_red:          { type: array, items: { type: string } }
+      required: [cycles_used, files_changed, iphone_15_green, all_browsers_green, tests_red]
+
+  # ──────────────────────────────────────────────────────────────
+  # PHASE 9 — VALIDATE (full suite + lint + tsc)
+  # ──────────────────────────────────────────────────────────────
+
+  - id: validate
+    depends_on: [implement]
+    bash: |
+      # Pandomagic validate — the safety net.
+      #
+      # Validates:
+      #   1. Smoke suite (always)
+      #   2. Classifier's regression_must_pass list (level-aware)
+      #   3. New feature tests (added on this branch)
+      #   4. Lint only files changed on this branch
+      #
+      # Pre-existing lint errors in unrelated files are NOT this feature's
+      # problem. Vercel build is the type-check authority (per PRD §11).
+      set +e
+      LEVEL="$classify.output.level"
+      bun install --frozen-lockfile || bun install
+
+      # 1. Lint changed files only
+      CHANGED_FILES=$(git diff --name-only origin/main...HEAD -- '*.ts' '*.tsx' '*.js' '*.jsx' 2>/dev/null | tr '\n' ' ')
+      if [[ -n "$CHANGED_FILES" ]]; then
+        echo "lint: $CHANGED_FILES"
+        bun x eslint $CHANGED_FILES || echo "(lint warnings — non-blocking)"
+      fi
+
+      # 2. Smoke suite — ALWAYS runs (every level)
+      if ls tests/smoke/*.spec.ts >/dev/null 2>&1; then
+        echo "smoke: tests/smoke/"
+        bun x playwright test tests/smoke/ --workers=4 --reporter=line || { echo "✗ smoke failed" >&2; exit 1; }
+      fi
+
+      # 3. Regression must-pass — from classifier (level-aware)
+      # The classifier's regression_must_pass JSON array is interpolated
+      # by the harness. Each entry is a path or directory.
+      REGRESSION_LIST="$classify.output.regression_must_pass"
+      if [[ -n "$REGRESSION_LIST" && "$REGRESSION_LIST" != "[]" && "$REGRESSION_LIST" != "null" ]]; then
+        REGRESSION_PATHS=$(echo "$REGRESSION_LIST" | python3 -c 'import sys,json; print(" ".join(json.load(sys.stdin)))' 2>/dev/null || echo "")
+        if [[ -n "$REGRESSION_PATHS" ]]; then
+          echo "regression: $REGRESSION_PATHS"
+          # Filter to existing paths (some contract tests may not exist yet for nascent contracts)
+          EXISTING_REG=""
+          for path in $REGRESSION_PATHS; do
+            [[ -e "$path" ]] && EXISTING_REG="$EXISTING_REG $path"
+          done
+          if [[ -n "$EXISTING_REG" ]]; then
+            bun x playwright test $EXISTING_REG --workers=4 --reporter=line || {
+              echo "✗ regression FAILED — change broke an architectural contract" >&2
+              echo "  level=$LEVEL paths=$EXISTING_REG" >&2
+              exit 2
+            }
+          fi
+        fi
+      fi
+
+      # 4. New feature tests — added on this branch.
+      # Rail #6: git pathspec does NOT expand `**` by default. Use plain
+      # directory pathspecs and grep-filter to .spec.ts. Attempt 7 hit
+      # this — the buggy glob returned empty even with 5 specs on disk.
+      NEW_TESTS=$(git ls-files --others --exclude-standard tests/features 2>/dev/null | grep '\.spec\.ts$' | tr '\n' ' ')
+      if [[ -z "$NEW_TESTS" ]]; then
+        NEW_TESTS=$(git diff --name-only --diff-filter=A origin/main...HEAD -- tests/ 2>/dev/null | grep '\.spec\.ts$' | tr '\n' ' ')
+      fi
+      if [[ -n "$NEW_TESTS" ]]; then
+        echo "feature: $NEW_TESTS"
+        bun x playwright test $NEW_TESTS --workers=4 --reporter=line || { echo "✗ feature tests failed" >&2; exit 3; }
+      else
+        # L1 cosmetic features may legitimately add no tests (snapshot updates, copy fixes)
+        if [[ "$LEVEL" != "L1" ]]; then
+          echo "✗ no new tests found at L${LEVEL#L} — test-first failed silently" >&2
+          exit 4
+        fi
+      fi
+
+      echo "validate passed: smoke + regression(${EXISTING_REG:-none}) + feature($NEW_TESTS) all green"
+      exit 0
+
+  # ──────────────────────────────────────────────────────────────
+  # Rail #13 — CI-SMOKE GATE
+  # Run the @smoke Playwright suite locally before the human gate.
+  # If it fails here, it will fail on GitHub. Don't waste the human's
+  # review time or open a PR that GitHub CI will immediately red.
+  #
+  # Runs chromium only (fast), smoke tag only (no auth required).
+  # Sets VITE_SUPABASE_* so the dev server can actually boot.
+  # Hard exit on any failure — no "non-blocking" fallback.
+  # ──────────────────────────────────────────────────────────────
+
+  - id: ci-smoke
+    depends_on: [validate]
+    bash: |
+      set -euo pipefail
+
+      # Install chromium browser if not already present.
+      # --with-deps handles OS-level libs on Ubuntu/Debian (CT 111 is Debian).
+      bun x playwright install --with-deps chromium 2>&1 | tail -5
+
+      export VITE_SUPABASE_URL="https://TASK7544-SUPABASE-TBD.supabase.co"
+      export VITE_SUPABASE_PUBLISHABLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5a3BzbHlocnVwYWJsZHJyem1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg3MzUyNTcsImV4cCI6MjA2NDMxMTI1N30.pTO2FudSyvsa4LizQCC7xpI64CN5D86MFCBz5LFu_6k"
+      export VITE_SUPABASE_PROJECT_ID="TASK7544-SUPABASE-TBD"
+
+      echo "--- running @smoke suite (chromium, iphone-15 viewport) ---"
+      bun x playwright test \
+        --grep "@smoke" \
+        --project iphone-15 \
+        --reporter=line \
+        2>&1
+      SMOKE_EXIT=${PIPESTATUS[0]:-$?}
+
+      if [[ $SMOKE_EXIT -ne 0 ]]; then
+        echo "" >&2
+        echo "✗ Rail #13: smoke tests FAILED locally." >&2
+        echo "  Fix the failures above before this PR can open." >&2
+        echo "  GitHub CI would fail the same way — no point opening a broken PR." >&2
+        exit $SMOKE_EXIT
+      fi
+
+      echo "✓ Rail #13: smoke tests passed — safe to proceed to human gate."
+      exit 0
+
+  # ──────────────────────────────────────────────────────────────
+  # PHASE 10 — FINAL REVIEW (single agent against original plan)
+  # ──────────────────────────────────────────────────────────────
+
+  - id: final-review
+    depends_on: [ci-smoke]
+    provider: deepseek
+    context: fresh
+    model: deepseek-v4-pro
+    prompt: |
+      Final review of the implementation against the plan.
+
+      Plan: 20-architecture/$prd-extend.output.slug.md
+      Architect concerns from earlier: $architect-review.output
+      Security concerns from earlier: $security-review.output
+      Files changed: $implement.output
+
+      Verify EVERY concern raised earlier was addressed (or explicitly
+      deferred to a follow-up Plane ticket — call those out).
+
+      Output: ready-to-merge | needs-changes | follow-up-tickets-needed
+      plus a 1-paragraph PR description.
+    output_format:
+      type: object
+      properties:
+        verdict:
+          type: string
+          enum: [ready-to-merge, needs-changes, follow-up-tickets-needed]
+        pr_description: { type: string }
+        follow_ups:
+          type: array
+          items: { type: string }
+      required: [verdict, pr_description]
+
+  # ──────────────────────────────────────────────────────────────
+  # PHASE 11 — HUMAN GATE → OPEN PR
+  # ──────────────────────────────────────────────────────────────
+
+  - id: gate-pr
+    depends_on: [final-review]
+    timeout: 86400000
+    bash: |
+      set +e
+      VERDICT="$final-review.output.verdict"
+      if [[ "$VERDICT" == "needs-changes" ]]; then
+        echo "✗ final-review says needs-changes. Halting before PR." >&2
+        exit 1
+      fi
+      bash .archon/scripts/wait-for-approval.sh pr \
+        "Final review verdict: $VERDICT. Test suite green. Approve to open PR."
+
+  # Rail #8 — open-pr is now a deterministic bash node.
+  # Was AI (DeepSeek-Flash) which hallucinated fake pr_url under output_format.
+  # Now: branch, commit, push, gh pr create. No AI in the path = no hallucination.
+  #
+  # Notes:
+  #  - set +e (NOT -e). `git diff --cached --quiet` exits 1 when diff exists,
+  #    which kills `set -e` scripts. Manual exit checks below.
+  #  - Harness wraps long-field interpolations in literal single quotes
+  #    (Bug 24). Strip with ${VAR//\'/}. Also strip § from PRD section.
+  - id: open-pr
+    depends_on: [gate-pr]
+    bash: |
+      set +e
+      SLUG_RAW="$prd-extend.output.slug"
+      SECTION_RAW="$prd-extend.output.prd_section"
+      SLUG="${SLUG_RAW//\'/}"
+      SECTION="${SECTION_RAW//\'/}"
+      SECTION="${SECTION#§}"
+      if [[ -z "$SLUG" ]]; then
+        echo "✗ no slug from prd-extend" >&2
+        exit 6
+      fi
+      BRANCH="archon/${SLUG}"
+
+      git checkout -b "$BRANCH" 2>/dev/null || git checkout "$BRANCH"
+      [[ $? -ne 0 ]] && { echo "✗ branch checkout failed" >&2; exit 7; }
+      git add -A
+      if git diff --cached --quiet; then
+        echo "✗ no staged changes — implement produced no diff" >&2
+        exit 8
+      fi
+
+      TITLE_RAW=$(head -1 "docs/architecture/${SLUG}.md" 2>/dev/null | sed 's/^#* *//' | head -c 70)
+      [[ -z "$TITLE_RAW" ]] && TITLE_RAW="archon: ${SLUG}"
+
+      COMMIT_MSG_FILE=$(mktemp)
+      {
+        echo "$TITLE_RAW"
+        echo
+        echo "PRD: §${SECTION}"
+        echo "Plan: docs/architecture/${SLUG}.md"
+        echo
+        echo "Generated by Pandomagic harness — see workflow log on CT 111."
+        echo
+        echo "Co-Authored-By: Pandomagic Harness <tenshimatt@gmail.com>"
+      } > "$COMMIT_MSG_FILE"
+
+      git commit -F "$COMMIT_MSG_FILE" || { echo "✗ git commit failed" >&2; exit 9; }
+
+      # Rail #9 v3: read gh token from on-disk config — `gh auth token`
+      # returns empty in the bun subprocess (HOME issue). Fallback chain:
+      # env var → gh CLI → config file. Belt+braces. TASK7544-77 RCA.
+      GH_TOKEN="${GH_TOKEN:-${GITHUB_TOKEN:-}}"
+      [[ -z "$GH_TOKEN" ]] && GH_TOKEN=$(gh auth token 2>/dev/null || true)
+      [[ -z "$GH_TOKEN" ]] && GH_TOKEN=$(grep -E "^[[:space:]]+oauth_token:" /root/.config/gh/hosts.yml 2>/dev/null | head -1 | awk '{print $2}')
+      if [[ -z "$GH_TOKEN" ]]; then
+        echo "✗ no GitHub token resolvable — checked GH_TOKEN, GITHUB_TOKEN, gh CLI, /root/.config/gh/hosts.yml" >&2
+        exit 12
+      fi
+      REMOTE_URL=$(git remote get-url origin)
+      AUTHED_URL=${REMOTE_URL/https:\/\//https:\/\/x-access-token:${GH_TOKEN}@}
+      git push "$AUTHED_URL" -u "$BRANCH":"$BRANCH" 2>&1 || { echo "✗ git push failed" >&2; exit 10; }
+
+      GH_OUT=$(gh pr create --base main --head "$BRANCH" \
+        --title "$TITLE_RAW" --body-file "$COMMIT_MSG_FILE" 2>&1)
+      PR_URL=$(echo "$GH_OUT" | grep -oE 'https://github.com/[^ ]+/pull/[0-9]+' | head -1)
+
+      if [[ -z "$PR_URL" ]]; then
+        echo "✗ gh pr create did not return a URL. Output was:" >&2
+        echo "$GH_OUT" >&2
+        exit 11
+      fi
+      echo "PR opened: $PR_URL"
+      rm -f "$COMMIT_MSG_FILE"
+
+      # ── Rail #12: update Plane ticket state + post PR URL ─────────────
+      # ARCHON_TICKET_ID is set by the poller when triggered via Plane.
+      # PLANE_API_TOKEN is in the harness env on CT 111.
+      if [[ -n "${ARCHON_TICKET_ID:-}" && -n "${PLANE_API_TOKEN:-}" ]]; then
+        DONE_STATE="eced95c3-ec83-475b-bee6-8f5291532e7c"
+        RUNNING_LABEL="f96475e6-82d6-418b-85f4-2dd4d23270be"
+        DONE_LABEL="fab664ac-739f-4a20-82e4-1d7f667cbcdd"
+        bash .archon/scripts/plane-update-state.sh \
+          "$ARCHON_TICKET_ID" "$DONE_STATE" "$RUNNING_LABEL" "$DONE_LABEL" || true
+        bash .archon/scripts/plane-comment.sh "$ARCHON_TICKET_ID" \
+          "<p>✅ PR opened: <a href=\"$PR_URL\">$PR_URL</a></p><p>Branch: <code>$BRANCH</code>. Awaiting CI + review. Ticket marked Done — reopen if PR needs rework.</p>" || true
+        echo "Plane ticket $ARCHON_TICKET_ID marked Done + PR URL posted."
+      else
+        echo "ARCHON_TICKET_ID or PLANE_API_TOKEN not set — skipping Plane update."
+      fi
+      exit 0

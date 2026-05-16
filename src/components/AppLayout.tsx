@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { OnboardingProgress } from '@/components/sidebar/OnboardingProgress';
 
 const NAV_ITEMS = [
   { href: '/inbox', label: 'Inbox', icon: '📥' },
@@ -66,6 +67,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
+        <OnboardingProgress />
       </aside>
 
       {/* Main content */}

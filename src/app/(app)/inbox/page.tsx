@@ -21,6 +21,7 @@ import LiveSection, {
   type InboundRow,
   type DraftRow,
 } from '@/components/inbox/LiveSection';
+import DraftsIncomingBanner from '@/components/inbox/DraftsIncomingBanner';
 
 export const dynamic = 'force-dynamic';
 
@@ -125,6 +126,8 @@ export default async function InboxPage() {
           Latest activity across your connected mailboxes.
         </p>
       </header>
+
+      <DraftsIncomingBanner />
 
       <div className="flex flex-col gap-6">
         <LiveSection
