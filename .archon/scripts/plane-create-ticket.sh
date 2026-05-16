@@ -16,7 +16,7 @@ set -euo pipefail
 # inline for now so the script has zero deps beyond curl + jq.
 PLANE_BASE="${PLANE_BASE:-https://plane.beyondpandora.com}"
 WORKSPACE="${PLANE_WORKSPACE:-beyond-pandora}"
-PROJECT_ID="${PLANE_PROJECT_ID:-f88111cd-cac2-4e9f-af38-2241e215c4ad}"
+PROJECT_ID="${PLANE_PROJECT_ID:-b8bd07d5-eba9-4470-94ae-a4cec5abc2f2}"
 
 PAYLOAD="$(cat)"
 NAME="$(jq -r '.name' <<<"$PAYLOAD")"

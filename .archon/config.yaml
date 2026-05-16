@@ -1,15 +1,16 @@
-# Project-scoped Archon harness config for Ainbox.
+# Project-scoped Archon harness config for Task Response.
 # Read by archon-cli when run from the repo root.
-# Pandomagic conversion: 2026-05-08 (dark-factory mode)
+# Pandomagic conversion: 2026-05-08 (dark-factory mode).
+# Renamed Ainbox → Task Response and consolidated pipeline: 2026-05-16.
 
 worktree:
   baseBranch: main
 
 # Per-project Obsidian docs (used by workflow nodes that read/write
-# the PRD anchor + architecture diagrams). For Ainbox the PRD lives
+# the PRD anchor + architecture diagrams). For Task Response the PRD lives
 # in-repo at docs/prd.md; Obsidian holds the ops doc only.
 obsidian:
-  project: /Users/mattwright/pandora/Obsidian/PROJECTS/Ainbox
+  project: /Users/mattwright/pandora/Obsidian/PROJECTS/Task Response
   prd_in_repo: docs/prd.md      # PRD lives in repo, not Obsidian
   architecture_dir: docs/architecture
 
@@ -18,18 +19,18 @@ integrations:
   plane:
     base_url: https://plane.beyondpandora.com
     workspace: beyond-pandora
-    project_id: e11bee8b-8e92-43ea-b4e8-943fce9f204d   # Ainbox in Plane
+    project_id: b8bd07d5-eba9-4470-94ae-a4cec5abc2f2   # Task Response in Plane (canonical, single pipeline)
     labels:
-      archon_ready: a4c742e7-ec43-4f0f-9c0a-724390eadbd9
-      archon_running: f96475e6-82d6-418b-85f4-2dd4d23270be
-      archon_done: fab664ac-739f-4a20-82e4-1d7f667cbcdd
-      archon_failed: 8fa5cbf8-6e27-484b-b0ac-1a68f740e976
+      archon_ready: 8734486b-03b8-4c71-a89c-d3f52e347325
+      archon_running: 3d036f8a-9c5a-48dc-b3a9-11de3dac723e
+      archon_done: 40909953-bfb1-4193-bd15-0d473c0437fb
+      archon_failed: 605fd32d-cff6-41b3-a64b-9b5fbf927b06
     states:
-      backlog: 88b35983-573a-4d39-99e7-1f5ee3ea6b0d
-      todo: 8c01c917-2294-4cd7-a13c-fe22a6c3f80f
-      in_progress: 0c4c08e9-2cbb-4152-951f-96dcf1691780
-      done: eced95c3-ec83-475b-bee6-8f5291532e7c
-      cancelled: 53371713-e64c-4acf-a49b-de1888033b68
+      backlog: 565e8561-8a32-40cb-980b-975452d46077
+      todo: 0a0f43ea-0745-4062-b808-cefb3f63f2d8
+      in_progress: 24381093-433d-4880-ae96-d80ac632dd6a
+      done: 4c99844c-4808-41da-89c8-1b4d5db79ee7
+      cancelled: 61c8d4dc-f6e9-4c46-b909-ec71931ef23c
     # token loaded via env PLANE_API_TOKEN
   archon_rag:
     base_url: http://10.90.10.55:8181

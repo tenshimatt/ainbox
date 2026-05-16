@@ -1,11 +1,14 @@
-# CLAUDE.md — Ainbox global rules
+# CLAUDE.md — Task Response global rules
+
+> Renamed from "Ainbox" → "Task Response" on 2026-05-16. The repo
+> folder is still `ainbox/` for now; refactor that separately.
 
 > Auto-loaded by Claude Code on every session in this repo. Also
 > loaded into every Archon workflow context. Treat as ALWAYS-IN-EFFECT.
 
 ## What this repo is
 
-The Ainbox source — AI inbox operations platform. Backend on Supabase
+The Task Response source — AI inbox operations platform. Backend on Supabase
 (Postgres + pgvector + Auth + Edge Functions). Frontend Next.js 15 on
 Vercel. Email integrations via Gmail API + Microsoft Graph.
 
@@ -61,7 +64,7 @@ If a change needs to deviate, write an ADR in `docs/decisions/` first.
 
 ## How work flows here
 
-- **Idea → Plane ticket** (workspace `beyond-pandora`, project `ainbox`)
+- **Idea → Plane ticket** (workspace `beyond-pandora`, project `task-response` / `b8bd07d5`; TASK7544-* sequence)
 - **Plane label `archon-ready`** → 5-min poller on CT 111 picks it up
 - **Workflow runs** in dark-factory mode: PRD edit → mission triage →
   classify → plan → architect-review (Opus) + security-review →
@@ -71,7 +74,7 @@ If a change needs to deviate, write an ADR in `docs/decisions/` first.
 - **Halts** post Telegram alert + Plane comment
 - **PR opens** with full audit trail in description
 
-Full ops doc: `Obsidian/PROJECTS/Ainbox/40-operations/archon-ainbox-workflow.md`
+Full ops doc: `Obsidian/PROJECTS/Task Response/40-operations/archon-ainbox-workflow.md`
 
 ## Files I should always read
 

@@ -16,7 +16,7 @@ ADD_LABEL="${4:-}"
 
 PLANE_BASE="${PLANE_BASE:-https://plane.beyondpandora.com}"
 WORKSPACE="${PLANE_WORKSPACE:-beyond-pandora}"
-PROJECT_ID="${PLANE_PROJECT_ID:-e11bee8b-8e92-43ea-b4e8-943fce9f204d}"
+PROJECT_ID="${PLANE_PROJECT_ID:-b8bd07d5-eba9-4470-94ae-a4cec5abc2f2}"
 
 # Patch state
 curl -fsS -X PATCH \
