@@ -22,6 +22,26 @@ export default function GoogleConnectPage() {
     (async () => {
       try {
         const supabase = getBrowserSupabase();
+
+        // Skip re-auth if the user already has a valid session with a gmail token.
+        // getSession() reads from localStorage without a network round-trip;
+        // server-side token validation is handled by the middleware on /inbox.
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!cancelled && session?.user) {
+          const resp = await fetch('/api/oauth/tokens');
+          if (!cancelled && resp.ok) {
+            const json = await resp.json();
+            const hasGmail = (json.providers ?? []).some(
+              (p: { id: string }) => p.id === 'gmail',
+            );
+            if (hasGmail) {
+              window.location.assign('/inbox');
+              return;
+            }
+          }
+        }
+
+        if (cancelled) return;
         const origin = window.location.origin;
         const { url, error } = await startGoogleOAuth(supabase, origin);
         if (cancelled) return;

@@ -15,6 +15,7 @@
 
 import { useEffect, useState } from 'react';
 import { startMicrosoftOAuth } from '@/lib/auth/microsoft';
+import { getBrowserSupabase } from '@/lib/supabase/client';
 
 export default function ConnectMicrosoftPage() {
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +27,26 @@ export default function ConnectMicrosoftPage() {
     let cancelled = false;
     (async () => {
       try {
+        // Skip re-auth if the user already has a valid session with an outlook token.
+        // getSession() reads from localStorage without a network round-trip;
+        // server-side token validation is handled by the middleware on /inbox.
+        const supabase = getBrowserSupabase();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!cancelled && session?.user) {
+          const resp = await fetch('/api/oauth/tokens');
+          if (!cancelled && resp.ok) {
+            const json = await resp.json();
+            const hasOutlook = (json.providers ?? []).some(
+              (p: { id: string }) => p.id === 'outlook',
+            );
+            if (hasOutlook) {
+              window.location.assign('/inbox');
+              return;
+            }
+          }
+        }
+
+        if (cancelled) return;
         const result = await startMicrosoftOAuth();
         if (cancelled) return;
         if (result.ok) {
