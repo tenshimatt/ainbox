@@ -37,8 +37,9 @@ export function DraftsIncomingBanner() {
       const channelName = `drafts-incoming-${Math.random().toString(36).slice(2, 8)}`;
       const channel = supabase.channel(channelName);
 
-      // @ts-expect-error supabase-js typing for postgres_changes payload is loose
-      channel.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'drafts' }, () => {
+      // supabase-js typing for postgres_changes is loose; cast through any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (channel as any).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'drafts' }, () => {
         if (!cancelled) addIncoming();
       });
 
