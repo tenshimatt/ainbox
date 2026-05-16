@@ -16,6 +16,7 @@ import { cookies } from 'next/headers';
 
 import { runOutlookBackfill, type PersistedMessage } from '@/lib/sync/outlook';
 import { refreshMicrosoftToken } from '@/lib/auth/microsoft-refresh';
+import { makePipelineKick } from '@/lib/sync/pipeline-kick';
 
 export const runtime = 'nodejs';
 
@@ -127,6 +128,16 @@ export async function POST(): Promise<NextResponse> {
     return (data?.delta_token as string | undefined) ?? null;
   };
 
+  // TASK7544-79: kick classify + draft after the first page to meet 4-min
+  // time-to-first-draft. Only wired when CRON_SECRET is configured.
+  const pipelineKick =
+    process.env.CRON_SECRET && process.env.NEXT_PUBLIC_SUPABASE_URL
+      ? makePipelineKick({
+          supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+          cronSecret: process.env.CRON_SECRET,
+        })
+      : undefined;
+
   // ------- Fire-and-forget backfill (same rationale as gmail route) -------
   try {
     void runOutlookBackfill({
@@ -135,6 +146,7 @@ export async function POST(): Promise<NextResponse> {
       persistMessage,
       saveDeltaToken,
       loadDeltaToken,
+      pipelineKick,
     }).catch((err) => {
       console.error('[sync/outlook] background backfill threw', err);
     });
