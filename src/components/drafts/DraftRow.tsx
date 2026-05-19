@@ -45,7 +45,7 @@ export function DraftRow({ draft, selected, onApprove, onReject }: Props) {
       data-focused={selected ? 'true' : 'false'}
       aria-selected={selected ? 'true' : 'false'}
       className={`w-full rounded-lg border bg-white p-3 shadow-sm transition ${
-        selected ? 'border-slate-900 ring-2 ring-slate-900 selected' : 'border-slate-200'
+        selected ? 'border-brand-500 ring-2 ring-brand-500 selected' : 'border-slate-200'
       }`}
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -68,14 +68,14 @@ export function DraftRow({ draft, selected, onApprove, onReject }: Props) {
           <button
             type="button"
             onClick={() => onApprove(draft.id)}
-            className="inline-flex items-center justify-center rounded-md bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-1"
+            className="inline-flex items-center justify-center rounded-md bg-brand-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-1"
           >
             Approve
           </button>
           <button
             type="button"
             onClick={() => setEditing((v) => !v)}
-            className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-1"
+            className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-1"
           >
             Edit
           </button>
@@ -92,7 +92,7 @@ export function DraftRow({ draft, selected, onApprove, onReject }: Props) {
         <div className="mt-3">
           <textarea
             data-testid="draft-editor"
-            className="block w-full rounded-md border border-slate-300 p-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+            className="block w-full rounded-md border border-slate-300 p-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={5}

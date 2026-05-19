@@ -86,7 +86,7 @@ export default function ConnectPage() {
               type="button"
               onClick={() => go('/connect/google')}
               aria-label="Continue with Google"
-              className="flex w-full items-center justify-center gap-2 rounded-md bg-slate-900 px-4 py-3 text-sm font-medium text-white hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+              className="flex w-full items-center justify-center gap-2 rounded-md bg-brand-500 px-4 py-3 text-sm font-medium text-white hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
             >
               {/* Google "G" mark — inline SVG, no external asset */}
               <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-white">

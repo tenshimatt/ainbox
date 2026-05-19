@@ -99,7 +99,7 @@ export default function PricingPage() {
                 href="/connect"
                 className={`block w-full rounded-lg px-4 py-2.5 text-center text-sm font-medium transition-colors ${
                   tier.highlighted
-                    ? 'bg-slate-900 text-white hover:bg-slate-800'
+                    ? 'bg-brand-500 text-white hover:bg-brand-600'
                     : 'border border-slate-200 text-slate-700 hover:bg-slate-50'
                 }`}
               >

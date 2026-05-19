@@ -20,7 +20,7 @@ export default function LandingPage() {
             <a href="#features" className="text-slate-600 hover:text-slate-900">Features</a>
             <a href="#how" className="text-slate-600 hover:text-slate-900">How it works</a>
             <Link href="/pricing" className="text-slate-600 hover:text-slate-900">Pricing</Link>
-            <Link href="/connect" className="rounded-md bg-slate-900 px-3.5 py-1.5 text-sm font-medium text-white hover:bg-slate-800">
+            <Link href="/connect" className="rounded-md bg-brand-500 px-3.5 py-1.5 text-sm font-medium text-white hover:bg-brand-600">
               Sign in
             </Link>
           </nav>
@@ -41,7 +41,7 @@ export default function LandingPage() {
             your voice. You approve the borderline ones; the safe ones send themselves.
           </p>
           <div className="mt-10 flex items-center justify-center gap-4">
-            <Link href="/connect" className="rounded-md bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-slate-800">
+            <Link href="/connect" className="rounded-md bg-brand-500 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-brand-600">
               Connect your inbox
             </Link>
             <a href="#how" className="text-sm font-semibold text-slate-700 hover:underline">
@@ -83,7 +83,7 @@ export default function LandingPage() {
             { n: 4, t: 'Respond', d: 'New mail arrives → classify → draft → auto-send if confidence ≥ your threshold.' },
           ].map((s) => (
             <li key={s.n} className="rounded-xl border border-slate-200 bg-white p-5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-500 text-sm font-bold text-white">
                 {s.n}
               </div>
               <h3 className="mt-3 text-base font-semibold">{s.t}</h3>
