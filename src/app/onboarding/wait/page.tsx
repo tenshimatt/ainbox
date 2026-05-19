@@ -307,7 +307,7 @@ export default function WaitPage() {
           {syncStatus === 'complete' ? (
             <Link
               href="/onboarding/kb-review"
-              className="inline-block rounded-lg bg-slate-900 px-6 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
+              className="inline-block rounded-lg bg-brand-500 px-6 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
               data-testid="wait-continue-link"
             >
               Continue to Knowledge Review

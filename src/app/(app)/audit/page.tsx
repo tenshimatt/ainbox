@@ -270,7 +270,7 @@ export default function AuditPage() {
         </label>
         <button
           type="submit"
-          className="rounded bg-black px-3 py-1 text-sm font-medium text-white hover:bg-gray-800"
+          className="rounded bg-brand-500 px-3 py-1 text-sm font-medium text-white hover:bg-brand-600"
           data-testid="filter-apply"
         >
           Apply filters
