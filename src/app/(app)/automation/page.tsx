@@ -9,6 +9,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { PRESETS, detectPreset, type PresetKey } from '@/lib/automation/presets';
 
 const CATEGORIES = [
   'sales',
@@ -121,6 +122,40 @@ export default function AutomationPage() {
         <strong>{FLOOR}</strong> (cannot be lowered). Drafts are dispatched
         after a 60-second cooling delay so you can intercept from the inbox.
       </p>
+
+      {/* Preset selector — AINBOX-58 */}
+      <div className="mb-6">
+        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Quick presets</p>
+        <div className="flex flex-wrap gap-3" role="group" aria-label="Confidence threshold presets">
+          {(Object.entries(PRESETS) as [PresetKey, (typeof PRESETS)[PresetKey]][]).map(([key, preset]) => {
+            const active = !loading && detectPreset(rows) === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                data-testid={`preset-${key}`}
+                aria-pressed={active}
+                disabled={loading}
+                onClick={() =>
+                  setRows((prev) =>
+                    prev.map((r) => ({ ...r, threshold: preset.threshold })),
+                  )
+                }
+                className={`flex flex-col items-start rounded-lg border px-4 py-3 text-left transition-colors disabled:opacity-40 ${
+                  active
+                    ? 'border-slate-900 bg-slate-900 text-white'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-400'
+                }`}
+              >
+                <span className="text-sm font-semibold">{preset.label}</span>
+                <span className={`mt-0.5 text-xs ${active ? 'text-slate-300' : 'text-slate-500'}`}>
+                  {preset.description}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {loading ? (
         <p className="text-sm text-gray-500">Loading…</p>
