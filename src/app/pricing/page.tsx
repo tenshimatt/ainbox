@@ -1,4 +1,12 @@
-import Link from 'next/link';
+import { PublicShell } from '@/components/brand/PublicShell';
+import { PillLink } from '@/components/brand/PillButton';
+import { EyebrowChip } from '@/components/brand/EyebrowChip';
+import { WaveBackground } from '@/components/brand/WaveBackground';
+
+export const metadata = {
+  title: 'Pricing — Task Response',
+  description: 'Simple, predictable pricing for AI inbox automation. 14-day free trial.',
+};
 
 const TIERS = [
   {
@@ -55,73 +63,84 @@ const TIERS = [
 
 export default function PricingPage() {
   return (
-    <main className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Pricing</h1>
-          <p className="mt-3 text-lg text-slate-500">
-            Choose the plan that fits your team&apos;s needs
+    <PublicShell>
+      <section className="relative overflow-hidden">
+        <WaveBackground variant="top" />
+        <div className="relative z-10 mx-auto max-w-3xl px-6 pt-20 pb-12 text-center">
+          <EyebrowChip>14-day free trial · no card required</EyebrowChip>
+          <h1 className="mt-6 font-display text-display text-ink">
+            Simple{' '}
+            <span className="font-serif italic text-brand-500">pricing.</span>
+          </h1>
+          <p className="mt-5 text-base text-muted">
+            Pick a plan. Cancel anytime. Every plan includes the full Task
+            Response pipeline — drafting, classification, auto-send.
           </p>
         </div>
+      </section>
 
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="mx-auto max-w-6xl px-6 pb-24">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {TIERS.map((tier) => (
             <div
               key={tier.name}
-              className={`relative flex flex-col rounded-2xl border bg-white p-6 shadow-sm ${
+              className={`relative flex flex-col rounded-3xl p-8 transition-shadow ${
                 tier.highlighted
-                  ? 'border-slate-900 ring-2 ring-slate-900'
-                  : 'border-slate-200'
+                  ? 'bg-ink text-white shadow-card'
+                  : 'bg-surface text-ink shadow-card hover:shadow-lg'
               }`}
             >
               {tier.highlighted && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">
+                <span className="absolute -top-3 left-8 rounded-pill bg-brand-500 px-3 py-1 text-xs font-medium text-white">
                   Most popular
                 </span>
               )}
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-slate-900">{tier.name}</h2>
-                <div className="mt-2 flex items-baseline gap-1">
-                  <span className="text-4xl font-bold tracking-tight text-slate-900">{tier.price}</span>
-                  <span className="text-sm text-slate-500">{tier.period}</span>
-                </div>
-                <p className="mt-2 text-sm text-slate-500">{tier.description}</p>
+              <h2 className={`font-display text-title ${tier.highlighted ? 'text-white' : 'text-ink'}`}>
+                {tier.name}
+              </h2>
+              <div className="mt-3 flex items-baseline gap-1">
+                <span className={`font-display text-4xl font-medium ${tier.highlighted ? 'text-white' : 'text-ink'}`}>
+                  {tier.price}
+                </span>
+                <span className={`text-sm ${tier.highlighted ? 'text-white/60' : 'text-muted'}`}>
+                  {tier.period}
+                </span>
               </div>
-              <ul className="mb-6 flex-1 space-y-3">
-                {tier.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2 text-sm text-slate-600">
-                    <span className="mt-0.5 shrink-0 text-green-500">✓</span>
-                    {feature}
+              <p className={`mt-3 text-sm ${tier.highlighted ? 'text-white/70' : 'text-muted'}`}>
+                {tier.description}
+              </p>
+              <ul className="mt-6 mb-8 flex-1 space-y-3">
+                {tier.features.map((f) => (
+                  <li
+                    key={f}
+                    className={`flex items-start gap-2 text-sm ${tier.highlighted ? 'text-white/85' : 'text-muted'}`}
+                  >
+                    <span className="mt-1 block h-1.5 w-1.5 flex-none rounded-full bg-brand-500" />
+                    {f}
                   </li>
                 ))}
               </ul>
-              <Link
+              <PillLink
                 href="/connect"
-                className={`block w-full rounded-lg px-4 py-2.5 text-center text-sm font-medium transition-colors ${
-                  tier.highlighted
-                    ? 'bg-brand-500 text-white hover:bg-brand-600'
-                    : 'border border-slate-200 text-slate-700 hover:bg-slate-50'
-                }`}
+                variant={tier.highlighted ? 'primary' : 'tertiary'}
+                className="w-full"
               >
                 {tier.cta}
-              </Link>
+              </PillLink>
             </div>
           ))}
         </div>
 
-        <div className="mt-12 rounded-xl border border-slate-200 bg-white p-6">
-          <h2 className="text-lg font-semibold text-slate-900">Need something different?</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            All plans include a 14-day free trial. No credit card required. Contact our sales team for custom enterprise pricing.
+        <div className="mt-12 rounded-3xl bg-surface p-8 text-center">
+          <h2 className="font-display text-title text-ink">Need something different?</h2>
+          <p className="mt-2 text-sm text-muted">
+            All plans include a 14-day free trial. No credit card required. Contact sales for custom enterprise pricing.
           </p>
-          <Link
-            href="/connect"
-            className="mt-4 inline-block rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Start free trial
-          </Link>
+          <div className="mt-5">
+            <PillLink href="/connect" variant="secondary">Start free trial</PillLink>
+          </div>
         </div>
-      </div>
-    </main>
+      </section>
+    </PublicShell>
   );
 }
