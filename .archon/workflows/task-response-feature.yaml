@@ -23,7 +23,7 @@ description: |
     - Playwright tests committed BEFORE the implementation
     - Branch + PR ready for review
 
-provider: deepseek
+provider: claude
 
 # ────────────────────────────────────────────────────────────────
 # CONTEXT PRIME — read once, reuse across nodes
@@ -66,8 +66,8 @@ nodes:
 
   - id: mission-triage
     depends_on: [prime-context]
-    provider: deepseek
-    model: deepseek-v4-flash
+    provider: claude
+    model: claude-sonnet-4-6
     prompt: |
       Triage the input against mission.md (loaded in primed context above).
 
@@ -124,8 +124,8 @@ nodes:
 
   - id: classify
     depends_on: [gate-mission]
-    provider: deepseek
-    model: deepseek-v4-pro
+    provider: claude
+    model: claude-opus-4-7
     context: fresh
     prompt: |
       You are the Pandomagic classifier. Read docs/architecture/levels.md
@@ -372,8 +372,8 @@ nodes:
 
   - id: prd-extend
     depends_on: [gate-classify]
-    provider: deepseek
-    model: deepseek-v4-pro
+    provider: claude
+    model: claude-opus-4-7
     prompt: |
       You are the architecture partner for Task Response. Your job in this step
       is to update the PRD anchor (10-product/00-overview.md in the Task Response
@@ -452,9 +452,9 @@ nodes:
 
   - id: plan
     depends_on: [rag-check]
-    provider: deepseek
+    provider: claude
     context: fresh
-    model: deepseek-v4-pro
+    model: claude-opus-4-7
     prompt: |
       Build the implementation plan for PRD section $prd-extend.output.prd_section.
 
@@ -476,8 +476,8 @@ nodes:
 
   - id: architect-review
     depends_on: [rag-check, plan]
-    provider: deepseek
-    model: deepseek-v4-pro
+    provider: claude
+    model: claude-opus-4-7
     context: fresh
     prompt: |
       You are the adversarial architect-reviewer. Your job is to
@@ -514,9 +514,9 @@ nodes:
 
   - id: security-review
     depends_on: [rag-check, plan]
-    provider: deepseek
+    provider: claude
     context: fresh
-    model: deepseek-v4-pro
+    model: claude-opus-4-7
     prompt: |
       Security-only review of the plan: $plan.output
 
@@ -559,9 +559,9 @@ nodes:
 
   - id: excalidraw-business
     depends_on: [plan]
-    provider: deepseek
+    provider: claude
     context: fresh
-    model: deepseek-v4-pro
+    model: claude-opus-4-7
     prompt: |
       ## SKILL TO USE
       Apply the `.claude/skills/excalidraw-diagram` skill (Cole Medin's
@@ -627,9 +627,9 @@ nodes:
 
   - id: excalidraw-data
     depends_on: [plan]
-    provider: deepseek
+    provider: claude
     context: fresh
-    model: deepseek-v4-pro
+    model: claude-opus-4-7
     prompt: |
       ## SKILL TO USE
       Apply the `.claude/skills/excalidraw-diagram` skill (Cole Medin's
@@ -683,9 +683,9 @@ nodes:
 
   - id: excalidraw-application
     depends_on: [plan]
-    provider: deepseek
+    provider: claude
     context: fresh
-    model: deepseek-v4-pro
+    model: claude-opus-4-7
     prompt: |
       ## SKILL TO USE
       Apply the `.claude/skills/excalidraw-diagram` skill (Cole Medin's
@@ -736,9 +736,9 @@ nodes:
 
   - id: excalidraw-technology
     depends_on: [plan]
-    provider: deepseek
+    provider: claude
     context: fresh
-    model: deepseek-v4-pro
+    model: claude-opus-4-7
     prompt: |
       ## SKILL TO USE
       Apply the `.claude/skills/excalidraw-diagram` skill (Cole Medin's
@@ -789,9 +789,9 @@ nodes:
 
   - id: excalidraw-security
     depends_on: [plan, security-review]
-    provider: deepseek
+    provider: claude
     context: fresh
-    model: deepseek-v4-pro
+    model: claude-opus-4-7
     prompt: |
       ## SKILL TO USE
       Apply the `.claude/skills/excalidraw-diagram` skill (Cole Medin's
@@ -842,9 +842,9 @@ nodes:
 
   - id: excalidraw-integration
     depends_on: [plan]
-    provider: deepseek
+    provider: claude
     context: fresh
-    model: deepseek-v4-pro
+    model: claude-opus-4-7
     prompt: |
       ## SKILL TO USE
       Apply the `.claude/skills/excalidraw-diagram` skill (Cole Medin's
@@ -922,9 +922,9 @@ nodes:
 
   - id: plane-tickets
     depends_on: [gate-plan]
-    provider: deepseek
+    provider: claude
     context: fresh
-    model: deepseek-v4-flash
+    model: claude-sonnet-4-6
     prompt: |
       Read the plan at docs/architecture/$prd-extend.output.slug.md.
 
@@ -960,9 +960,9 @@ nodes:
 
   - id: test-first
     depends_on: [plane-tickets]
-    provider: deepseek
+    provider: claude
     context: fresh
-    model: deepseek-v4-pro
+    model: claude-opus-4-7
     max_turns: 20
     prompt: |
       Write Playwright tests BEFORE any implementation, against the
@@ -1018,9 +1018,9 @@ nodes:
 
   - id: implement
     depends_on: [gate-test-first]
-    provider: deepseek
+    provider: claude
     context: fresh
-    model: deepseek-v4-pro
+    model: claude-opus-4-7
     max_turns: 60
     prompt: |
       Implement the feature against the failing tests.
@@ -1214,9 +1214,9 @@ nodes:
 
   - id: final-review
     depends_on: [ci-smoke]
-    provider: deepseek
+    provider: claude
     context: fresh
-    model: deepseek-v4-pro
+    model: claude-opus-4-7
     prompt: |
       Final review of the implementation against the plan.
 
