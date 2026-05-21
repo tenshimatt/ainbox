@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: '/knowledge', label: 'Knowledge', icon: '📚' },
   { href: '/automation', label: 'Automation', icon: '⚡' },
   { href: '/audit', label: 'Audit', icon: '📋' },
+  { href: '/ideas', label: 'Ideas', icon: '💡' },
   { href: '/settings', label: 'Settings', icon: '⚙️' },
 ];
 
