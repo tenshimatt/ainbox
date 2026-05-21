@@ -10,8 +10,7 @@ interface Step {
 }
 
 const ONBOARDING_STEPS: Step[] = [
-  { label: 'Sync email',          href: '/onboarding/wait' },
-  { label: 'Review knowledge base', href: '/onboarding/kb-review' },
+  { label: 'Sync email', href: '/onboarding/wait' },
 ];
 
 interface Props {
