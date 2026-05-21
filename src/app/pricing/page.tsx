@@ -21,7 +21,9 @@ const TIERS = [
       'Basic category classification',
       'Email support',
     ],
-    cta: 'Get started',
+    cta: 'Start free trial',
+    ctaHref: '/connect?plan=starter&trial=true',
+    trial: true,
     highlighted: false,
   },
   {
@@ -39,6 +41,8 @@ const TIERS = [
       'Priority support',
     ],
     cta: 'Start free trial',
+    ctaHref: '/connect?plan=pro&trial=true',
+    trial: true,
     highlighted: true,
   },
   {
@@ -57,7 +61,46 @@ const TIERS = [
       '99.99% SLA',
     ],
     cta: 'Contact sales',
+    ctaHref: '/connect?plan=business',
+    trial: false,
     highlighted: false,
+  },
+];
+
+const TRIAL_STEPS = [
+  {
+    step: '01',
+    title: 'Connect your inbox',
+    body: 'Sign in with Google or Microsoft. No credit card required.',
+  },
+  {
+    step: '02',
+    title: 'AI starts learning',
+    body: 'Task Response classifies your backlog and builds your knowledge base automatically.',
+  },
+  {
+    step: '03',
+    title: 'Review drafts, go live',
+    body: 'Approve AI-generated replies. Upgrade when your 14-day trial ends — or cancel for free.',
+  },
+];
+
+const TRIAL_FAQS = [
+  {
+    q: 'Do I need a credit card to start?',
+    a: 'No. The 14-day free trial requires only a Google or Microsoft account. You add a payment method when you decide to upgrade.',
+  },
+  {
+    q: 'What happens when the trial ends?',
+    a: 'Your account pauses — no charges, no deletions. Log back in to choose a plan and pick up where you left off.',
+  },
+  {
+    q: 'Can I switch plans during the trial?',
+    a: 'Yes. You can change your trial plan at any time from Settings → Billing. The 14-day clock resets only on your first activation.',
+  },
+  {
+    q: 'Is the full feature set available in the trial?',
+    a: 'Starter and Pro trials give you the full feature set for that tier. Business trials are arranged separately via the sales team.',
   },
 ];
 
@@ -95,6 +138,14 @@ export default function PricingPage() {
                   Most popular
                 </span>
               )}
+              {tier.trial && !tier.highlighted && (
+                <span
+                  className="absolute -top-3 right-8 rounded-pill border border-brand-500/30 bg-white px-3 py-1 text-xs font-medium text-brand-500"
+                  aria-label="14-day free trial included"
+                >
+                  14-day free trial
+                </span>
+              )}
               <h2 className={`font-display text-title ${tier.highlighted ? 'text-white' : 'text-ink'}`}>
                 {tier.name}
               </h2>
@@ -106,6 +157,11 @@ export default function PricingPage() {
                   {tier.period}
                 </span>
               </div>
+              {tier.trial && (
+                <p className={`mt-1 text-xs font-medium ${tier.highlighted ? 'text-brand-400' : 'text-brand-500'}`}>
+                  Includes 14-day free trial
+                </p>
+              )}
               <p className={`mt-3 text-sm ${tier.highlighted ? 'text-white/70' : 'text-muted'}`}>
                 {tier.description}
               </p>
@@ -121,14 +177,68 @@ export default function PricingPage() {
                 ))}
               </ul>
               <PillLink
-                href="/connect"
+                href={tier.ctaHref}
                 variant={tier.highlighted ? 'primary' : 'tertiary'}
                 className="w-full"
               >
                 {tier.cta}
               </PillLink>
+              {tier.trial && (
+                <p className={`mt-3 text-center text-xs ${tier.highlighted ? 'text-white/50' : 'text-muted'}`}>
+                  No credit card required
+                </p>
+              )}
             </div>
           ))}
+        </div>
+
+        {/* How the free trial works */}
+        <div className="mt-20" id="free-trial">
+          <div className="text-center">
+            <EyebrowChip>Free trial</EyebrowChip>
+            <h2 className="mt-4 font-display text-title text-ink">
+              Up and running in{' '}
+              <span className="font-serif italic text-brand-500">3 steps.</span>
+            </h2>
+            <p className="mt-3 text-sm text-muted">
+              Your 14-day trial starts the moment you connect your inbox.
+            </p>
+          </div>
+          <div className="mt-10 grid gap-6 sm:grid-cols-3">
+            {TRIAL_STEPS.map((s) => (
+              <div key={s.step} className="rounded-3xl bg-surface p-8">
+                <span className="font-display text-4xl font-medium text-brand-500/30">
+                  {s.step}
+                </span>
+                <h3 className="mt-4 font-display text-base font-semibold text-ink">
+                  {s.title}
+                </h3>
+                <p className="mt-2 text-sm text-muted">{s.body}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 text-center">
+            <PillLink href="/connect?trial=true" variant="primary">
+              Start your free trial
+            </PillLink>
+            <p className="mt-3 text-xs text-muted">No credit card required · Cancel anytime</p>
+          </div>
+        </div>
+
+        {/* FAQ */}
+        <div className="mt-20" id="trial-faq">
+          <h2 className="font-display text-title text-ink">
+            Free trial{' '}
+            <span className="font-serif italic text-brand-500">FAQ.</span>
+          </h2>
+          <dl className="mt-8 divide-y divide-ink/5">
+            {TRIAL_FAQS.map((faq) => (
+              <div key={faq.q} className="py-6">
+                <dt className="font-medium text-ink">{faq.q}</dt>
+                <dd className="mt-2 text-sm text-muted">{faq.a}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
 
         <div className="mt-12 rounded-3xl bg-surface p-8 text-center">
@@ -137,7 +247,7 @@ export default function PricingPage() {
             All plans include a 14-day free trial. No credit card required. Contact sales for custom enterprise pricing.
           </p>
           <div className="mt-5">
-            <PillLink href="/connect" variant="secondary">Start free trial</PillLink>
+            <PillLink href="/connect?trial=true" variant="secondary">Start free trial</PillLink>
           </div>
         </div>
       </section>
