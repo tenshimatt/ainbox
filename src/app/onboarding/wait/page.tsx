@@ -166,6 +166,11 @@ export default function WaitPage() {
                 `Sync complete — ${lastCount} messages.`,
               ]);
               if (pollTimer) clearInterval(pollTimer);
+              // Auto-verify top KB items — fire-and-forget, TASK7544-22
+              fetch('/api/kb/auto-verify', {
+                method: 'POST',
+                credentials: 'same-origin',
+              }).catch(() => { /* non-critical */ });
             }
           } catch {
             /* keep polling */
@@ -306,11 +311,11 @@ export default function WaitPage() {
         <div className="mt-8 text-center" data-testid="wait-cta">
           {syncStatus === 'complete' ? (
             <Link
-              href="/onboarding/kb-review"
+              href="/inbox"
               className="inline-block rounded-lg bg-brand-500 px-6 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
               data-testid="wait-continue-link"
             >
-              Continue to Knowledge Review
+              Go to inbox
             </Link>
           ) : (
             <button
