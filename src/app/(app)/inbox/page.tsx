@@ -22,6 +22,7 @@ import LiveSection, {
   type DraftRow,
 } from '@/components/inbox/LiveSection';
 import DraftsIncomingBanner from '@/components/inbox/DraftsIncomingBanner';
+import SavingsMetrics from '@/components/inbox/SavingsMetrics';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,12 +54,13 @@ async function fetchInbox() {
       inbound: [] as InboundRow[],
       pendingDrafts: [] as DraftRow[],
       recentActivity: [] as DraftRow[],
+      sentDraftCount: 0,
     };
   }
 
   const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-  const [inboundRes, draftsRes, activityRes] = await Promise.all([
+  const [inboundRes, draftsRes, activityRes, sentCountRes] = await Promise.all([
     supabase
       .from('email_messages')
       .select('id, from_addr, subject, subject_hash, received_at, internal_date, category, label_ids, provider')
@@ -78,6 +80,10 @@ async function fetchInbox() {
       .gte('updated_at', since24h)
       .order('updated_at', { ascending: false })
       .limit(50),
+    supabase
+      .from('drafts')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'sent'),
   ]);
 
   // Map backfill columns -> UI shape. Gmail backfill writes from_addr/subject_hash;
@@ -109,11 +115,12 @@ async function fetchInbox() {
     inbound,
     pendingDrafts: (draftsRes.data ?? []) as DraftRow[],
     recentActivity: (activityRes.data ?? []) as DraftRow[],
+    sentDraftCount: sentCountRes.count ?? 0,
   };
 }
 
 export default async function InboxPage() {
-  const { inbound, pendingDrafts, recentActivity } = await fetchInbox();
+  const { inbound, pendingDrafts, recentActivity, sentDraftCount } = await fetchInbox();
 
   return (
     <main
@@ -126,6 +133,8 @@ export default async function InboxPage() {
           Latest activity across your connected mailboxes.
         </p>
       </header>
+
+      <SavingsMetrics sentDraftCount={sentDraftCount} />
 
       <DraftsIncomingBanner />
 
