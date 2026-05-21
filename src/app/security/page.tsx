@@ -1,99 +1,72 @@
-import Link from 'next/link';
+import { PublicShell } from '@/components/brand/PublicShell';
+import { PillLink } from '@/components/brand/PillButton';
+import { EyebrowChip } from '@/components/brand/EyebrowChip';
+import { WaveBackground } from '@/components/brand/WaveBackground';
 
-const COMPLIANCE_ITEMS = [
-  {
-    title: 'SOC 2 Type II',
-    description: 'Ainbox undergoes annual SOC 2 Type II audits, verifying our controls for security, availability, and confidentiality.',
-    status: 'Certified',
-    statusColor: 'text-green-600',
-  },
-  {
-    title: 'GDPR Compliance',
-    description: 'Full compliance with GDPR requirements. Your data is processed in accordance with EU data protection regulations.',
-    status: 'Compliant',
-    statusColor: 'text-green-600',
-  },
-  {
-    title: 'Data Encryption',
-    description: 'All data is encrypted at rest using AES-256 and in transit using TLS 1.3. Email content is encrypted with per-row column-level encryption.',
-    status: 'Active',
-    statusColor: 'text-green-600',
-  },
-  {
-    title: 'OAuth 2.0 Authentication',
-    description: 'All email provider connections use OAuth 2.0. We never store or have access to your email passwords.',
-    status: 'Active',
-    statusColor: 'text-green-600',
-  },
-  {
-    title: 'Token Security',
-    description: 'OAuth refresh tokens are encrypted at rest and never leave our server-side edge functions. No tokens are exposed to client-side JavaScript.',
-    status: 'Active',
-    statusColor: 'text-green-600',
-  },
-  {
-    title: 'Email Content Protection',
-    description: 'Email bodies are never logged in plaintext. All observability output has redacted content. Data is decrypted only in edge function memory during a single request.',
-    status: 'Active',
-    statusColor: 'text-green-600',
-  },
-  {
-    title: 'Tenant Isolation',
-    description: 'Every database query filters by authenticated user ID. Row-Level Security (RLS) is enforced on every table. No cross-tenant data flow is possible.',
-    status: 'Active',
-    statusColor: 'text-green-600',
-  },
-  {
-    title: 'Penetration Testing',
-    description: 'Regular third-party penetration testing and vulnerability assessments are conducted against our infrastructure.',
-    status: 'Quarterly',
-    statusColor: 'text-blue-600',
-  },
+export const metadata = {
+  title: 'Security & Compliance — Task Response',
+  description: 'How Task Response protects your inbox data: encryption, tenant isolation, SOC 2, GDPR.',
+};
+
+const ITEMS = [
+  { title: 'SOC 2 Type II', description: 'Annual SOC 2 Type II audits verify our controls for security, availability, and confidentiality.', status: 'Certified' },
+  { title: 'GDPR Compliance', description: 'Your data is processed in accordance with EU data protection regulations.', status: 'Compliant' },
+  { title: 'Data Encryption', description: 'AES-256 at rest, TLS 1.3 in transit. Email content uses per-row column-level encryption.', status: 'Active' },
+  { title: 'OAuth 2.0 Authentication', description: 'All email provider connections use OAuth 2.0. We never store or have access to your email passwords.', status: 'Active' },
+  { title: 'Token Security', description: 'OAuth refresh tokens are encrypted at rest and never leave our server-side edge functions.', status: 'Active' },
+  { title: 'Email Content Protection', description: 'Email bodies are never logged in plaintext. Decrypted only in edge function memory during a single request.', status: 'Active' },
+  { title: 'Tenant Isolation', description: 'Every database query filters by authenticated user ID. Row-Level Security is enforced on every table.', status: 'Active' },
+  { title: 'Penetration Testing', description: 'Regular third-party penetration testing and vulnerability assessments against our infrastructure.', status: 'Quarterly' },
 ];
 
 export default function SecurityPage() {
   return (
-    <main className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Security & Compliance</h1>
-          <p className="mt-3 text-lg text-slate-500">
-            Your data security is our top priority
+    <PublicShell>
+      <section className="relative overflow-hidden">
+        <WaveBackground variant="top" />
+        <div className="relative z-10 mx-auto max-w-3xl px-6 pt-20 pb-12 text-center">
+          <EyebrowChip>Security &amp; compliance</EyebrowChip>
+          <h1 className="mt-6 font-display text-display text-ink">
+            Your data,{' '}
+            <span className="font-serif italic text-brand-500">guarded.</span>
+          </h1>
+          <p className="mt-5 text-base text-muted">
+            Task Response is built for inboxes that matter — encrypted end-to-end, tenant-isolated, audited.
           </p>
         </div>
+      </section>
 
-        <div className="mt-10 grid gap-4">
-          {COMPLIANCE_ITEMS.map((item) => (
-            <div
-              key={item.title}
-              className="rounded-lg border border-slate-200 bg-white p-5"
-            >
+      <section className="mx-auto max-w-4xl px-6 pb-12">
+        <div className="grid gap-4">
+          {ITEMS.map((item) => (
+            <div key={item.title} className="rounded-3xl bg-surface p-6">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <h2 className="text-sm font-semibold text-slate-900">{item.title}</h2>
-                  <p className="mt-1 text-sm text-slate-500">{item.description}</p>
+                  <h2 className="font-display text-base font-medium text-ink">{item.title}</h2>
+                  <p className="mt-2 text-sm leading-relaxed text-muted">{item.description}</p>
                 </div>
-                <span className={`shrink-0 rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium ${item.statusColor}`}>
+                <span className="shrink-0 rounded-pill bg-brand-500/10 px-3 py-1 text-xs font-medium text-brand-600">
                   {item.status}
                 </span>
               </div>
             </div>
           ))}
         </div>
+      </section>
 
-        <div className="mt-10 rounded-xl border border-slate-200 bg-white p-6">
-          <h2 className="text-lg font-semibold text-slate-900">Report a Vulnerability</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            If you discover a security vulnerability, please report it to our security team immediately. We follow a responsible disclosure policy.
+      <section className="mx-auto max-w-4xl px-6 pb-24">
+        <div className="rounded-3xl bg-ink p-8 text-white">
+          <h2 className="font-display text-title">Report a vulnerability</h2>
+          <p className="mt-2 text-sm text-white/70">
+            If you discover a security vulnerability, please report it to our security team. We follow a responsible disclosure policy.
           </p>
-          <Link
-            href="mailto:security@ainbox.app"
-            className="mt-4 inline-block rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
-          >
-            security@ainbox.app
-          </Link>
+          <div className="mt-5">
+            <PillLink href="mailto:security@taskresponse.com" variant="primary">
+              security@taskresponse.com
+            </PillLink>
+          </div>
         </div>
-      </div>
-    </main>
+      </section>
+    </PublicShell>
   );
 }
